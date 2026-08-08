@@ -1,0 +1,26 @@
+services:
+  dt-toolkit:
+    build: .
+    image: dt-toolkit-server:latest
+    # Tell Compose to always build from the local Dockerfile and never try to
+    # pull "dt-toolkit-server" from a registry (it doesn't exist there — it's
+    # not a published image). Without this, some app-store importers (ZimaOS
+    # included) try a pull first and fail with "repository does not exist".
+    pull_policy: build
+    container_name: dt-toolkit
+    restart: unless-stopped
+    ports:
+      - "8080:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      # Change these before first boot. On first launch, an admin account is
+      # created automatically using these credentials (or "admin" / "changeme123"
+      # if left unset — make sure to set them!).
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: changeme123
+      # Any long random string. Used to sign login session cookies.
+      SESSION_SECRET: please-change-this-to-something-random
+      # Set to "true" only if you put this behind HTTPS (e.g. a reverse proxy
+      # with a certificate). Leave "false" for plain-HTTP LAN access.
+      COOKIE_SECURE: "false"
