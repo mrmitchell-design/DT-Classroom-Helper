@@ -2,6 +2,7 @@ const express = require("express");
 const rateLimit = require("express-rate-limit");
 const db = require("../db");
 const { verifyPassword } = require("../auth");
+const { SESSION_COOKIE_NAME } = require("../config");
 
 const router = express.Router();
 
@@ -35,7 +36,7 @@ router.post("/login", loginLimiter, (req, res) => {
 
 router.post("/logout", (req, res) => {
   req.session.destroy(() => {
-    res.clearCookie("connect.sid");
+    res.clearCookie(SESSION_COOKIE_NAME);
     res.json({ ok: true });
   });
 });

@@ -1,7 +1,7 @@
 {
-  "name": "dt-toolkit-server",
+  "name": "dt-classroom-helper",
   "version": "1.0.0",
-  "description": "The Design Bench — ACCESSFM & SCAMPER toolkit with student logins and an admin console.",
+  "description": "DT Classroom Helper — The Design Bench (ACCESSFM & SCAMPER toolkit) with student logins and an admin console.",
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",

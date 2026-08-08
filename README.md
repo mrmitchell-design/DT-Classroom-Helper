@@ -1,51 +1,71 @@
-# The Design Bench — ACCESSFM & SCAMPER Toolkit (server edition)
+# DT Classroom Helper — The Design Bench (ACCESSFM & SCAMPER Toolkit)
 
 A self-hosted web app for teaching ACCESSFM and SCAMPER, with student logins,
 saved work, difficulty-tiered quizzes, and an admin console for managing
-accounts and reviewing student work.
+accounts and reviewing student work. This is intended as the first module of
+a larger DT Classroom Helper toolset.
 
 ## What's inside
 
 - **Backend**: Node.js + Express + SQLite (one file database — easy to back up)
 - **Frontend**: plain JS compiled ahead of time from React/JSX (no build step needed at runtime; everything, including icons and React itself, is served locally — works fully offline once loaded)
 - **Auth**: username/password, hashed with bcrypt, session cookies. Students cannot self-register — accounts are created by the admin.
+- **Health check**: `GET /api/health` (no auth required) returns `{"status":"ok"}` — used by the Docker Compose healthcheck, and handy for any reverse proxy or uptime monitor.
+- **Graceful shutdown**: the server closes its database connection cleanly on `SIGTERM`/`SIGINT`, so `docker compose stop`/container updates don't risk leaving the SQLite file in a bad state.
 
-## Quick start on your Zima server (CasaOS)
+## ZimaOS / Docker Installation
 
-1. Copy this whole folder onto your Zima server (e.g. via the CasaOS file manager, `scp`, or a Git clone).
-2. Open `docker-compose.yml` and change:
-   - `ADMIN_PASSWORD` — the password for your admin account (username defaults to `admin`)
-   - `SESSION_SECRET` — any long random string (e.g. `openssl rand -hex 32`)
-3. In CasaOS, use **Custom Install → Install a docker-compose.yml** and point it at this folder, or from a terminal on the server:
+These steps assume you're installing somewhere like
+`/DATA/Apps/DT-Classroom-Helper` on your ZimaOS server, via a terminal (SSH,
+or ZimaOS's built-in terminal app) rather than the App Store's GUI importer —
+see the troubleshooting notes below for why.
+
+1. Clone the repository:
    ```bash
-   docker compose up -d --build
+   git clone https://github.com/mrmitchell-design/DT-Classroom-Helper.git
+   cd DT-Classroom-Helper
    ```
-4. Visit `http://<your-zima-ip>:8080` and log in with your admin account.
+2. Create your real config from the example file:
+   ```bash
+   cp .env.example .env
+   ```
+3. Edit `.env` and set a secure `ADMIN_PASSWORD` and `SESSION_SECRET`. Never
+   commit `.env` to git — it's already listed in `.gitignore`. Generate a
+   strong session secret with:
+   ```bash
+   openssl rand -hex 32
+   ```
+   Paste the result in as `SESSION_SECRET` in `.env`. The app will refuse to
+   start in production if `SESSION_SECRET` is missing or shorter than 32
+   characters, or if `ADMIN_PASSWORD` is missing — this is intentional, so a
+   misconfigured deployment fails loudly instead of running insecurely.
+4. Build and start:
+   ```bash
+   docker compose build --no-cache
+   docker compose up -d
+   ```
+5. Check it's actually running:
+   ```bash
+   docker compose ps
+   ```
+6. If anything looks wrong, check the logs:
+   ```bash
+   docker compose logs -f
+   ```
+7. Visit `http://<your-zima-ip>:8080` and log in with your admin account
+   (`ADMIN_USERNAME` from `.env`, default `admin`).
 
 ### "Failed to pull image: repository does not exist"
 
 Some app-store-style importers (ZimaOS's included) try to `docker pull` the
 image named in `docker-compose.yml` before building it — but
-`dt-toolkit-server` isn't a published image anywhere, it only exists once you
-build it locally from the included `Dockerfile`. The `docker-compose.yml`
+`dt-classroom-helper` isn't a published image anywhere, it only exists once
+you build it locally from the included `Dockerfile`. The `docker-compose.yml`
 already includes `pull_policy: build` to tell Compose "always build locally,
 never pull," which fixes this for standard `docker compose` and most
-importers.
-
-If your version of the ZimaOS app-store importer still tries to pull anyway
-(some GUI importers have limited support for newer Compose fields), the
-reliable fix is to build the image yourself first, so it already exists
-locally before you import:
-
-1. Open a terminal on the Zima server (SSH, or ZimaOS's built-in terminal app).
-2. `cd` into this folder (wherever you copied/cloned it).
-3. Run:
-   ```bash
-   docker compose build
-   ```
-4. Now import/install via the ZimaOS App Store as normal (or just run
-   `docker compose up -d` from the same terminal) — the image already exists
-   locally, so nothing needs to be pulled.
+importers. If your version of the ZimaOS GUI importer still tries to pull
+anyway, build it yourself first from a terminal (`docker compose build`),
+then import — the image already exists locally, so nothing needs pulling.
 
 ### Container builds fine but crashes on start (exit code 139 / segfault)
 
@@ -61,47 +81,36 @@ a mismatched native binary can segfault the whole process the moment it's
 actually used (e.g. the first time a database is opened), even though
 `require()` on the module succeeds.
 
-The earlier Dockerfile installed dependencies with `npm install
---ignore-scripts`, which skips `better-sqlite3`'s own version-matching logic
-and just uses whichever binary happened to ship in the npm package — fine on
-some Node versions, silently broken on others (specifically Node 20 in this
-case).
-
-**The fix**, already applied in this repo: the Dockerfile now **explicitly**
+**The fix**, already applied in this repo: the Dockerfile **explicitly**
 forces `better-sqlite3` to recompile from source with `npm rebuild
 better-sqlite3 --build-from-source`, in a dedicated build stage using the
-same Node version as the final image. (An earlier version of this fix relied
-on npm's *implicit* default behavior of auto-compiling packages with a
-`binding.gyp` file — that turned out to be unreliable in practice and could
-silently keep using the bundled prebuilt binary instead of actually
-compiling, so the explicit command is what actually matters here.) That
-compile stage's tools (Python, make, g++) are discarded afterward — they
-never end up in the image you actually run, so it stays just as lean.
-
-The build also now includes a **smoke test**: right after compiling, it
-opens a real database and exercises WAL mode inside the build itself — the
-exact operations that were segfaulting before. If the compiled binary is
-ever wrong for the target environment again, `docker compose build` will
-fail immediately with a clear error, instead of producing a broken image
-that only reveals the problem later as a crash-loop.
+same Node version as the final image, then verifies it with a build-time
+smoke test that actually opens a database and exercises WAL mode — the exact
+operations that were segfaulting before. If the compiled binary is ever
+wrong for the target environment again, `docker compose build` will fail
+immediately with a clear error, instead of producing a broken image that
+only reveals the problem later as a crash-loop. The compiler toolchain
+(Python, make, g++) used for this is discarded afterward — it never ends up
+in the image you actually run.
 
 One practical consequence: `docker compose build` will take noticeably
-longer than before (the native module is genuinely being compiled now,
-rather than just copied). That's expected — usually well under a minute on
-typical hardware, and it only happens on build, not on every `up`.
+longer than a plain JS-only image (the native module is genuinely being
+compiled). That's expected — usually well under a minute on typical
+hardware, and it only happens on build, not on every `up`.
 
 The first time the container starts, it automatically creates the admin
-account from `ADMIN_USERNAME` / `ADMIN_PASSWORD`. This only happens once —
-changing those environment variables later does **not** change an existing
-admin password (use the admin console, or see "Resetting the admin
-password" below).
+account from `ADMIN_USERNAME` / `ADMIN_PASSWORD` in `.env`. This only
+happens once — changing `.env` later does **not** change an existing admin
+password (use the admin console, or see "Resetting the admin password"
+below).
 
 ### Persisting data
 
 All accounts, saved worksheets, and quiz history live in one SQLite file at
-`./data/app.db` (mounted as a Docker volume). **Back this up regularly** —
-copying that one file (and `app.db-wal` / `app.db-shm` if present, or just
-stop the container first for a clean copy) is a complete backup.
+`./data/app.db` (mounted as a Docker volume, so it survives container
+rebuilds and updates). **Back this up regularly** — copying that one file
+(and `app.db-wal` / `app.db-shm` if present, or just stop the container
+first for a clean copy) is a complete backup.
 
 ## Using it
 
@@ -139,7 +148,7 @@ src/               React/JSX source — edit these
 public/            Compiled output + static assets (generated by build.js, don't hand-edit app.js)
 data/              SQLite database lives here (gitignore this in a real repo)
 Dockerfile         3-stage build: frontend assets, native deps (compiled from source), lean runtime
-docker-compose.yml CasaOS/Docker deployment config
+docker-compose.yml ZimaOS/Docker deployment config (reads secrets from .env)
 build.js           Compiles src/*.jsx -> public/app.js and vendors static assets
 ```
 
@@ -154,10 +163,12 @@ this — it's a five-minute job.
 ## Security notes for a real deployment
 
 - This is built for **trusted classroom/LAN use**. If you expose it beyond
-  your home network, put it behind HTTPS (e.g. a reverse proxy in CasaOS with
-  a certificate) and set `COOKIE_SECURE=true`.
-- Change `SESSION_SECRET` and `ADMIN_PASSWORD` from the defaults before
-  going live.
+  your home network, put it behind HTTPS (e.g. a reverse proxy in ZimaOS with
+  a certificate) and set `COOKIE_SECURE=true` in `.env`.
+- `ADMIN_PASSWORD` and `SESSION_SECRET` must be set in `.env` before a
+  production deploy — the app checks for this on startup and refuses to run
+  with a missing or weak `SESSION_SECRET` (under 32 characters) or a missing
+  `ADMIN_PASSWORD`, rather than silently falling back to an insecure default.
 - Student passwords are auto-generated (e.g. `otter-42-kite`) rather than
   chosen by students, which keeps things simple and avoids weak/reused
   passwords — but it does mean you're responsible for distributing them

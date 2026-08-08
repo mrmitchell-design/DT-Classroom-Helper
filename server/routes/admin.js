@@ -172,7 +172,7 @@ router.get("/export.csv", (req, res) => {
   });
 
   res.setHeader("Content-Type", "text/csv");
-  res.setHeader("Content-Disposition", `attachment; filename="dt-toolkit-export-${new Date().toISOString().slice(0, 10)}.csv"`);
+  res.setHeader("Content-Disposition", `attachment; filename="dt-classroom-helper-export-${new Date().toISOString().slice(0, 10)}.csv"`);
   res.send(lines.join("\n"));
 });
 

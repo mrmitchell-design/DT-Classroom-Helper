@@ -1,26 +1,32 @@
 services:
-  dt-toolkit:
+  dt-classroom-helper:
     build: .
-    image: dt-toolkit-server:latest
+    image: dt-classroom-helper:latest
     # Tell Compose to always build from the local Dockerfile and never try to
-    # pull "dt-toolkit-server" from a registry (it doesn't exist there — it's
-    # not a published image). Without this, some app-store importers (ZimaOS
-    # included) try a pull first and fail with "repository does not exist".
+    # pull "dt-classroom-helper" from a registry (it doesn't exist there —
+    # it's not a published image). Without this, some app-store importers
+    # (ZimaOS included) try a pull first and fail with "repository does not
+    # exist".
     pull_policy: build
-    container_name: dt-toolkit
+    container_name: dt-classroom-helper
     restart: unless-stopped
     ports:
-      - "8080:3000"
+      - "${HOST_PORT:-8080}:3000"
     volumes:
       - ./data:/app/data
+    # All real values come from .env (copy .env.example to .env and fill it
+    # in — see the "ZimaOS / Docker Installation" section in the README).
+    # Nothing sensitive is committed to this file or to git.
     environment:
-      # Change these before first boot. On first launch, an admin account is
-      # created automatically using these credentials (or "admin" / "changeme123"
-      # if left unset — make sure to set them!).
-      ADMIN_USERNAME: admin
-      ADMIN_PASSWORD: changeme123
-      # Any long random string. Used to sign login session cookies.
-      SESSION_SECRET: please-change-this-to-something-random
-      # Set to "true" only if you put this behind HTTPS (e.g. a reverse proxy
-      # with a certificate). Leave "false" for plain-HTTP LAN access.
-      COOKIE_SECURE: "false"
+      NODE_ENV: production
+      PORT: ${PORT:-3000}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      SESSION_SECRET: ${SESSION_SECRET}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
