@@ -22,7 +22,7 @@ function LoginScreen({ onLogin }) {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1 className="app-title login-title">The Design <span>Bench</span></h1>
+        <h1 className="app-title login-title">DT Classroom <span>Helper</span></h1>
         <p className="app-sub" style={{ marginBottom: 24 }}>Sign in to continue</p>
         <form onSubmit={handleSubmit} className="login-form">
           <label>

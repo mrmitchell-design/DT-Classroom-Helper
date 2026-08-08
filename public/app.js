@@ -1393,7 +1393,7 @@ function LoginScreen({
     className: "login-card"
   }, /*#__PURE__*/React.createElement("h1", {
     className: "app-title login-title"
-  }, "The Design ", /*#__PURE__*/React.createElement("span", null, "Bench")), /*#__PURE__*/React.createElement("p", {
+  }, "DT Classroom ", /*#__PURE__*/React.createElement("span", null, "Helper")), /*#__PURE__*/React.createElement("p", {
     className: "app-sub",
     style: {
       marginBottom: 24
@@ -1449,7 +1449,7 @@ function StudentApp({
     className: "app-header no-print"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", {
     className: "app-title"
-  }, "The Design ", /*#__PURE__*/React.createElement("span", null, "Bench")), /*#__PURE__*/React.createElement("p", {
+  }, "DT Classroom ", /*#__PURE__*/React.createElement("span", null, "Helper")), /*#__PURE__*/React.createElement("p", {
     className: "app-sub"
   }, "Signed in as ", user.displayName, user.classGroup ? ` \u00b7 ${user.classGroup}` : "")), /*#__PURE__*/React.createElement("div", {
     className: "header-controls"
@@ -1795,7 +1795,7 @@ function App() {
   if (user === undefined) {
     return /*#__PURE__*/React.createElement("div", {
       className: "loading-screen"
-    }, "Loading The Design Bench\u2026");
+    }, "Loading DT Classroom Helper\u2026");
   }
   if (!user) {
     return /*#__PURE__*/React.createElement(LoginScreen, {

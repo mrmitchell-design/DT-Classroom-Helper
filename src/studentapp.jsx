@@ -12,7 +12,7 @@ function StudentApp({ user, onLogout }) {
     <div className="app-root">
       <div className="app-header no-print">
         <div>
-          <h1 className="app-title">The Design <span>Bench</span></h1>
+          <h1 className="app-title">DT Classroom <span>Helper</span></h1>
           <p className="app-sub">Signed in as {user.displayName}{user.classGroup ? ` \u00b7 ${user.classGroup}` : ""}</p>
         </div>
         <div className="header-controls">

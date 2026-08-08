@@ -11,7 +11,7 @@ function App() {
   }
 
   if (user === undefined) {
-    return <div className="loading-screen">Loading The Design Bench&hellip;</div>;
+    return <div className="loading-screen">Loading DT Classroom Helper&hellip;</div>;
   }
   if (!user) {
     return <LoginScreen onLogin={setUser} />;
