@@ -23,4 +23,5 @@ async function api(path, options) {
 const apiGet = (path) => api(path);
 const apiPost = (path, data) => api(path, { method: "POST", body: JSON.stringify(data || {}) });
 const apiPut = (path, data) => api(path, { method: "PUT", body: JSON.stringify(data || {}) });
+const apiPatch = (path, data) => api(path, { method: "PATCH", body: JSON.stringify(data || {}) });
 const apiDelete = (path) => api(path, { method: "DELETE" });

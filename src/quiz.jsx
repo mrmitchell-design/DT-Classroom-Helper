@@ -108,6 +108,13 @@ function typedAnswerLooksGood(text, keywords) {
   return wordCount >= 6 || hasKeyword;
 }
 
+function formatDuration(seconds) {
+  if (seconds === null || seconds === undefined) return "\u2014";
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return m > 0 ? `${m}m ${s}s` : `${s}s`;
+}
+
 /* ------------------------------------------------------------------ */
 /* QUIZ TAB                                                             */
 /* ------------------------------------------------------------------ */
@@ -125,11 +132,21 @@ function QuizTab({ currentUser }) {
   const [finished, setFinished] = useState(false);
   const [history, setHistory] = useState([]);
   const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [expandedHistoryId, setExpandedHistoryId] = useState(null);
+  const [customSets, setCustomSets] = useState([]);
+  const [activeCustomSetId, setActiveCustomSetId] = useState(null);
+  const [activeCustomSetName, setActiveCustomSetName] = useState("");
+  const startTimeRef = useRef(null);
+  const answeredDetailsRef = useRef([]);
 
-  useEffect(() => {
+  function loadHistory() {
     apiGet("/api/quiz-attempts")
       .then((rows) => { setHistory(rows); setHistoryLoaded(true); })
       .catch(() => setHistoryLoaded(true));
+  }
+  useEffect(loadHistory, []);
+  useEffect(() => {
+    apiGet("/api/quiz-sets/available").then(setCustomSets).catch(() => {});
   }, []);
 
   function start() {
@@ -143,27 +160,66 @@ function QuizTab({ currentUser }) {
     setTypedChecked(false);
     setFinished(false);
     setStarted(true);
+    setActiveCustomSetId(null);
+    setActiveCustomSetName("");
+    startTimeRef.current = Date.now();
+    answeredDetailsRef.current = [];
+  }
+
+  async function startCustomSet(setSummary) {
+    try {
+      const full = await apiGet(`/api/quiz-sets/${setSummary.id}`);
+      const qs = full.questions.map((q) => ({ ...q, tint: q.tint || "#16324F", badge: q.badge || "?" }));
+      setQuestions(qs);
+      setIdx(0);
+      setScore(0);
+      setPicked(null);
+      setTypedValue("");
+      setTypedChecked(false);
+      setFinished(false);
+      setStarted(true);
+      setActiveCustomSetId(full.id);
+      setActiveCustomSetName(full.name);
+      startTimeRef.current = Date.now();
+      answeredDetailsRef.current = [];
+    } catch (e) { /* ignore */ }
   }
 
   function choose(option) {
     if (picked) return;
     setPicked(option);
-    if (option === questions[idx].answer) setScore((s) => s + 1);
+    const q = questions[idx];
+    const isCorrect = option === q.answer;
+    if (isCorrect) setScore((s) => s + 1);
+    answeredDetailsRef.current.push({
+      qid: q.qid, type: q.type, prompt: q.prompt, letter: q.badge,
+      studentAnswer: option, correctAnswer: q.answer, isCorrect,
+    });
   }
 
   function checkTyped() {
     if (typedChecked) return;
     setTypedChecked(true);
-    if (typedAnswerLooksGood(typedValue, questions[idx].keywords)) setScore((s) => s + 1);
+    const q = questions[idx];
+    const isCorrect = typedAnswerLooksGood(typedValue, q.keywords);
+    if (isCorrect) setScore((s) => s + 1);
+    answeredDetailsRef.current.push({
+      qid: q.qid, type: q.type, prompt: q.prompt, letter: q.badge,
+      studentAnswer: typedValue, correctAnswer: q.modelAnswer, isCorrect,
+    });
   }
 
   async function next() {
     if (idx + 1 >= questions.length) {
       setFinished(true);
+      const durationSeconds = startTimeRef.current ? Math.round((Date.now() - startTimeRef.current) / 1000) : null;
       try {
-        await apiPost("/api/quiz-attempts", { quizSet: mode, difficulty, score, total: questions.length });
-        const rows = await apiGet("/api/quiz-attempts");
-        setHistory(rows);
+        await apiPost("/api/quiz-attempts", {
+          quizSet: mode, difficulty, score, total: questions.length,
+          durationSeconds, details: answeredDetailsRef.current,
+          quizSetId: activeCustomSetId,
+        });
+        loadHistory();
       } catch (e) { /* non-fatal: quiz result just won't be saved */ }
     } else {
       setIdx((i) => i + 1);
@@ -215,17 +271,42 @@ function QuizTab({ currentUser }) {
 
           <button className="btn-primary" onClick={start}><IconGlyph name="Wrench" size={18} /> Start quiz</button>
 
+          {customSets.length > 0 && (
+            <div className="quiz-custom-sets">
+              <span className="quiz-history-label">Assigned &amp; practice quizzes from your teacher</span>
+              <div className="quiz-custom-set-list">
+                {customSets.map((s) => (
+                  <button type="button" key={s.id} className="quiz-custom-set-card" onClick={() => startCustomSet(s)}>
+                    <span className="quiz-custom-set-name">{s.name} {s.isPracticeBank && <span className="needs-marking-badge" style={{ background: "#EDF5EE", color: "#2A5B37" }}>practice</span>}</span>
+                    {s.description && <span className="sub">{s.description}</span>}
+                    <span className="mono">{s.questionCount} question{s.questionCount === 1 ? "" : "s"}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {historyLoaded && history.length > 0 && (
             <div className="quiz-history">
               <span className="quiz-history-label">Your recent attempts</span>
               <div className="quiz-history-list">
                 {history.slice(0, 6).map((h) => (
-                  <div className="quiz-history-row" key={h.id}>
-                    <span className="quiz-history-pct">{Math.round((h.score / h.total) * 100)}%</span>
-                    <span>{FRAMEWORKS[h.quizSet] ? FRAMEWORKS[h.quizSet].label : "Mixed"}</span>
-                    <span className="quiz-history-diff">{DIFFICULTY_INFO[h.difficulty] ? DIFFICULTY_INFO[h.difficulty].label : h.difficulty}</span>
-                    <span className="mono">{h.score}/{h.total}</span>
-                  </div>
+                  <React.Fragment key={h.id}>
+                    <div className="quiz-history-row" onClick={() => setExpandedHistoryId(expandedHistoryId === h.id ? null : h.id)}>
+                      <span className="quiz-history-pct">{Math.round((h.score / h.total) * 100)}%</span>
+                      <span>{FRAMEWORKS[h.quizSet] ? FRAMEWORKS[h.quizSet].label : "Mixed"}</span>
+                      <span className="quiz-history-diff">{DIFFICULTY_INFO[h.difficulty] ? DIFFICULTY_INFO[h.difficulty].label : h.difficulty}</span>
+                      <span className="mono">{h.score}/{h.total}</span>
+                      <span className="mono">{formatDuration(h.durationSeconds)}</span>
+                      {h.feedback && <IconGlyph name="Lightbulb" size={14} style={{ color: "#8A6A1E" }} />}
+                    </div>
+                    {expandedHistoryId === h.id && h.feedback && (
+                      <div className="quiz-history-feedback">
+                        <span className="help-label">Feedback from your teacher</span>
+                        <p>{h.feedback}</p>
+                      </div>
+                    )}
+                  </React.Fragment>
                 ))}
               </div>
             </div>
@@ -244,9 +325,14 @@ function QuizTab({ currentUser }) {
             {pct >= 70 ? "PASSED" : "TRY AGAIN"}
           </span>
           <h2>{score} / {questions.length}</h2>
-          <p className="sub">You scored {pct}% on {DIFFICULTY_INFO[difficulty].label}. {pct >= 70 ? "Solid work \u2014 that's a strong grasp of the framework." : "Have another go and see if you can beat it."}</p>
+          <p className="sub">
+            You scored {pct}% {activeCustomSetName ? <>on "{activeCustomSetName}"</> : <>on {DIFFICULTY_INFO[difficulty].label}</>}.{" "}
+            {pct >= 70 ? "Solid work \u2014 that's a strong grasp of the framework." : "Have another go and see if you can beat it."}
+          </p>
           <div className="quiz-result-actions">
-            <button className="btn-primary" onClick={start}><IconGlyph name="RotateCcw" size={18} /> Retake this quiz</button>
+            <button className="btn-primary" onClick={activeCustomSetId ? () => startCustomSet({ id: activeCustomSetId, name: activeCustomSetName }) : start}>
+              <IconGlyph name="RotateCcw" size={18} /> Retake this quiz
+            </button>
             <button className="btn-secondary" onClick={() => setStarted(false)}>Choose a different set</button>
           </div>
         </div>

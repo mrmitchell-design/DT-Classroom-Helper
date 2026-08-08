@@ -19,11 +19,18 @@ function WorksheetTab({ simpleMode, currentUser }) {
   const [helpOpen, setHelpOpen] = useState({});
   const [exportState, setExportState] = useState({ pdf: "idle", word: "idle" });
   const [currentId, setCurrentId] = useState(null);
+  const [currentFeedback, setCurrentFeedback] = useState("");
   const [savedList, setSavedList] = useState([]);
   const [savedListOpen, setSavedListOpen] = useState(false);
   const [saveState, setSaveState] = useState("idle"); // idle | saving | saved | error
+  const [availableTasks, setAvailableTasks] = useState([]);
+  const [activeTask, setActiveTask] = useState(null);
   const textareaRefs = useRef({});
   const fw = FRAMEWORKS[fwKey];
+
+  useEffect(() => {
+    apiGet("/api/tasks/available").then(setAvailableTasks).catch(() => {});
+  }, []);
 
   function refreshSavedList() {
     apiGet("/api/submissions").then(setSavedList).catch(() => {});
@@ -55,6 +62,8 @@ function WorksheetTab({ simpleMode, currentUser }) {
     setBrand("");
     setAnswers({});
     setCurrentId(null);
+    setCurrentFeedback("");
+    setActiveTask(null);
     setSaveState("idle");
   }
 
@@ -67,6 +76,21 @@ function WorksheetTab({ simpleMode, currentUser }) {
     startFresh(fwKey, mode);
   }
 
+  async function startTask(taskSummary) {
+    try {
+      const full = await apiGet(`/api/tasks/${taskSummary.id}`);
+      setFwKey(full.framework);
+      setMode(full.taskType === "image" ? "analyze" : "create");
+      setProductName(full.title);
+      setBrand("");
+      setAnswers({});
+      setCurrentId(null);
+      setCurrentFeedback("");
+      setSaveState("idle");
+      setActiveTask(full);
+    } catch (e) { /* ignore */ }
+  }
+
   async function openSaved(item) {
     try {
       const full = await apiGet(`/api/submissions/${item.id}`);
@@ -76,6 +100,8 @@ function WorksheetTab({ simpleMode, currentUser }) {
       setBrand(full.brand || "");
       setAnswers(full.answers || {});
       setCurrentId(full.id);
+      setCurrentFeedback(full.feedback || "");
+      setActiveTask(null);
       setSaveState("idle");
       setSavedListOpen(false);
     } catch (e) { /* ignore */ }
@@ -97,7 +123,7 @@ function WorksheetTab({ simpleMode, currentUser }) {
       if (currentId && !asNew) {
         await apiPut(`/api/submissions/${currentId}`, { productName, brand, answers });
       } else {
-        const created = await apiPost("/api/submissions", { toolMode: mode, framework: fwKey, productName, brand, answers });
+        const created = await apiPost("/api/submissions", { toolMode: mode, framework: fwKey, productName, brand, answers, taskId: activeTask ? activeTask.id : null });
         setCurrentId(created.id);
       }
       setSaveState("saved");
@@ -226,6 +252,36 @@ function WorksheetTab({ simpleMode, currentUser }) {
         </button>
       </div>
 
+      {availableTasks.length > 0 && !activeTask && (
+        <div className="task-picker no-print">
+          <span className="quiz-history-label">Assigned &amp; practice tasks from your teacher</span>
+          <div className="task-picker-list">
+            {availableTasks.map((t) => (
+              <button type="button" key={t.id} className="task-picker-card" onClick={() => startTask(t)}>
+                {t.imageUrl && <img src={t.imageUrl} alt={t.title} className="task-picker-thumb" />}
+                <span className="task-picker-info">
+                  <span className="task-picker-title">
+                    {t.title} {t.isPracticeBank && <span className="needs-marking-badge" style={{ background: "#EDF5EE", color: "#2A5B37" }}>practice</span>}
+                  </span>
+                  {t.dueAt && <span className="mono">Due {t.dueAt}</span>}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {activeTask && (
+        <div className="task-active-banner no-print">
+          <div className="task-active-head">
+            <span className="worksheet-feedback-label">Task: {activeTask.title}</span>
+            <button type="button" className="btn-text" onClick={() => setActiveTask(null)}>Clear task</button>
+          </div>
+          {activeTask.imageUrl && <img src={activeTask.imageUrl} alt={activeTask.title} className="task-active-image" />}
+          {activeTask.instructions && <p>{activeTask.instructions}</p>}
+        </div>
+      )}
+
       <p className="worksheet-editing-status sub no-print">
         {currentId
           ? <>Editing a saved worksheet{productName ? <> — <strong>{productName}</strong></> : null}. Changes save to this same one unless you use "New worksheet" or "Save as new copy".</>
@@ -238,12 +294,22 @@ function WorksheetTab({ simpleMode, currentUser }) {
           {savedList.map((item) => (
             <div className="saved-row" key={item.id} onClick={() => openSaved(item)}>
               <span className="saved-row-fw" style={{ color: FRAMEWORKS[item.framework].tint }}>{FRAMEWORKS[item.framework].label}</span>
-              <span className="saved-row-name">{item.productName || "Untitled"}</span>
+              <span className="saved-row-name">{item.productName || "Untitled"}{item.feedback && <IconGlyph name="Lightbulb" size={13} style={{ color: "#8A6A1E", marginLeft: 6, verticalAlign: "-2px" }} />}</span>
               <span className="saved-row-mode">{item.toolMode === "analyze" ? "Analysis" : "Design"}</span>
               <span className="saved-row-date mono">{formatDate(item.updatedAt)}</span>
               <button type="button" className="saved-row-delete" onClick={(e) => deleteSaved(item, e)} aria-label="Delete"><IconGlyph name="Trash2" size={14} /></button>
             </div>
           ))}
+        </div>
+      )}
+
+      {currentFeedback && (
+        <div className="worksheet-feedback-callout no-print">
+          <IconGlyph name="Lightbulb" size={16} style={{ color: "#8A6A1E" }} />
+          <div>
+            <span className="worksheet-feedback-label">Feedback from your teacher</span>
+            <p>{currentFeedback}</p>
+          </div>
         </div>
       )}
 

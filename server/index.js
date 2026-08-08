@@ -37,6 +37,10 @@ const authRoutes = require("./routes/auth");
 const submissionRoutes = require("./routes/submissions");
 const quizRoutes = require("./routes/quiz");
 const adminRoutes = require("./routes/admin");
+const quizSetsAdminRoutes = require("./routes/quizsets");
+const quizSetsPublicRoutes = require("./routes/quizsets-public");
+const tasksAdminRoutes = require("./routes/tasks");
+const tasksPublicRoutes = require("./routes/tasks-public");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -74,6 +78,14 @@ app.use("/api", authRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/quiz-attempts", quizRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/admin", quizSetsAdminRoutes);
+app.use("/api/admin", tasksAdminRoutes);
+app.use("/api/quiz-sets", quizSetsPublicRoutes);
+app.use("/api/tasks", tasksPublicRoutes);
+
+// uploaded task images - served statically, no auth (images are shown inline
+// in the worksheet task UI; they're not sensitive, just product photos)
+app.use("/uploads", express.static(path.join(DATA_DIR, "uploads")));
 
 app.use(express.static(path.join(__dirname, "..", "public")));
 

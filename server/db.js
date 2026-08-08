@@ -47,7 +47,85 @@ CREATE TABLE IF NOT EXISTS quiz_attempts (
 
 CREATE INDEX IF NOT EXISTS idx_submissions_user ON submissions(user_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_user ON quiz_attempts(user_id);
+
+-- A named quiz: a fully self-contained set of questions (either copied/edited
+-- from the built-in question set, or written from scratch by the admin -
+-- both end up as plain question objects here, so the backend never needs to
+-- know about the built-in content living in the frontend bundle). Can be
+-- assigned to classes, or marked as a self-serve practice quiz any student
+-- can take any time.
+CREATE TABLE IF NOT EXISTS quiz_sets (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  description TEXT,
+  questions TEXT NOT NULL DEFAULT '[]', -- JSON array of question objects
+  is_practice_bank INTEGER NOT NULL DEFAULT 0,
+  created_by INTEGER REFERENCES users(id),
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS quiz_assignments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  quiz_set_id INTEGER NOT NULL REFERENCES quiz_sets(id) ON DELETE CASCADE,
+  year_group TEXT DEFAULT '',
+  class_group TEXT DEFAULT '',
+  due_at TEXT,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+-- Admin-created worksheet tasks: a written prompt, or an uploaded image to
+-- analyse with ACCESSFM/SCAMPER. Can be assigned to classes (required) or
+-- marked as a practice-bank task any student can pick up any time.
+CREATE TABLE IF NOT EXISTS worksheet_tasks (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  task_type TEXT NOT NULL DEFAULT 'written', -- written | image
+  framework TEXT NOT NULL DEFAULT 'accessfm',
+  instructions TEXT,
+  image_path TEXT,
+  is_practice_bank INTEGER NOT NULL DEFAULT 0,
+  created_by INTEGER REFERENCES users(id),
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS task_assignments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  task_id INTEGER NOT NULL REFERENCES worksheet_tasks(id) ON DELETE CASCADE,
+  year_group TEXT DEFAULT '',
+  class_group TEXT DEFAULT '',
+  due_at TEXT,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_quiz_assignments_class ON quiz_assignments(year_group, class_group);
+CREATE INDEX IF NOT EXISTS idx_task_assignments_class ON task_assignments(year_group, class_group);
 `);
+
+// --- lightweight migrations: add columns to existing tables if missing ---
+// SQLite has no "ADD COLUMN IF NOT EXISTS", so we check pragma table_info
+// first. This lets an existing deployment upgrade in place without losing
+// any data - students keep their accounts, submissions and quiz history
+// exactly as they are, these just add new optional fields alongside them.
+function ensureColumn(table, column, definition) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all();
+  const exists = cols.some((c) => c.name === column);
+  if (!exists) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+    console.log(`[migrate] Added column ${table}.${column}`);
+  }
+}
+ensureColumn("users", "year_group", "TEXT DEFAULT ''");
+ensureColumn("submissions", "feedback", "TEXT DEFAULT ''");
+ensureColumn("quiz_attempts", "feedback", "TEXT DEFAULT ''");
+ensureColumn("quiz_attempts", "duration_seconds", "INTEGER");
+ensureColumn("quiz_attempts", "details", "TEXT DEFAULT '[]'");
+ensureColumn("submissions", "marked_complete", "INTEGER NOT NULL DEFAULT 0");
+ensureColumn("quiz_attempts", "marked_complete", "INTEGER NOT NULL DEFAULT 0");
+ensureColumn("submissions", "task_id", "INTEGER REFERENCES worksheet_tasks(id)");
+ensureColumn("quiz_attempts", "quiz_set_id", "INTEGER REFERENCES quiz_sets(id)");
+
 
 // --- one-time admin bootstrap ---
 function ensureAdmin() {

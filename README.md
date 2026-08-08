@@ -115,16 +115,28 @@ first for a clean copy) is a complete backup.
 ## Using it
 
 ### As the teacher/admin
-- Log in with your admin account to land on the **Admin Console**.
-- **Add student**: creates an account and shows a one-time temporary password — write it down or share it with the student immediately, it isn't shown again (though you can always generate a new one with "Reset password").
-- Click a student's row to see their saved worksheets and quiz history.
-- **Export class CSV** downloads everyone's saved work and quiz scores in one spreadsheet-friendly file.
+The Admin Console has four tabs:
+
+- **Students**: add accounts one at a time or in bulk via **Import CSV** (download the template from the button, or see the format below). Organise by **Year** and **Class** — the class-block cards above the table filter instantly, and moving a student between classes (via the pencil icon) never affects their saved work, since it's tied to their account, not their class. Each row shows an "N to mark" badge when there's unreviewed work.
+- **Quizzes**: build custom quizzes (multiple choice, scenario, or typed-answer questions), or pull in the built-in ACCESSFM/SCAMPER question sets with one click and edit from there. Assign a quiz to a year/class (with an optional due date), or tick "practice bank" to make it available to every student, any time.
+- **Tasks**: create a written prompt or an image-analysis task (upload a photo, students analyse it with ACCESSFM/SCAMPER). Same assignment model as quizzes — assign to a class, mark as practice bank, or both.
+- **Gradebook**: pick a year/class to see every student against every quiz/task assigned to them, with a class average per quiz. Cells show a small lightbulb icon until you've marked that piece of work as reviewed.
+
+Within a student's expanded row, you can leave **feedback** on any worksheet or quiz attempt (visible to the student), **override** any quiz question's right/wrong marking (the score recalculates live), mark work as **complete**, and **export** any worksheet or quiz attempt as a PDF.
+
+**CSV import format** (header row, case-insensitive column order doesn't matter):
+```
+username,displayName,yearGroup,classGroup,password
+jsmith,Jamie Smith,Year 9,9A,
+abrown,Alex Brown,Year 9,9A,mychosenpassword
+```
+`password` is optional per row — leave blank to auto-generate one. Failed rows (bad username, duplicate, etc.) are reported individually without blocking the rest of the import.
 
 ### As a student
 - Log in with the username/password your teacher gave you.
 - **Learn**: reference cards for every ACCESSFM/SCAMPER letter.
-- **Quiz**: three difficulty tiers (Standard multiple-choice, Challenge adds scenario questions, Extension adds short typed answers marked against a model answer). Scores are saved automatically.
-- **Worksheet**: design-your-own or analyse-an-existing-product modes, with optional word banks and sentence starters, a Simple English toggle, and read-aloud on every question. Work is saved to your account (see "My saved work") and can be exported as a PDF or Word document.
+- **Quiz**: three difficulty tiers (Standard multiple-choice, Challenge adds scenario questions, Extension adds short typed answers marked against a model answer) — plus any quizzes your teacher has assigned to your class or added to the practice bank. Scores, timing, and feedback are all saved automatically.
+- **Worksheet**: design-your-own or analyse-an-existing-product modes, with optional word banks and sentence starters, a Simple English toggle, and read-aloud on every question — plus any tasks (written or image-analysis) your teacher has assigned or added to the practice bank. Work is saved to your account (see "My saved work") and can be exported as a PDF or Word document.
 
 ## Local development (without Docker)
 

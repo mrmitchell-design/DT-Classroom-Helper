@@ -14,6 +14,9 @@ function serialize(row) {
     productName: row.product_name,
     brand: row.brand,
     answers: JSON.parse(row.answers || "{}"),
+    feedback: row.feedback || "",
+    markedComplete: !!row.marked_complete,
+    taskId: row.task_id,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -23,7 +26,7 @@ function serialize(row) {
 router.get("/", (req, res) => {
   const rows = db
     .prepare(
-      `SELECT id, module, tool_mode, framework, product_name, brand, created_at, updated_at
+      `SELECT id, module, tool_mode, framework, product_name, brand, feedback, marked_complete, task_id, created_at, updated_at
        FROM submissions WHERE user_id = ? ORDER BY updated_at DESC`
     )
     .all(req.session.userId);
@@ -35,6 +38,9 @@ router.get("/", (req, res) => {
       framework: r.framework,
       productName: r.product_name,
       brand: r.brand,
+      feedback: r.feedback || "",
+      markedComplete: !!r.marked_complete,
+      taskId: r.task_id,
       createdAt: r.created_at,
       updatedAt: r.updated_at,
     }))
@@ -50,16 +56,21 @@ router.get("/:id", (req, res) => {
 
 // create new
 router.post("/", (req, res) => {
-  const { module = "accessfm_scamper", toolMode, framework, productName, brand, answers } = req.body || {};
+  const { module = "accessfm_scamper", toolMode, framework, productName, brand, answers, taskId } = req.body || {};
   if (!toolMode || !framework || typeof answers !== "object") {
     return res.status(400).json({ error: "toolMode, framework and answers are required." });
   }
+  let taskIdVal = null;
+  if (taskId !== undefined && taskId !== null) {
+    const task = db.prepare("SELECT id FROM worksheet_tasks WHERE id = ?").get(taskId);
+    if (task) taskIdVal = task.id;
+  }
   const info = db
     .prepare(
-      `INSERT INTO submissions (user_id, module, tool_mode, framework, product_name, brand, answers, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))`
+      `INSERT INTO submissions (user_id, module, tool_mode, framework, product_name, brand, answers, task_id, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`
     )
-    .run(req.session.userId, module, toolMode, framework, productName || "", brand || "", JSON.stringify(answers));
+    .run(req.session.userId, module, toolMode, framework, productName || "", brand || "", JSON.stringify(answers), taskIdVal);
   const row = db.prepare("SELECT * FROM submissions WHERE id = ?").get(info.lastInsertRowid);
   res.status(201).json(serialize(row));
 });
