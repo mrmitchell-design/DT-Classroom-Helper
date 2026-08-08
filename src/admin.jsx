@@ -9,6 +9,7 @@ function AdminConsole({ user, onLogout }) {
   const [newUsername, setNewUsername] = useState("");
   const [newDisplayName, setNewDisplayName] = useState("");
   const [newClassGroup, setNewClassGroup] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [addBusy, setAddBusy] = useState(false);
   const [addError, setAddError] = useState("");
 
@@ -24,6 +25,10 @@ function AdminConsole({ user, onLogout }) {
   async function handleAddStudent(e) {
     e.preventDefault();
     if (!newUsername.trim() || !newDisplayName.trim()) return;
+    if (newPassword.trim() && newPassword.trim().length < 6) {
+      setAddError("Password must be at least 6 characters (or leave it blank to auto-generate one).");
+      return;
+    }
     setAddBusy(true);
     setAddError("");
     try {
@@ -31,9 +36,10 @@ function AdminConsole({ user, onLogout }) {
         username: newUsername.trim(),
         displayName: newDisplayName.trim(),
         classGroup: newClassGroup.trim(),
+        password: newPassword.trim() || undefined,
       });
-      setBanner({ text: `Created "${created.username}" \u2014 temporary password: ${created.temporaryPassword}` });
-      setNewUsername(""); setNewDisplayName(""); setNewClassGroup(""); setShowAddForm(false);
+      setBanner({ text: `Created "${created.username}" \u2014 password: ${created.temporaryPassword}` });
+      setNewUsername(""); setNewDisplayName(""); setNewClassGroup(""); setNewPassword(""); setShowAddForm(false);
       loadStudents();
     } catch (err) {
       setAddError(err.message);
@@ -43,9 +49,18 @@ function AdminConsole({ user, onLogout }) {
   }
 
   async function handleResetPassword(student) {
-    if (!window.confirm(`Reset the password for ${student.displayName} (${student.username})?`)) return;
+    const chosen = window.prompt(
+      `Set a new password for ${student.displayName} (${student.username}).\n\nType a specific password (at least 6 characters), or leave this blank to auto-generate a random one.`,
+      ""
+    );
+    if (chosen === null) return; // cancelled
+    const trimmed = chosen.trim();
+    if (trimmed && trimmed.length < 6) {
+      setBanner({ text: "Password must be at least 6 characters (or leave it blank to auto-generate one).", isError: true });
+      return;
+    }
     try {
-      const res = await apiPost(`/api/admin/users/${student.id}/reset-password`, {});
+      const res = await apiPost(`/api/admin/users/${student.id}/reset-password`, trimmed ? { password: trimmed } : {});
       setBanner({ text: `New password for ${student.username}: ${res.temporaryPassword}` });
     } catch (err) {
       setBanner({ text: `Couldn't reset password: ${err.message}`, isError: true });
@@ -88,6 +103,7 @@ function AdminConsole({ user, onLogout }) {
         </div>
         <div className="header-controls">
           <a className="btn-secondary" href="/api/admin/export.csv"><IconGlyph name="FileDown" size={16} /> Export class CSV</a>
+          <ChangePasswordForm />
           <button type="button" className="btn-text logout-btn" onClick={onLogout}><IconGlyph name="LogOut" size={15} /> Log out</button>
         </div>
       </div>
@@ -124,6 +140,10 @@ function AdminConsole({ user, onLogout }) {
               <span>Class / group (optional)</span>
               <input value={newClassGroup} onChange={(e) => setNewClassGroup(e.target.value)} placeholder="e.g. 9A" />
             </label>
+            <label>
+              <span>Password (optional)</span>
+              <input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Leave blank to auto-generate" />
+            </label>
             {addError && <p className="login-error" style={{ gridColumn: "1 / -1" }}>{addError}</p>}
             <button className="btn-primary" type="submit" disabled={addBusy} style={{ justifyContent: "center" }}>
               <IconGlyph name="Key" size={16} /> {addBusy ? "Creating..." : "Create account"}
@@ -135,7 +155,7 @@ function AdminConsole({ user, onLogout }) {
         {error && <p className="export-error">{error}</p>}
 
         {!loading && students.length === 0 && (
-          <p className="sub">No students yet \u2014 add your first account above.</p>
+          <p className="sub">No students yet — add your first account above.</p>
         )}
 
         {!loading && students.length > 0 && (
@@ -184,7 +204,7 @@ function AdminConsole({ user, onLogout }) {
                                 <div className="submission-answers">
                                   {FRAMEWORKS[sub.framework].items.map((item) => (
                                     sub.answers[item.id] ? (
-                                      <p key={item.id}><strong>{item.letter} \u2014 {item.word}:</strong> {sub.answers[item.id]}</p>
+                                      <p key={item.id}><strong>{item.letter} — {item.word}:</strong> {sub.answers[item.id]}</p>
                                     ) : null
                                   ))}
                                 </div>

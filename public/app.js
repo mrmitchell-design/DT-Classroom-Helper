@@ -528,6 +528,101 @@ function LearnTab({
   }))));
 }
 
+/* ===== changepassword.jsx ===== */
+function ChangePasswordForm() {
+  const [open, setOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  function reset() {
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setError("");
+    setSuccess(false);
+  }
+  function toggle() {
+    setOpen(o => !o);
+    reset();
+  }
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setError("Fill in all three fields.");
+      return;
+    }
+    if (newPassword.length < 6) {
+      setError("New password must be at least 6 characters.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError("New password and confirmation don't match.");
+      return;
+    }
+    setBusy(true);
+    try {
+      await apiPost("/api/change-password", {
+        currentPassword,
+        newPassword
+      });
+      setSuccess(true);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "change-password-wrap"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-text",
+    onClick: toggle
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Key",
+    size: 15
+  }), " Change password"), open && /*#__PURE__*/React.createElement("div", {
+    className: "change-password-panel no-print"
+  }, success ? /*#__PURE__*/React.createElement("p", {
+    className: "change-password-success"
+  }, "Password updated \u2713") : /*#__PURE__*/React.createElement("form", {
+    onSubmit: handleSubmit,
+    className: "change-password-form"
+  }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", null, "Current password"), /*#__PURE__*/React.createElement("input", {
+    type: "password",
+    value: currentPassword,
+    onChange: e => setCurrentPassword(e.target.value),
+    autoFocus: true
+  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", null, "New password"), /*#__PURE__*/React.createElement("input", {
+    type: "password",
+    value: newPassword,
+    onChange: e => setNewPassword(e.target.value)
+  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", null, "Confirm new password"), /*#__PURE__*/React.createElement("input", {
+    type: "password",
+    value: confirmPassword,
+    onChange: e => setConfirmPassword(e.target.value)
+  })), error && /*#__PURE__*/React.createElement("p", {
+    className: "login-error"
+  }, error), /*#__PURE__*/React.createElement("div", {
+    className: "change-password-actions"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn-primary",
+    type: "submit",
+    disabled: busy
+  }, busy ? "Saving..." : "Update password"), /*#__PURE__*/React.createElement("button", {
+    className: "btn-text",
+    type: "button",
+    onClick: toggle
+  }, "Cancel")))));
+}
+
 /* ===== quiz.jsx ===== */
 /* ------------------------------------------------------------------ */
 /* QUIZ QUESTION BUILDERS                                              */
@@ -963,6 +1058,14 @@ function WorksheetTab({
     setCurrentId(null);
     setSaveState("idle");
   }
+  function handleNewWorksheet() {
+    const hasContent = productName.trim() || Object.values(answers).some(a => a && a.trim());
+    const hasUnsavedChanges = hasContent && saveState !== "saved";
+    if (hasUnsavedChanges && !window.confirm("Start a new blank worksheet? Any unsaved changes to this one will be lost. (Already-saved worksheets are safe in \"My saved work\".)")) {
+      return;
+    }
+    startFresh(fwKey, mode);
+  }
   async function openSaved(item) {
     try {
       const full = await apiGet(`/api/submissions/${item.id}`);
@@ -1188,11 +1291,20 @@ function WorksheetTab({
   }, /*#__PURE__*/React.createElement(IconGlyph, {
     name: "ClipboardList",
     size: 15
-  }), " My saved work (", savedList.length, ")")), savedListOpen && /*#__PURE__*/React.createElement("div", {
+  }), " My saved work (", savedList.length, ")"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "mode-toggle-btn",
+    onClick: handleNewWorksheet
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "PenLine",
+    size: 15
+  }), " New worksheet")), /*#__PURE__*/React.createElement("p", {
+    className: "worksheet-editing-status sub no-print"
+  }, currentId ? /*#__PURE__*/React.createElement(React.Fragment, null, "Editing a saved worksheet", productName ? /*#__PURE__*/React.createElement(React.Fragment, null, " \u2014 ", /*#__PURE__*/React.createElement("strong", null, productName)) : null, ". Changes save to this same one unless you use \"New worksheet\" or \"Save as new copy\".") : /*#__PURE__*/React.createElement(React.Fragment, null, "Starting a new, unsaved worksheet", productName ? /*#__PURE__*/React.createElement(React.Fragment, null, " \u2014 ", /*#__PURE__*/React.createElement("strong", null, productName)) : null, ".")), savedListOpen && /*#__PURE__*/React.createElement("div", {
     className: "saved-panel no-print"
   }, savedList.length === 0 && /*#__PURE__*/React.createElement("p", {
     className: "sub"
-  }, "Nothing saved yet \\u2014 fill in a worksheet below and hit Save."), savedList.map(item => /*#__PURE__*/React.createElement("div", {
+  }, "Nothing saved yet \u2014 fill in a worksheet below and hit Save."), savedList.map(item => /*#__PURE__*/React.createElement("div", {
     className: "saved-row",
     key: item.id,
     onClick: () => openSaved(item)
@@ -1288,7 +1400,7 @@ function WorksheetTab({
       className: "help-block"
     }, /*#__PURE__*/React.createElement("span", {
       className: "help-label"
-    }, "Useful words \\u2014 tap to add one"), /*#__PURE__*/React.createElement("div", {
+    }, "Useful words \u2014 tap to add one"), /*#__PURE__*/React.createElement("div", {
       className: "chip-row"
     }, item.wordbank.map(w => /*#__PURE__*/React.createElement("button", {
       key: w,
@@ -1462,7 +1574,7 @@ function StudentApp({
     className: "switch" + (simpleMode ? " on" : "")
   }, /*#__PURE__*/React.createElement("span", {
     className: "switch-knob"
-  }))), /*#__PURE__*/React.createElement("button", {
+  }))), /*#__PURE__*/React.createElement(ChangePasswordForm, null), /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "btn-text logout-btn",
     onClick: onLogout
@@ -1502,6 +1614,7 @@ function AdminConsole({
   const [newUsername, setNewUsername] = useState("");
   const [newDisplayName, setNewDisplayName] = useState("");
   const [newClassGroup, setNewClassGroup] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [addBusy, setAddBusy] = useState(false);
   const [addError, setAddError] = useState("");
   function loadStudents() {
@@ -1515,20 +1628,26 @@ function AdminConsole({
   async function handleAddStudent(e) {
     e.preventDefault();
     if (!newUsername.trim() || !newDisplayName.trim()) return;
+    if (newPassword.trim() && newPassword.trim().length < 6) {
+      setAddError("Password must be at least 6 characters (or leave it blank to auto-generate one).");
+      return;
+    }
     setAddBusy(true);
     setAddError("");
     try {
       const created = await apiPost("/api/admin/users", {
         username: newUsername.trim(),
         displayName: newDisplayName.trim(),
-        classGroup: newClassGroup.trim()
+        classGroup: newClassGroup.trim(),
+        password: newPassword.trim() || undefined
       });
       setBanner({
-        text: `Created "${created.username}" \u2014 temporary password: ${created.temporaryPassword}`
+        text: `Created "${created.username}" \u2014 password: ${created.temporaryPassword}`
       });
       setNewUsername("");
       setNewDisplayName("");
       setNewClassGroup("");
+      setNewPassword("");
       setShowAddForm(false);
       loadStudents();
     } catch (err) {
@@ -1538,9 +1657,20 @@ function AdminConsole({
     }
   }
   async function handleResetPassword(student) {
-    if (!window.confirm(`Reset the password for ${student.displayName} (${student.username})?`)) return;
+    const chosen = window.prompt(`Set a new password for ${student.displayName} (${student.username}).\n\nType a specific password (at least 6 characters), or leave this blank to auto-generate a random one.`, "");
+    if (chosen === null) return; // cancelled
+    const trimmed = chosen.trim();
+    if (trimmed && trimmed.length < 6) {
+      setBanner({
+        text: "Password must be at least 6 characters (or leave it blank to auto-generate one).",
+        isError: true
+      });
+      return;
+    }
     try {
-      const res = await apiPost(`/api/admin/users/${student.id}/reset-password`, {});
+      const res = await apiPost(`/api/admin/users/${student.id}/reset-password`, trimmed ? {
+        password: trimmed
+      } : {});
       setBanner({
         text: `New password for ${student.username}: ${res.temporaryPassword}`
       });
@@ -1620,7 +1750,7 @@ function AdminConsole({
   }, /*#__PURE__*/React.createElement(IconGlyph, {
     name: "FileDown",
     size: 16
-  }), " Export class CSV"), /*#__PURE__*/React.createElement("button", {
+  }), " Export class CSV"), /*#__PURE__*/React.createElement(ChangePasswordForm, null), /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "btn-text logout-btn",
     onClick: onLogout
@@ -1664,6 +1794,10 @@ function AdminConsole({
     value: newClassGroup,
     onChange: e => setNewClassGroup(e.target.value),
     placeholder: "e.g. 9A"
+  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", null, "Password (optional)"), /*#__PURE__*/React.createElement("input", {
+    value: newPassword,
+    onChange: e => setNewPassword(e.target.value),
+    placeholder: "Leave blank to auto-generate"
   })), addError && /*#__PURE__*/React.createElement("p", {
     className: "login-error",
     style: {
@@ -1685,7 +1819,7 @@ function AdminConsole({
     className: "export-error"
   }, error), !loading && students.length === 0 && /*#__PURE__*/React.createElement("p", {
     className: "sub"
-  }, "No students yet \\u2014 add your first account above."), !loading && students.length > 0 && /*#__PURE__*/React.createElement("div", {
+  }, "No students yet \u2014 add your first account above."), !loading && students.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "student-table"
   }, /*#__PURE__*/React.createElement("div", {
     className: "student-table-head"
@@ -1756,7 +1890,7 @@ function AdminConsole({
       className: "submission-answers"
     }, FRAMEWORKS[sub.framework].items.map(item => sub.answers[item.id] ? /*#__PURE__*/React.createElement("p", {
       key: item.id
-    }, /*#__PURE__*/React.createElement("strong", null, item.letter, " \\u2014 ", item.word, ":"), " ", sub.answers[item.id]) : null))))), /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("strong", null, item.letter, " \u2014 ", item.word, ":"), " ", sub.answers[item.id]) : null))))), /*#__PURE__*/React.createElement("div", {
       className: "student-detail-col"
     }, /*#__PURE__*/React.createElement("span", {
       className: "help-label"

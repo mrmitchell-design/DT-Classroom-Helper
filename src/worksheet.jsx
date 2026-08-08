@@ -58,6 +58,15 @@ function WorksheetTab({ simpleMode, currentUser }) {
     setSaveState("idle");
   }
 
+  function handleNewWorksheet() {
+    const hasContent = productName.trim() || Object.values(answers).some((a) => a && a.trim());
+    const hasUnsavedChanges = hasContent && saveState !== "saved";
+    if (hasUnsavedChanges && !window.confirm("Start a new blank worksheet? Any unsaved changes to this one will be lost. (Already-saved worksheets are safe in \"My saved work\".)")) {
+      return;
+    }
+    startFresh(fwKey, mode);
+  }
+
   async function openSaved(item) {
     try {
       const full = await apiGet(`/api/submissions/${item.id}`);
@@ -212,11 +221,20 @@ function WorksheetTab({ simpleMode, currentUser }) {
         <button type="button" className="mode-toggle-btn saved-toggle" onClick={() => setSavedListOpen((o) => !o)}>
           <IconGlyph name="ClipboardList" size={15} /> My saved work ({savedList.length})
         </button>
+        <button type="button" className="mode-toggle-btn" onClick={handleNewWorksheet}>
+          <IconGlyph name="PenLine" size={15} /> New worksheet
+        </button>
       </div>
+
+      <p className="worksheet-editing-status sub no-print">
+        {currentId
+          ? <>Editing a saved worksheet{productName ? <> — <strong>{productName}</strong></> : null}. Changes save to this same one unless you use "New worksheet" or "Save as new copy".</>
+          : <>Starting a new, unsaved worksheet{productName ? <> — <strong>{productName}</strong></> : null}.</>}
+      </p>
 
       {savedListOpen && (
         <div className="saved-panel no-print">
-          {savedList.length === 0 && <p className="sub">Nothing saved yet \u2014 fill in a worksheet below and hit Save.</p>}
+          {savedList.length === 0 && <p className="sub">Nothing saved yet — fill in a worksheet below and hit Save.</p>}
           {savedList.map((item) => (
             <div className="saved-row" key={item.id} onClick={() => openSaved(item)}>
               <span className="saved-row-fw" style={{ color: FRAMEWORKS[item.framework].tint }}>{FRAMEWORKS[item.framework].label}</span>
@@ -270,7 +288,7 @@ function WorksheetTab({ simpleMode, currentUser }) {
                   {isHelpOpen && (
                     <div className="help-panel no-print">
                       <div className="help-block">
-                        <span className="help-label">Useful words \u2014 tap to add one</span>
+                        <span className="help-label">Useful words — tap to add one</span>
                         <div className="chip-row">
                           {item.wordbank.map((w) => (<button key={w} type="button" className="chip chip-word" onClick={() => insertText(item.id, w)}>{w}</button>))}
                         </div>

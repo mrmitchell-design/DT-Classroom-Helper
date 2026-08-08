@@ -1,5 +1,5 @@
 # ---- stage 1: build the frontend bundle (JS/CSS) and vendor static assets ----
-FROM node:20-bookworm-slim AS frontend-build
+FROM node:22-bookworm-slim AS frontend-build
 WORKDIR /app
 COPY package.json package-lock.json ./
 # --ignore-scripts is fine here: this stage only needs devDependencies
@@ -15,7 +15,7 @@ RUN npm run build
 # stable N-API, so a binary built for one Node build isn't guaranteed to be
 # safe in another - loading a mismatched one doesn't always fail cleanly,
 # it can segfault the moment real native code runs (e.g. opening a database).
-FROM node:20-bookworm-slim AS deps-build
+FROM node:22-bookworm-slim AS deps-build
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
       python3 make g++ \
@@ -48,7 +48,7 @@ RUN node -e "\
   "
 
 # ---- stage 3: lean production image (no compiler toolchain included) ----
-FROM node:20-bookworm-slim
+FROM node:22-bookworm-slim
 WORKDIR /app
 
 COPY package.json ./

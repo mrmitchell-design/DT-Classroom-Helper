@@ -20,6 +20,7 @@ function StudentApp({ user, onLogout }) {
             <span>Simple English</span>
             <span className={"switch" + (simpleMode ? " on" : "")}><span className="switch-knob" /></span>
           </button>
+          <ChangePasswordForm />
           <button type="button" className="btn-text logout-btn" onClick={onLogout}><IconGlyph name="LogOut" size={15} /> Log out</button>
         </div>
       </div>
