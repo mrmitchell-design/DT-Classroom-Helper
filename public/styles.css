@@ -342,7 +342,7 @@ body {
 
 .assign-panel { display:flex; flex-direction:column; gap:10px; }
 .assign-row { display:flex; gap:8px; flex-wrap:wrap; }
-.assign-row input { font-family:'IBM Plex Sans', sans-serif; font-size:13px; padding:8px 10px; border:1.5px solid #D8D3C4; border-radius:6px; flex:1; min-width:140px; }
+.assign-row input, .assign-row select { font-family:'IBM Plex Sans', sans-serif; font-size:13px; padding:8px 10px; border:1.5px solid #D8D3C4; border-radius:6px; flex:1; min-width:140px; background:#fff; color:var(--ink); }
 .assign-list { display:flex; flex-wrap:wrap; gap:6px; }
 .assign-chip { display:inline-flex; align-items:center; gap:6px; background:#fff; border:1.5px solid #D8D3C4; border-radius:14px; padding:5px 10px; font-size:12px; }
 .assign-chip button { background:none; border:none; color:#8A8371; cursor:pointer; display:flex; }
@@ -358,6 +358,17 @@ body {
 .gradebook-cell.marked { background:#EDF5EE; }
 .gradebook-cell.unmarked { background:#FBF7EC; }
 .gradebook-cell.average { background:#F4F2EA; font-weight:600; }
+
+/* Classes tab */
+.year-section { margin-bottom:24px; }
+.year-section-title { font-family:'Big Shoulders Display', sans-serif; font-size:18px; text-transform:uppercase; letter-spacing:.3px; margin:0 0 10px 0; color: var(--ink); }
+.class-card-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:10px; }
+.class-card { border:1px solid #E1DDD0; border-radius:8px; overflow:hidden; background:#fff; }
+.class-card-head { width:100%; display:flex; align-items:center; gap:10px; padding:12px 14px; background:none; border:none; cursor:pointer; text-align:left; }
+.class-card-head:hover { background:#FDFBF6; }
+.class-card-name { flex:1; font-weight:600; font-size:13.5px; }
+.class-card-roster { background:#FAF8F2; border-top:1px solid #EEEBE3; padding:10px 14px; display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto; }
+.class-card-student { display:flex; align-items:center; justify-content:space-between; font-size:12.5px; }
 
 @media (max-width:720px) {
   .student-table-head, .student-row { grid-template-columns: 1fr; }

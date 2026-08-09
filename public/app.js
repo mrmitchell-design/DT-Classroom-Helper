@@ -1841,7 +1841,7 @@ function CsvImportPanel({
     className: "csv-import-panel no-print"
   }, /*#__PURE__*/React.createElement("p", {
     className: "sub"
-  }, "CSV needs a header row with at least ", /*#__PURE__*/React.createElement("code", null, "username"), " and ", /*#__PURE__*/React.createElement("code", null, "displayName"), " columns (", /*#__PURE__*/React.createElement("code", null, "yearGroup"), ", ", /*#__PURE__*/React.createElement("code", null, "classGroup"), " and ", /*#__PURE__*/React.createElement("code", null, "password"), " are optional \\u2014 leave password blank per row to auto-generate one).", " ", /*#__PURE__*/React.createElement("a", {
+  }, "CSV needs a header row with ", /*#__PURE__*/React.createElement("code", null, "username"), ", ", /*#__PURE__*/React.createElement("code", null, "displayName"), ", ", /*#__PURE__*/React.createElement("code", null, "yearGroup"), " and", " ", /*#__PURE__*/React.createElement("code", null, "classGroup"), " columns (all required), plus an optional ", /*#__PURE__*/React.createElement("code", null, "password"), " column \u2014 leave password blank per row to auto-generate one.", " ", /*#__PURE__*/React.createElement("a", {
     href: "/api/admin/users/import-template.csv",
     className: "csv-template-link"
   }, "Download a template")), /*#__PURE__*/React.createElement("div", {
@@ -1882,6 +1882,72 @@ function CsvImportPanel({
     key: f.row,
     className: "mono"
   }, "Row ", f.row, " (", f.username || "?", "): ", f.error)))));
+}
+
+/* ===== admin-classes.jsx ===== */
+function ClassesPanel() {
+  const [classGroups, setClassGroups] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [expandedKey, setExpandedKey] = useState(null);
+  function load() {
+    setLoading(true);
+    apiGet("/api/admin/classes").then(setClassGroups).catch(e => setError(e.message)).finally(() => setLoading(false));
+  }
+  useEffect(load, []);
+  const byYear = {};
+  classGroups.forEach(c => {
+    const y = c.yearGroup || "No year set";
+    byYear[y] = byYear[y] || [];
+    byYear[y].push(c);
+  });
+  const years = Object.keys(byYear).sort();
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content admin-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "Classes"), /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "Every year group and class currently in use, with a quick look at who's in each one."))), loading && /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "Loading..."), error && /*#__PURE__*/React.createElement("p", {
+    className: "export-error"
+  }, error), !loading && classGroups.length === 0 && /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "No classes yet \u2014 add students with a year and class from the Students tab."), years.map(year => /*#__PURE__*/React.createElement("div", {
+    className: "year-section",
+    key: year
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: "year-section-title"
+  }, year), /*#__PURE__*/React.createElement("div", {
+    className: "class-card-grid"
+  }, byYear[year].map(c => {
+    const key = `${c.yearGroup}|${c.classGroup}`;
+    const isOpen = expandedKey === key;
+    return /*#__PURE__*/React.createElement("div", {
+      className: "class-card",
+      key: key
+    }, /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      className: "class-card-head",
+      onClick: () => setExpandedKey(isOpen ? null : key)
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "class-card-name"
+    }, c.classGroup || "No class set"), /*#__PURE__*/React.createElement("span", {
+      className: "mono"
+    }, c.students.length, " student", c.students.length === 1 ? "" : "s"), /*#__PURE__*/React.createElement(IconGlyph, {
+      name: "ChevronDown",
+      size: 14,
+      className: "chevron" + (isOpen ? " up" : "")
+    })), isOpen && /*#__PURE__*/React.createElement("div", {
+      className: "class-card-roster"
+    }, c.students.map(s => /*#__PURE__*/React.createElement("div", {
+      className: "class-card-student",
+      key: s.id
+    }, /*#__PURE__*/React.createElement("span", null, s.displayName), /*#__PURE__*/React.createElement("span", {
+      className: "mono student-username"
+    }, "@", s.username)))));
+  })))));
 }
 
 /* ===== admin-quizzes.jsx ===== */
@@ -2007,6 +2073,11 @@ function QuizSetBuilder({
   const [questions, setQuestions] = useState(existing ? existing.questions : [emptyQuestion("mcq")]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [showCsvImport, setShowCsvImport] = useState(false);
+  const [csvText, setCsvText] = useState("");
+  const [csvBusy, setCsvBusy] = useState(false);
+  const [csvResult, setCsvResult] = useState(null);
+  const [csvError, setCsvError] = useState("");
   function addQuestion(type) {
     setQuestions(qs => [...qs, emptyQuestion(type)]);
   }
@@ -2015,6 +2086,35 @@ function QuizSetBuilder({
   }
   function removeQuestion(idx) {
     setQuestions(qs => qs.filter((_, i) => i !== idx));
+  }
+  function handleCsvFile(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setCsvText(String(reader.result || ""));
+    reader.readAsText(file);
+  }
+  async function handleCsvImport() {
+    if (!csvText.trim()) {
+      setCsvError("Paste CSV text or choose a file first.");
+      return;
+    }
+    setCsvBusy(true);
+    setCsvError("");
+    setCsvResult(null);
+    try {
+      const res = await apiPost("/api/admin/quiz-sets/parse-csv", {
+        csv: csvText
+      });
+      setCsvResult(res);
+      if (res.questions.length > 0) {
+        setQuestions(qs => [...qs, ...res.questions]);
+      }
+    } catch (err) {
+      setCsvError(err.message);
+    } finally {
+      setCsvBusy(false);
+    }
   }
   function importFromBuiltIn(frameworkKey) {
     const fw = FRAMEWORKS[frameworkKey];
@@ -2095,7 +2195,52 @@ function QuizSetBuilder({
     type: "button",
     className: "chip chip-word",
     onClick: () => importFromBuiltIn("scamper")
-  }, "+ All SCAMPER letters"))), /*#__PURE__*/React.createElement("div", {
+  }, "+ All SCAMPER letters")), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: () => setShowCsvImport(s => !s),
+    style: {
+      alignSelf: "flex-start",
+      marginTop: 6
+    }
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "FileDown",
+    size: 15
+  }), " ", showCsvImport ? "Cancel CSV import" : "Import questions from CSV")), showCsvImport && /*#__PURE__*/React.createElement("div", {
+    className: "csv-import-panel"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "Header row: ", /*#__PURE__*/React.createElement("code", null, "type,prompt,option1,option2,option3,option4,answer,badge,keywords,modelAnswer"), ".", " ", /*#__PURE__*/React.createElement("code", null, "type"), " is ", /*#__PURE__*/React.createElement("code", null, "mcq"), ", ", /*#__PURE__*/React.createElement("code", null, "scenario"), " or ", /*#__PURE__*/React.createElement("code", null, "typed"), ". For mcq/scenario, fill in 2\u20134 options and make ", /*#__PURE__*/React.createElement("code", null, "answer"), " match one exactly. For typed, fill in", " ", /*#__PURE__*/React.createElement("code", null, "keywords"), " (comma-separated \u2014 quote the cell) and ", /*#__PURE__*/React.createElement("code", null, "modelAnswer"), " instead."), /*#__PURE__*/React.createElement("div", {
+    className: "csv-import-controls"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    accept: ".csv,text/csv",
+    onChange: handleCsvFile
+  })), /*#__PURE__*/React.createElement("textarea", {
+    rows: 4,
+    value: csvText,
+    onChange: e => {
+      setCsvText(e.target.value);
+      setCsvResult(null);
+    },
+    placeholder: "Or paste CSV text directly here..."
+  }), csvError && /*#__PURE__*/React.createElement("p", {
+    className: "login-error"
+  }, csvError), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: handleCsvImport,
+    disabled: csvBusy
+  }, csvBusy ? "Importing..." : "Add these questions"), csvResult && /*#__PURE__*/React.createElement("div", {
+    className: "csv-import-result"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, /*#__PURE__*/React.createElement("strong", null, csvResult.importedCount), " question", csvResult.importedCount === 1 ? "" : "s", " added, ", /*#__PURE__*/React.createElement("strong", null, csvResult.failedCount), " row", csvResult.failedCount === 1 ? "" : "s", " skipped."), csvResult.errors.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "csv-import-failed"
+  }, csvResult.errors.map(e => /*#__PURE__*/React.createElement("div", {
+    key: e.row,
+    className: "mono"
+  }, "Row ", e.row, ": ", e.error))))), /*#__PURE__*/React.createElement("div", {
     className: "qb-questions"
   }, questions.map((q, i) => /*#__PURE__*/React.createElement(QuestionEditor, {
     key: q.qid,
@@ -2135,19 +2280,22 @@ function AssignPanel({
   itemLabel,
   onAssign,
   existingAssignments,
-  onUnassign
+  onUnassign,
+  classGroups
 }) {
   const [yearGroup, setYearGroup] = useState("");
   const [classGroup, setClassGroup] = useState("");
   const [dueAt, setDueAt] = useState("");
   const [busy, setBusy] = useState(false);
+  const yearOptions = [...new Set(classGroups.map(c => c.yearGroup).filter(Boolean))].sort();
+  const classOptions = [...new Set(classGroups.map(c => c.classGroup).filter(Boolean))].sort();
   async function handleAssign() {
-    if (!yearGroup.trim() && !classGroup.trim()) return;
+    if (!yearGroup && !classGroup) return;
     setBusy(true);
     try {
       await onAssign({
-        yearGroup: yearGroup.trim(),
-        classGroup: classGroup.trim(),
+        yearGroup,
+        classGroup,
         dueAt: dueAt || null
       });
       setYearGroup("");
@@ -2160,15 +2308,23 @@ function AssignPanel({
     className: "assign-panel"
   }, /*#__PURE__*/React.createElement("div", {
     className: "assign-row"
-  }, /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("select", {
     value: yearGroup,
-    onChange: e => setYearGroup(e.target.value),
-    placeholder: "Year (e.g. Year 9, blank = any)"
-  }), /*#__PURE__*/React.createElement("input", {
+    onChange: e => setYearGroup(e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "Any year"), yearOptions.map(y => /*#__PURE__*/React.createElement("option", {
+    key: y,
+    value: y
+  }, y))), /*#__PURE__*/React.createElement("select", {
     value: classGroup,
-    onChange: e => setClassGroup(e.target.value),
-    placeholder: "Class (e.g. 9A, blank = any)"
-  }), /*#__PURE__*/React.createElement("input", {
+    onChange: e => setClassGroup(e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "Any class"), classOptions.map(c => /*#__PURE__*/React.createElement("option", {
+    key: c,
+    value: c
+  }, c))), /*#__PURE__*/React.createElement("input", {
     type: "date",
     value: dueAt,
     onChange: e => setDueAt(e.target.value)
@@ -2176,8 +2332,10 @@ function AssignPanel({
     type: "button",
     className: "btn-secondary",
     onClick: handleAssign,
-    disabled: busy
-  }, "Assign ", itemLabel)), existingAssignments.length > 0 && /*#__PURE__*/React.createElement("div", {
+    disabled: busy || !yearGroup && !classGroup
+  }, "Assign ", itemLabel)), yearOptions.length === 0 && /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "No classes exist yet \u2014 add students with a year/class first."), existingAssignments.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "assign-list"
   }, existingAssignments.map(a => /*#__PURE__*/React.createElement("span", {
     key: a.id,
@@ -2194,15 +2352,17 @@ function AssignPanel({
 function QuizManagerPanel() {
   const [sets, setSets] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const [classGroups, setClassGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null); // null | "new" | quizSet object
   const [expandedId, setExpandedId] = useState(null);
   const [banner, setBanner] = useState(null);
   function load() {
     setLoading(true);
-    Promise.all([apiGet("/api/admin/quiz-sets"), apiGet("/api/admin/quiz-assignments")]).then(([s, a]) => {
+    Promise.all([apiGet("/api/admin/quiz-sets"), apiGet("/api/admin/quiz-assignments"), apiGet("/api/admin/classes")]).then(([s, a, c]) => {
       setSets(s);
       setAssignments(a);
+      setClassGroups(c);
     }).catch(() => {}).finally(() => setLoading(false));
   }
   useEffect(load, []);
@@ -2314,7 +2474,8 @@ function QuizManagerPanel() {
       itemLabel: "quiz",
       existingAssignments: setAssignments,
       onAssign: payload => handleAssign(set.id, payload),
-      onUnassign: handleUnassign
+      onUnassign: handleUnassign,
+      classGroups: classGroups
     })));
   })));
 }
@@ -2432,14 +2593,16 @@ function TaskBuilder({
 function TaskManagerPanel() {
   const [tasks, setTasks] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const [classGroups, setClassGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
   function load() {
     setLoading(true);
-    Promise.all([apiGet("/api/admin/tasks"), apiGet("/api/admin/task-assignments")]).then(([t, a]) => {
+    Promise.all([apiGet("/api/admin/tasks"), apiGet("/api/admin/task-assignments"), apiGet("/api/admin/classes")]).then(([t, a, c]) => {
       setTasks(t);
       setAssignments(a);
+      setClassGroups(c);
     }).catch(() => {}).finally(() => setLoading(false));
   }
   useEffect(load, []);
@@ -2545,7 +2708,8 @@ function TaskManagerPanel() {
       itemLabel: "task",
       existingAssignments: taskAssignments,
       onAssign: payload => handleAssign(task.id, payload),
-      onUnassign: handleUnassign
+      onUnassign: handleUnassign,
+      classGroups: classGroups
     })));
   })));
 }
@@ -3032,6 +3196,9 @@ function AdminConsole({
     key: "students",
     label: "Students"
   }, {
+    key: "classes",
+    label: "Classes"
+  }, {
     key: "quizzes",
     label: "Quizzes"
   }, {
@@ -3079,7 +3246,7 @@ function AdminConsole({
     onClick: () => setSubTab(t.key)
   }, t.label))), subTab === "students" && /*#__PURE__*/React.createElement(StudentsPanel, {
     user: user
-  }), subTab === "quizzes" && /*#__PURE__*/React.createElement(QuizManagerPanel, null), subTab === "tasks" && /*#__PURE__*/React.createElement(TaskManagerPanel, null), subTab === "gradebook" && /*#__PURE__*/React.createElement(GradebookPanel, null));
+  }), subTab === "classes" && /*#__PURE__*/React.createElement(ClassesPanel, null), subTab === "quizzes" && /*#__PURE__*/React.createElement(QuizManagerPanel, null), subTab === "tasks" && /*#__PURE__*/React.createElement(TaskManagerPanel, null), subTab === "gradebook" && /*#__PURE__*/React.createElement(GradebookPanel, null));
 }
 
 /* ------------------------------------------------------------------ */
@@ -3224,6 +3391,10 @@ function StudentsPanel({
   async function handleAddStudent(e) {
     e.preventDefault();
     if (!newUsername.trim() || !newDisplayName.trim()) return;
+    if (!newYearGroup.trim() || !newClassGroup.trim()) {
+      setAddError("Year group and class group are both required.");
+      return;
+    }
     if (newPassword.trim() && newPassword.trim().length < 6) {
       setAddError("Password must be at least 6 characters (or leave it blank to auto-generate one).");
       return;
@@ -3444,15 +3615,29 @@ function StudentsPanel({
     value: newDisplayName,
     onChange: e => setNewDisplayName(e.target.value),
     placeholder: "e.g. Jamie Smith"
-  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", null, "Year group (optional)"), /*#__PURE__*/React.createElement("input", {
+  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", null, "Year group *"), /*#__PURE__*/React.createElement("input", {
     value: newYearGroup,
     onChange: e => setNewYearGroup(e.target.value),
-    placeholder: "e.g. Year 9"
-  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", null, "Class / group (optional)"), /*#__PURE__*/React.createElement("input", {
+    placeholder: "e.g. Year 9",
+    list: "year-group-options",
+    required: true
+  }), /*#__PURE__*/React.createElement("datalist", {
+    id: "year-group-options"
+  }, yearOptions.map(y => /*#__PURE__*/React.createElement("option", {
+    key: y,
+    value: y
+  })))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", null, "Class group *"), /*#__PURE__*/React.createElement("input", {
     value: newClassGroup,
     onChange: e => setNewClassGroup(e.target.value),
-    placeholder: "e.g. 9A"
-  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", null, "Password (optional)"), /*#__PURE__*/React.createElement("input", {
+    placeholder: "e.g. 9A",
+    list: "class-group-options",
+    required: true
+  }), /*#__PURE__*/React.createElement("datalist", {
+    id: "class-group-options"
+  }, classOptions.map(c => /*#__PURE__*/React.createElement("option", {
+    key: c,
+    value: c
+  })))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", null, "Password (optional)"), /*#__PURE__*/React.createElement("input", {
     value: newPassword,
     onChange: e => setNewPassword(e.target.value),
     placeholder: "Leave blank to auto-generate"

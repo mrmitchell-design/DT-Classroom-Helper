@@ -21,6 +21,7 @@ const FILES_IN_ORDER = [
   "login.jsx",
   "studentapp.jsx",
   "admin-csvimport.jsx",
+  "admin-classes.jsx",
   "admin-quizzes.jsx",
   "admin-tasks.jsx",
   "admin-gradebook.jsx",

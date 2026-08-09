@@ -39,9 +39,9 @@ function CsvImportPanel({ onImported, onBanner }) {
   return (
     <div className="csv-import-panel no-print">
       <p className="sub">
-        CSV needs a header row with at least <code>username</code> and <code>displayName</code> columns
-        (<code>yearGroup</code>, <code>classGroup</code> and <code>password</code> are optional \u2014 leave password
-        blank per row to auto-generate one).{" "}
+        CSV needs a header row with <code>username</code>, <code>displayName</code>, <code>yearGroup</code> and{" "}
+        <code>classGroup</code> columns (all required), plus an optional <code>password</code> column — leave
+        password blank per row to auto-generate one.{" "}
         <a href="/api/admin/users/import-template.csv" className="csv-template-link">Download a template</a>
       </p>
       <div className="csv-import-controls">

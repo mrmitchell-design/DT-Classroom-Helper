@@ -62,10 +62,41 @@ function QuizSetBuilder({ existing, onSaved, onCancel }) {
   const [questions, setQuestions] = useState(existing ? existing.questions : [emptyQuestion("mcq")]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [showCsvImport, setShowCsvImport] = useState(false);
+  const [csvText, setCsvText] = useState("");
+  const [csvBusy, setCsvBusy] = useState(false);
+  const [csvResult, setCsvResult] = useState(null);
+  const [csvError, setCsvError] = useState("");
 
   function addQuestion(type) { setQuestions((qs) => [...qs, emptyQuestion(type)]); }
   function updateQuestion(idx, q) { setQuestions((qs) => qs.map((old, i) => (i === idx ? q : old))); }
   function removeQuestion(idx) { setQuestions((qs) => qs.filter((_, i) => i !== idx)); }
+
+  function handleCsvFile(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setCsvText(String(reader.result || ""));
+    reader.readAsText(file);
+  }
+
+  async function handleCsvImport() {
+    if (!csvText.trim()) { setCsvError("Paste CSV text or choose a file first."); return; }
+    setCsvBusy(true);
+    setCsvError("");
+    setCsvResult(null);
+    try {
+      const res = await apiPost("/api/admin/quiz-sets/parse-csv", { csv: csvText });
+      setCsvResult(res);
+      if (res.questions.length > 0) {
+        setQuestions((qs) => [...qs, ...res.questions]);
+      }
+    } catch (err) {
+      setCsvError(err.message);
+    } finally {
+      setCsvBusy(false);
+    }
+  }
 
   function importFromBuiltIn(frameworkKey) {
     const fw = FRAMEWORKS[frameworkKey];
@@ -127,7 +158,37 @@ function QuizSetBuilder({ existing, onSaved, onCancel }) {
           <button type="button" className="chip chip-word" onClick={() => importFromBuiltIn("accessfm")}>+ All ACCESSFM letters</button>
           <button type="button" className="chip chip-word" onClick={() => importFromBuiltIn("scamper")}>+ All SCAMPER letters</button>
         </div>
+        <button type="button" className="btn-secondary" onClick={() => setShowCsvImport((s) => !s)} style={{ alignSelf: "flex-start", marginTop: 6 }}>
+          <IconGlyph name="FileDown" size={15} /> {showCsvImport ? "Cancel CSV import" : "Import questions from CSV"}
+        </button>
       </div>
+
+      {showCsvImport && (
+        <div className="csv-import-panel">
+          <p className="sub">
+            Header row: <code>type,prompt,option1,option2,option3,option4,answer,badge,keywords,modelAnswer</code>.{" "}
+            <code>type</code> is <code>mcq</code>, <code>scenario</code> or <code>typed</code>. For mcq/scenario,
+            fill in 2–4 options and make <code>answer</code> match one exactly. For typed, fill in{" "}
+            <code>keywords</code> (comma-separated — quote the cell) and <code>modelAnswer</code> instead.
+          </p>
+          <div className="csv-import-controls">
+            <input type="file" accept=".csv,text/csv" onChange={handleCsvFile} />
+          </div>
+          <textarea rows={4} value={csvText} onChange={(e) => { setCsvText(e.target.value); setCsvResult(null); }} placeholder="Or paste CSV text directly here..." />
+          {csvError && <p className="login-error">{csvError}</p>}
+          <button type="button" className="btn-primary" onClick={handleCsvImport} disabled={csvBusy}>{csvBusy ? "Importing..." : "Add these questions"}</button>
+          {csvResult && (
+            <div className="csv-import-result">
+              <p className="sub"><strong>{csvResult.importedCount}</strong> question{csvResult.importedCount === 1 ? "" : "s"} added, <strong>{csvResult.failedCount}</strong> row{csvResult.failedCount === 1 ? "" : "s"} skipped.</p>
+              {csvResult.errors.length > 0 && (
+                <div className="csv-import-failed">
+                  {csvResult.errors.map((e) => <div key={e.row} className="mono">Row {e.row}: {e.error}</div>)}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="qb-questions">
         {questions.map((q, i) => (
@@ -150,17 +211,20 @@ function QuizSetBuilder({ existing, onSaved, onCancel }) {
   );
 }
 
-function AssignPanel({ itemLabel, onAssign, existingAssignments, onUnassign }) {
+function AssignPanel({ itemLabel, onAssign, existingAssignments, onUnassign, classGroups }) {
   const [yearGroup, setYearGroup] = useState("");
   const [classGroup, setClassGroup] = useState("");
   const [dueAt, setDueAt] = useState("");
   const [busy, setBusy] = useState(false);
 
+  const yearOptions = [...new Set(classGroups.map((c) => c.yearGroup).filter(Boolean))].sort();
+  const classOptions = [...new Set(classGroups.map((c) => c.classGroup).filter(Boolean))].sort();
+
   async function handleAssign() {
-    if (!yearGroup.trim() && !classGroup.trim()) return;
+    if (!yearGroup && !classGroup) return;
     setBusy(true);
     try {
-      await onAssign({ yearGroup: yearGroup.trim(), classGroup: classGroup.trim(), dueAt: dueAt || null });
+      await onAssign({ yearGroup, classGroup, dueAt: dueAt || null });
       setYearGroup(""); setClassGroup(""); setDueAt("");
     } catch (e) { /* ignore */ }
     setBusy(false);
@@ -169,11 +233,18 @@ function AssignPanel({ itemLabel, onAssign, existingAssignments, onUnassign }) {
   return (
     <div className="assign-panel">
       <div className="assign-row">
-        <input value={yearGroup} onChange={(e) => setYearGroup(e.target.value)} placeholder="Year (e.g. Year 9, blank = any)" />
-        <input value={classGroup} onChange={(e) => setClassGroup(e.target.value)} placeholder="Class (e.g. 9A, blank = any)" />
+        <select value={yearGroup} onChange={(e) => setYearGroup(e.target.value)}>
+          <option value="">Any year</option>
+          {yearOptions.map((y) => <option key={y} value={y}>{y}</option>)}
+        </select>
+        <select value={classGroup} onChange={(e) => setClassGroup(e.target.value)}>
+          <option value="">Any class</option>
+          {classOptions.map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
         <input type="date" value={dueAt} onChange={(e) => setDueAt(e.target.value)} />
-        <button type="button" className="btn-secondary" onClick={handleAssign} disabled={busy}>Assign {itemLabel}</button>
+        <button type="button" className="btn-secondary" onClick={handleAssign} disabled={busy || (!yearGroup && !classGroup)}>Assign {itemLabel}</button>
       </div>
+      {yearOptions.length === 0 && <p className="sub">No classes exist yet — add students with a year/class first.</p>}
       {existingAssignments.length > 0 && (
         <div className="assign-list">
           {existingAssignments.map((a) => (
@@ -191,6 +262,7 @@ function AssignPanel({ itemLabel, onAssign, existingAssignments, onUnassign }) {
 function QuizManagerPanel() {
   const [sets, setSets] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const [classGroups, setClassGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null); // null | "new" | quizSet object
   const [expandedId, setExpandedId] = useState(null);
@@ -198,8 +270,8 @@ function QuizManagerPanel() {
 
   function load() {
     setLoading(true);
-    Promise.all([apiGet("/api/admin/quiz-sets"), apiGet("/api/admin/quiz-assignments")])
-      .then(([s, a]) => { setSets(s); setAssignments(a); })
+    Promise.all([apiGet("/api/admin/quiz-sets"), apiGet("/api/admin/quiz-assignments"), apiGet("/api/admin/classes")])
+      .then(([s, a, c]) => { setSets(s); setAssignments(a); setClassGroups(c); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }
@@ -278,6 +350,7 @@ function QuizManagerPanel() {
                     existingAssignments={setAssignments}
                     onAssign={(payload) => handleAssign(set.id, payload)}
                     onUnassign={handleUnassign}
+                    classGroups={classGroups}
                   />
                 </div>
               )}

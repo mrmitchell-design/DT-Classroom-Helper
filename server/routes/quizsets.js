@@ -1,9 +1,73 @@
 const express = require("express");
 const db = require("../db");
 const { requireAdmin } = require("../auth");
+const { parseCSV } = require("../csv");
 
 const router = express.Router();
 router.use(requireAdmin);
+
+// Parses (but does not save) a CSV of quiz questions, so the quiz builder
+// can show them for review/editing before the admin commits to saving the
+// quiz set. Expected header (case-insensitive, any order):
+//   type,prompt,option1,option2,option3,option4,answer,badge,keywords,modelAnswer
+// - type: mcq | scenario | typed
+// - option1-4 and answer: used for mcq/scenario (answer must match one option)
+// - keywords: comma-separated, used for typed (quote the cell if it has commas)
+// - modelAnswer: used for typed
+router.post("/quiz-sets/parse-csv", (req, res) => {
+  const { csv } = req.body || {};
+  if (!csv || typeof csv !== "string") return res.status(400).json({ error: "csv text is required." });
+
+  const rows = parseCSV(csv);
+  if (rows.length < 2) return res.status(400).json({ error: "CSV needs a header row and at least one data row." });
+
+  const header = rows[0].map((h) => h.trim().toLowerCase());
+  const col = (name) => header.indexOf(name.toLowerCase());
+  const idx = {
+    type: col("type"), prompt: col("prompt"),
+    option1: col("option1"), option2: col("option2"), option3: col("option3"), option4: col("option4"),
+    answer: col("answer"), badge: col("badge"), keywords: col("keywords"), modelAnswer: col("modelanswer"),
+  };
+  if (idx.prompt === -1) {
+    return res.status(400).json({ error: 'CSV header must include at least a "prompt" column.' });
+  }
+
+  const questions = [];
+  const errors = [];
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    const rowNum = i + 1;
+    const get = (key) => (idx[key] >= 0 ? (r[idx[key]] || "").trim() : "");
+    const prompt = get("prompt");
+    if (!prompt) continue; // skip blank rows
+
+    const type = ["mcq", "scenario", "typed"].includes(get("type").toLowerCase()) ? get("type").toLowerCase() : "mcq";
+    const badge = get("badge") || "?";
+    const qid = `csv-${Date.now()}-${i}-${Math.random().toString(36).slice(2, 6)}`;
+
+    if (type === "typed") {
+      questions.push({
+        qid, type, prompt, badge, tint: "#16324F",
+        keywords: get("keywords") ? get("keywords").split(",").map((k) => k.trim()).filter(Boolean) : [],
+        modelAnswer: get("modelAnswer"),
+      });
+    } else {
+      const options = [get("option1"), get("option2"), get("option3"), get("option4")].filter(Boolean);
+      const answer = get("answer");
+      if (options.length < 2) {
+        errors.push({ row: rowNum, error: "Needs at least 2 options for a multiple-choice/scenario question." });
+        continue;
+      }
+      if (!answer || !options.includes(answer)) {
+        errors.push({ row: rowNum, error: `Answer ("${answer}") must exactly match one of the options.` });
+        continue;
+      }
+      questions.push({ qid, type, prompt, badge, tint: "#16324F", options, answer });
+    }
+  }
+
+  res.json({ questions, errors, importedCount: questions.length, failedCount: errors.length });
+});
 
 function serializeSet(row) {
   return {

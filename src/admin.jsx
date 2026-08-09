@@ -236,6 +236,7 @@ function AdminConsole({ user, onLogout }) {
 
   const subTabs = [
     { key: "students", label: "Students" },
+    { key: "classes", label: "Classes" },
     { key: "quizzes", label: "Quizzes" },
     { key: "tasks", label: "Tasks" },
     { key: "gradebook", label: "Gradebook" },
@@ -262,6 +263,7 @@ function AdminConsole({ user, onLogout }) {
       </div>
 
       {subTab === "students" && <StudentsPanel user={user} />}
+      {subTab === "classes" && <ClassesPanel />}
       {subTab === "quizzes" && <QuizManagerPanel />}
       {subTab === "tasks" && <TaskManagerPanel />}
       {subTab === "gradebook" && <GradebookPanel />}
@@ -369,6 +371,10 @@ function StudentsPanel({ user }) {
   async function handleAddStudent(e) {
     e.preventDefault();
     if (!newUsername.trim() || !newDisplayName.trim()) return;
+    if (!newYearGroup.trim() || !newClassGroup.trim()) {
+      setAddError("Year group and class group are both required.");
+      return;
+    }
     if (newPassword.trim() && newPassword.trim().length < 6) {
       setAddError("Password must be at least 6 characters (or leave it blank to auto-generate one).");
       return;
@@ -527,12 +533,14 @@ function StudentsPanel({ user }) {
               <input value={newDisplayName} onChange={(e) => setNewDisplayName(e.target.value)} placeholder="e.g. Jamie Smith" />
             </label>
             <label>
-              <span>Year group (optional)</span>
-              <input value={newYearGroup} onChange={(e) => setNewYearGroup(e.target.value)} placeholder="e.g. Year 9" />
+              <span>Year group *</span>
+              <input value={newYearGroup} onChange={(e) => setNewYearGroup(e.target.value)} placeholder="e.g. Year 9" list="year-group-options" required />
+              <datalist id="year-group-options">{yearOptions.map((y) => <option key={y} value={y} />)}</datalist>
             </label>
             <label>
-              <span>Class / group (optional)</span>
-              <input value={newClassGroup} onChange={(e) => setNewClassGroup(e.target.value)} placeholder="e.g. 9A" />
+              <span>Class group *</span>
+              <input value={newClassGroup} onChange={(e) => setNewClassGroup(e.target.value)} placeholder="e.g. 9A" list="class-group-options" required />
+              <datalist id="class-group-options">{classOptions.map((c) => <option key={c} value={c} />)}</datalist>
             </label>
             <label>
               <span>Password (optional)</span>

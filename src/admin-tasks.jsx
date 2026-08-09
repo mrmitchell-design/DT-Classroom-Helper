@@ -91,14 +91,15 @@ function TaskBuilder({ onSaved, onCancel }) {
 function TaskManagerPanel() {
   const [tasks, setTasks] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const [classGroups, setClassGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
 
   function load() {
     setLoading(true);
-    Promise.all([apiGet("/api/admin/tasks"), apiGet("/api/admin/task-assignments")])
-      .then(([t, a]) => { setTasks(t); setAssignments(a); })
+    Promise.all([apiGet("/api/admin/tasks"), apiGet("/api/admin/task-assignments"), apiGet("/api/admin/classes")])
+      .then(([t, a, c]) => { setTasks(t); setAssignments(a); setClassGroups(c); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }
@@ -168,6 +169,7 @@ function TaskManagerPanel() {
                     existingAssignments={taskAssignments}
                     onAssign={(payload) => handleAssign(task.id, payload)}
                     onUnassign={handleUnassign}
+                    classGroups={classGroups}
                   />
                 </div>
               )}

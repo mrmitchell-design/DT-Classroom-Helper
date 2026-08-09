@@ -13,6 +13,12 @@ function createStudentRow({ username, displayName, classGroup, yearGroup, passwo
   if (!username || !displayName) {
     return { ok: false, error: "username and displayName are required." };
   }
+  if (!yearGroup || !String(yearGroup).trim()) {
+    return { ok: false, error: "yearGroup is required." };
+  }
+  if (!classGroup || !String(classGroup).trim()) {
+    return { ok: false, error: "classGroup is required." };
+  }
   const cleanUsername = String(username).trim().toLowerCase().replace(/\s+/g, "");
   if (!USERNAME_RE.test(cleanUsername)) {
     return { ok: false, error: "Username must be 3-32 characters: letters, numbers, dots, dashes or underscores only.", username: cleanUsername };
@@ -24,7 +30,7 @@ function createStudentRow({ username, displayName, classGroup, yearGroup, passwo
   const hash = hashPassword(finalPassword);
   const info = db
     .prepare("INSERT INTO users (username, password_hash, display_name, role, class_group, year_group) VALUES (?, ?, ?, 'student', ?, ?)")
-    .run(cleanUsername, hash, displayName, classGroup || "", yearGroup || "");
+    .run(cleanUsername, hash, displayName, String(classGroup).trim(), String(yearGroup).trim());
   return {
     ok: true,
     id: info.lastInsertRowid,
@@ -65,6 +71,29 @@ router.get("/users", (req, res) => {
       needsMarkingCount: r.needs_marking_count,
     }))
   );
+});
+
+// every existing year/class combination, with its roster - used to populate
+// assignment dropdowns (so nobody has to remember/retype how a class name
+// was spelled) and the Classes tab.
+router.get("/classes", (req, res) => {
+  const students = db
+    .prepare(
+      `SELECT id, username, display_name, class_group, year_group
+       FROM users WHERE role = 'student' ORDER BY year_group, class_group, display_name`
+    )
+    .all();
+
+  const groups = new Map();
+  students.forEach((s) => {
+    const key = `${s.year_group}|||${s.class_group}`;
+    if (!groups.has(key)) {
+      groups.set(key, { yearGroup: s.year_group, classGroup: s.class_group, students: [] });
+    }
+    groups.get(key).students.push({ id: s.id, username: s.username, displayName: s.display_name });
+  });
+
+  res.json([...groups.values()]);
 });
 
 // create a student account. If password omitted, a temp password is generated and returned once.
@@ -139,11 +168,17 @@ router.patch("/users/:id", (req, res) => {
   const user = db.prepare("SELECT id, role FROM users WHERE id = ?").get(req.params.id);
   if (!user || user.role !== "student") return res.status(404).json({ error: "Student not found." });
   const { displayName, classGroup, yearGroup } = req.body || {};
+  if (classGroup !== undefined && !String(classGroup).trim()) {
+    return res.status(400).json({ error: "classGroup cannot be blank." });
+  }
+  if (yearGroup !== undefined && !String(yearGroup).trim()) {
+    return res.status(400).json({ error: "yearGroup cannot be blank." });
+  }
   const current = db.prepare("SELECT display_name, class_group, year_group FROM users WHERE id = ?").get(req.params.id);
   db.prepare("UPDATE users SET display_name = ?, class_group = ?, year_group = ? WHERE id = ?").run(
     displayName !== undefined ? displayName : current.display_name,
-    classGroup !== undefined ? classGroup : current.class_group,
-    yearGroup !== undefined ? yearGroup : current.year_group,
+    classGroup !== undefined ? String(classGroup).trim() : current.class_group,
+    yearGroup !== undefined ? String(yearGroup).trim() : current.year_group,
     req.params.id
   );
   const updated = db.prepare("SELECT id, username, display_name, class_group, year_group FROM users WHERE id = ?").get(req.params.id);
