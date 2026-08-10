@@ -25,7 +25,22 @@ function availableSetsForUser(userId) {
             (qa.year_group = '' OR qa.year_group = ?))
      ORDER BY qs.updated_at DESC`
   ).all(class_group || "", year_group || "");
-  return rows;
+
+  const assignedIds = new Set(
+    db.prepare(
+      `SELECT DISTINCT qa.quiz_set_id FROM quiz_assignments qa
+       WHERE (qa.class_group = '' OR qa.class_group = ?) AND (qa.year_group = '' OR qa.year_group = ?)`
+    ).all(class_group || "", year_group || "").map((r) => r.quiz_set_id)
+  );
+  const completedIds = new Set(
+    db.prepare("SELECT DISTINCT quiz_set_id FROM quiz_attempts WHERE user_id = ? AND quiz_set_id IS NOT NULL").all(userId).map((r) => r.quiz_set_id)
+  );
+
+  return rows.map((r) => ({
+    ...r,
+    is_assigned: assignedIds.has(r.id),
+    is_completed: completedIds.has(r.id),
+  }));
 }
 
 router.get("/available", (req, res) => {
@@ -35,6 +50,8 @@ router.get("/available", (req, res) => {
     name: r.name,
     description: r.description || "",
     isPracticeBank: !!r.is_practice_bank,
+    isAssigned: r.is_assigned,
+    isCompleted: r.is_completed,
     questionCount: JSON.parse(r.questions || "[]").length,
   })));
 });

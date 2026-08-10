@@ -123,13 +123,13 @@ function QuizTab({ currentUser }) {
   const [mode, setMode] = useState("accessfm");
   const [difficulty, setDifficulty] = useState("standard");
   const [started, setStarted] = useState(false);
+  const [phase, setPhase] = useState("answering"); // answering | reviewing | finished
   const [questions, setQuestions] = useState([]);
+  const [responses, setResponses] = useState([]); // {answer} for mcq/scenario, {text} for typed
+  const [checkedTyped, setCheckedTyped] = useState({}); // idx -> true, shows model answer inline (self-help only)
   const [idx, setIdx] = useState(0);
   const [score, setScore] = useState(0);
-  const [picked, setPicked] = useState(null);
-  const [typedValue, setTypedValue] = useState("");
-  const [typedChecked, setTypedChecked] = useState(false);
-  const [finished, setFinished] = useState(false);
+  const [finishedDetails, setFinishedDetails] = useState([]);
   const [history, setHistory] = useState([]);
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const [expandedHistoryId, setExpandedHistoryId] = useState(null);
@@ -137,7 +137,6 @@ function QuizTab({ currentUser }) {
   const [activeCustomSetId, setActiveCustomSetId] = useState(null);
   const [activeCustomSetName, setActiveCustomSetName] = useState("");
   const startTimeRef = useRef(null);
-  const answeredDetailsRef = useRef([]);
 
   function loadHistory() {
     apiGet("/api/quiz-attempts")
@@ -145,88 +144,96 @@ function QuizTab({ currentUser }) {
       .catch(() => setHistoryLoaded(true));
   }
   useEffect(loadHistory, []);
-  useEffect(() => {
+  function loadCustomSets() {
     apiGet("/api/quiz-sets/available").then(setCustomSets).catch(() => {});
-  }, []);
+  }
+  useEffect(loadCustomSets, []);
+
+  function beginQuiz(qs, customId, customName) {
+    setQuestions(qs);
+    setResponses(qs.map(() => ({})));
+    setCheckedTyped({});
+    setIdx(0);
+    setScore(0);
+    setFinishedDetails([]);
+    setPhase("answering");
+    setStarted(true);
+    setActiveCustomSetId(customId || null);
+    setActiveCustomSetName(customName || "");
+    startTimeRef.current = Date.now();
+  }
 
   function start() {
     const keys = mode === "mixed" ? ["accessfm", "scamper"] : [mode];
-    const qs = buildQuiz(keys, difficulty);
-    setQuestions(qs);
-    setIdx(0);
-    setScore(0);
-    setPicked(null);
-    setTypedValue("");
-    setTypedChecked(false);
-    setFinished(false);
-    setStarted(true);
-    setActiveCustomSetId(null);
-    setActiveCustomSetName("");
-    startTimeRef.current = Date.now();
-    answeredDetailsRef.current = [];
+    beginQuiz(buildQuiz(keys, difficulty), null, "");
   }
 
   async function startCustomSet(setSummary) {
     try {
       const full = await apiGet(`/api/quiz-sets/${setSummary.id}`);
       const qs = full.questions.map((q) => ({ ...q, tint: q.tint || "#16324F", badge: q.badge || "?" }));
-      setQuestions(qs);
-      setIdx(0);
-      setScore(0);
-      setPicked(null);
-      setTypedValue("");
-      setTypedChecked(false);
-      setFinished(false);
-      setStarted(true);
-      setActiveCustomSetId(full.id);
-      setActiveCustomSetName(full.name);
-      startTimeRef.current = Date.now();
-      answeredDetailsRef.current = [];
+      beginQuiz(qs, full.id, full.name);
     } catch (e) { /* ignore */ }
   }
 
-  function choose(option) {
-    if (picked) return;
-    setPicked(option);
-    const q = questions[idx];
-    const isCorrect = option === q.answer;
-    if (isCorrect) setScore((s) => s + 1);
-    answeredDetailsRef.current.push({
-      qid: q.qid, type: q.type, prompt: q.prompt, letter: q.badge,
-      studentAnswer: option, correctAnswer: q.answer, isCorrect,
-    });
+  function selectOption(option) {
+    setResponses((rs) => rs.map((r, i) => (i === idx ? { answer: option } : r)));
   }
 
-  function checkTyped() {
-    if (typedChecked) return;
-    setTypedChecked(true);
-    const q = questions[idx];
-    const isCorrect = typedAnswerLooksGood(typedValue, q.keywords);
-    if (isCorrect) setScore((s) => s + 1);
-    answeredDetailsRef.current.push({
-      qid: q.qid, type: q.type, prompt: q.prompt, letter: q.badge,
-      studentAnswer: typedValue, correctAnswer: q.modelAnswer, isCorrect,
-    });
+  function setTypedText(text) {
+    setResponses((rs) => rs.map((r, i) => (i === idx ? { ...r, text } : r)));
   }
 
-  async function next() {
+  function toggleCheckTyped() {
+    setCheckedTyped((c) => ({ ...c, [idx]: !c[idx] }));
+  }
+
+  function goNext() {
     if (idx + 1 >= questions.length) {
-      setFinished(true);
-      const durationSeconds = startTimeRef.current ? Math.round((Date.now() - startTimeRef.current) / 1000) : null;
-      try {
-        await apiPost("/api/quiz-attempts", {
-          quizSet: mode, difficulty, score, total: questions.length,
-          durationSeconds, details: answeredDetailsRef.current,
-          quizSetId: activeCustomSetId,
-        });
-        loadHistory();
-      } catch (e) { /* non-fatal: quiz result just won't be saved */ }
+      setPhase("reviewing");
     } else {
       setIdx((i) => i + 1);
-      setPicked(null);
-      setTypedValue("");
-      setTypedChecked(false);
     }
+  }
+  function goPrev() {
+    if (idx > 0) setIdx((i) => i - 1);
+  }
+  function jumpTo(i) {
+    setIdx(i);
+    setPhase("answering");
+  }
+
+  async function handIn() {
+    let newScore = 0;
+    const details = questions.map((q, i) => {
+      const r = responses[i] || {};
+      let isCorrect, studentAnswer, correctAnswer;
+      if (q.type === "typed") {
+        studentAnswer = r.text || "";
+        correctAnswer = q.modelAnswer || null;
+        isCorrect = typedAnswerLooksGood(studentAnswer, q.keywords);
+      } else {
+        studentAnswer = r.answer || "(not answered)";
+        correctAnswer = q.answer;
+        isCorrect = r.answer === q.answer;
+      }
+      if (isCorrect) newScore++;
+      return { qid: q.qid, type: q.type, prompt: q.prompt, letter: q.badge, studentAnswer, correctAnswer, isCorrect };
+    });
+
+    setScore(newScore);
+    setFinishedDetails(details);
+    setPhase("finished");
+
+    const durationSeconds = startTimeRef.current ? Math.round((Date.now() - startTimeRef.current) / 1000) : null;
+    try {
+      await apiPost("/api/quiz-attempts", {
+        quizSet: mode, difficulty, score: newScore, total: questions.length,
+        durationSeconds, details, quizSetId: activeCustomSetId,
+      });
+      loadHistory();
+      loadCustomSets();
+    } catch (e) { /* non-fatal: quiz result just won't be saved */ }
   }
 
   if (!started) {
@@ -277,7 +284,11 @@ function QuizTab({ currentUser }) {
               <div className="quiz-custom-set-list">
                 {customSets.map((s) => (
                   <button type="button" key={s.id} className="quiz-custom-set-card" onClick={() => startCustomSet(s)}>
-                    <span className="quiz-custom-set-name">{s.name} {s.isPracticeBank && <span className="needs-marking-badge" style={{ background: "#EDF5EE", color: "#2A5B37" }}>practice</span>}</span>
+                    <span className="quiz-custom-set-name">
+                      {s.name}{" "}
+                      {s.isAssigned && <span className="needs-marking-badge" style={{ background: s.isCompleted ? "#EDF5EE" : "#FBEFC9", color: s.isCompleted ? "#2A5B37" : "#8A6A1E" }}>{s.isCompleted ? "done" : "assigned"}</span>}
+                      {!s.isAssigned && s.isPracticeBank && <span className="needs-marking-badge" style={{ background: "#EDF5EE", color: "#2A5B37" }}>practice</span>}
+                    </span>
                     {s.description && <span className="sub">{s.description}</span>}
                     <span className="mono">{s.questionCount} question{s.questionCount === 1 ? "" : "s"}</span>
                   </button>
@@ -316,7 +327,7 @@ function QuizTab({ currentUser }) {
     );
   }
 
-  if (finished) {
+  if (phase === "finished") {
     const pct = Math.round((score / questions.length) * 100);
     return (
       <div className="tab-panel">
@@ -329,6 +340,23 @@ function QuizTab({ currentUser }) {
             You scored {pct}% {activeCustomSetName ? <>on "{activeCustomSetName}"</> : <>on {DIFFICULTY_INFO[difficulty].label}</>}.{" "}
             {pct >= 70 ? "Solid work \u2014 that's a strong grasp of the framework." : "Have another go and see if you can beat it."}
           </p>
+
+          <details className="quiz-finished-review">
+            <summary>Review your answers</summary>
+            <div className="quiz-review-questions">
+              {finishedDetails.map((d) => (
+                <div key={d.qid} className={"quiz-review-q" + (d.isCorrect ? " correct" : " wrong")}>
+                  <p className="quiz-review-prompt" style={{ whiteSpace: "pre-line" }}>{d.prompt}</p>
+                  <p className="quiz-review-answer">
+                    <strong>Your answer:</strong> {d.studentAnswer}
+                    {d.type !== "typed" && <span className="mono"> (correct: {d.correctAnswer})</span>}
+                  </p>
+                  {d.type === "typed" && <p className="quiz-review-answer"><strong>Model answer:</strong> {d.correctAnswer}</p>}
+                </div>
+              ))}
+            </div>
+          </details>
+
           <div className="quiz-result-actions">
             <button className="btn-primary" onClick={activeCustomSetId ? () => startCustomSet({ id: activeCustomSetId, name: activeCustomSetName }) : start}>
               <IconGlyph name="RotateCcw" size={18} /> Retake this quiz
@@ -340,16 +368,56 @@ function QuizTab({ currentUser }) {
     );
   }
 
+  if (phase === "reviewing") {
+    const unansweredCount = responses.filter((r, i) => {
+      const q = questions[i];
+      return q.type === "typed" ? !(r.text || "").trim() : !r.answer;
+    }).length;
+    return (
+      <div className="tab-panel">
+        <div className="panel-head">
+          <div>
+            <h2>Check your answers</h2>
+            <p className="sub">
+              Review everything below before you hand in \u2014 tap any question to change your answer.
+              {unansweredCount > 0 && <strong> {unansweredCount} question{unansweredCount === 1 ? "" : "s"} not answered yet.</strong>}
+            </p>
+          </div>
+        </div>
+        <div className="quiz-review-list">
+          {questions.map((q, i) => {
+            const r = responses[i] || {};
+            const answered = q.type === "typed" ? !!(r.text || "").trim() : !!r.answer;
+            const summary = q.type === "typed" ? (r.text || "").slice(0, 60) || "Not answered yet" : (r.answer || "Not answered yet");
+            return (
+              <button type="button" key={q.qid} className={"quiz-review-item" + (answered ? "" : " unanswered")} onClick={() => jumpTo(i)}>
+                <LetterBadge letter={q.badge} tint={q.tint} size={30} />
+                <span className="quiz-review-item-text">
+                  <span className="quiz-review-item-prompt">{q.prompt.split("\n")[0]}</span>
+                  <span className="quiz-review-item-answer">{summary}{q.type === "typed" && (r.text || "").length > 60 ? "\u2026" : ""}</span>
+                </span>
+                <IconGlyph name="PenLine" size={14} />
+              </button>
+            );
+          })}
+        </div>
+        <div className="quiz-result-actions">
+          <button className="btn-primary" onClick={handIn}><IconGlyph name="Check" size={18} /> Hand in quiz</button>
+          <button className="btn-secondary" onClick={() => jumpTo(questions.length - 1)}>Keep answering</button>
+        </div>
+      </div>
+    );
+  }
+
+  // phase === "answering"
   const q = questions[idx];
-  const isCorrect = (opt) => picked && opt === q.answer;
-  const isWrongPick = (opt) => picked && opt === picked && opt !== q.answer;
+  const r = responses[idx] || {};
 
   return (
     <div className="tab-panel">
       <div className="quiz-progress">
-        <div className="quiz-progress-bar"><div style={{ width: `${(idx / questions.length) * 100}%`, background: q.tint }} /></div>
+        <div className="quiz-progress-bar"><div style={{ width: `${((idx + 1) / questions.length) * 100}%`, background: q.tint }} /></div>
         <span className="mono">Q{idx + 1} / {questions.length}</span>
-        <span className="mono">Score {score}</span>
       </div>
 
       <div className="quiz-card">
@@ -367,13 +435,11 @@ function QuizTab({ currentUser }) {
             {q.options.map((opt) => (
               <button
                 key={opt}
-                className={"quiz-option" + (isCorrect(opt) ? " correct" : "") + (isWrongPick(opt) ? " wrong" : "")}
-                onClick={() => choose(opt)}
-                disabled={!!picked}
+                className={"quiz-option" + (r.answer === opt ? " picked" : "")}
+                onClick={() => selectOption(opt)}
               >
                 <span>{opt}</span>
-                {isCorrect(opt) && <IconGlyph name="Check" size={18} />}
-                {isWrongPick(opt) && <IconGlyph name="X" size={18} />}
+                {r.answer === opt && <IconGlyph name="Check" size={18} />}
               </button>
             ))}
           </div>
@@ -387,30 +453,28 @@ function QuizTab({ currentUser }) {
             </span>
             <textarea
               rows={3}
-              value={typedValue}
-              onChange={(e) => setTypedValue(e.target.value)}
+              value={r.text || ""}
+              onChange={(e) => setTypedText(e.target.value)}
               placeholder="Type a short answer..."
-              disabled={typedChecked}
             />
-            {!typedChecked && (
-              <button className="btn-secondary" onClick={checkTyped} disabled={!typedValue.trim()}>Check my answer</button>
-            )}
-            {typedChecked && (
-              <div className={"typed-feedback" + (typedAnswerLooksGood(typedValue, q.keywords) ? " good" : "")}>
-                <span className="typed-feedback-label">
-                  {typedAnswerLooksGood(typedValue, q.keywords) ? "Nice \u2014 that counts! Compare with a model answer:" : "Have a look at a model answer \u2014 try adding more detail next time:"}
-                </span>
+            <button type="button" className="btn-secondary" onClick={toggleCheckTyped} disabled={!(r.text || "").trim()}>
+              {checkedTyped[idx] ? "Hide model answer" : "Check my answer"}
+            </button>
+            {checkedTyped[idx] && (
+              <div className="typed-feedback">
+                <span className="typed-feedback-label">Model answer to compare against — you can still change yours before handing in:</span>
                 <span className="typed-feedback-text">{q.modelAnswer}</span>
               </div>
             )}
           </div>
         )}
 
-        {(picked || (q.type === "typed" && typedChecked)) && (
-          <button className="btn-primary quiz-next" onClick={next}>
-            {idx + 1 >= questions.length ? "See results" : "Next question"} <IconGlyph name="ChevronRight" size={18} />
+        <div className="quiz-nav-row">
+          <button className="btn-secondary" onClick={goPrev} disabled={idx === 0}><IconGlyph name="ChevronRight" size={16} style={{ transform: "rotate(180deg)" }} /> Back</button>
+          <button className="btn-primary quiz-next" onClick={goNext}>
+            {idx + 1 >= questions.length ? "Review answers" : "Next question"} <IconGlyph name="ChevronRight" size={18} />
           </button>
-        )}
+        </div>
       </div>
     </div>
   );

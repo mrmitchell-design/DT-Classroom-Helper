@@ -627,6 +627,93 @@ function ChangePasswordForm() {
   }, "Cancel")))));
 }
 
+/* ===== notifications.jsx ===== */
+function NotificationCenter({
+  onNavigate
+}) {
+  const [pending, setPending] = useState({
+    quizzes: [],
+    tasks: []
+  });
+  const [loaded, setLoaded] = useState(false);
+  const [popupDismissed, setPopupDismissed] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(false);
+  function load() {
+    Promise.all([apiGet("/api/quiz-sets/available").catch(() => []), apiGet("/api/tasks/available").catch(() => [])]).then(([quizzes, tasks]) => {
+      setPending({
+        quizzes: quizzes.filter(q => q.isAssigned && !q.isCompleted),
+        tasks: tasks.filter(t => t.isAssigned && !t.isCompleted)
+      });
+      setLoaded(true);
+    });
+  }
+  useEffect(load, []);
+  const count = pending.quizzes.length + pending.tasks.length;
+  const showPopup = loaded && count > 0 && !popupDismissed;
+  function goTo(tabKey) {
+    setPopupDismissed(true);
+    setPanelOpen(false);
+    onNavigate(tabKey);
+  }
+  if (!loaded || count === 0) {
+    return /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      className: "notif-bell",
+      disabled: true,
+      "aria-label": "No new assigned work"
+    }, /*#__PURE__*/React.createElement(IconGlyph, {
+      name: "Lightbulb",
+      size: 17
+    }));
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "notif-wrap"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "notif-bell has-items",
+    onClick: () => setPanelOpen(o => !o),
+    "aria-label": `${count} assigned item${count === 1 ? "" : "s"} pending`
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Lightbulb",
+    size: 17
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "notif-badge"
+  }, count)), (panelOpen || showPopup) && /*#__PURE__*/React.createElement(React.Fragment, null, showPopup && !panelOpen && /*#__PURE__*/React.createElement("div", {
+    className: "notif-overlay",
+    onClick: () => setPopupDismissed(true)
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "notif-panel" + (showPopup && !panelOpen ? " notif-panel-popup" : "")
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "notif-panel-head"
+  }, /*#__PURE__*/React.createElement("span", null, "Work assigned to you"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => {
+      setPopupDismissed(true);
+      setPanelOpen(false);
+    },
+    "aria-label": "Dismiss"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "X",
+    size: 14
+  }))), pending.quizzes.map(q => /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    key: "q" + q.id,
+    className: "notif-item",
+    onClick: () => goTo("quiz")
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Wrench",
+    size: 14
+  }), /*#__PURE__*/React.createElement("span", null, q.name))), pending.tasks.map(t => /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    key: "t" + t.id,
+    className: "notif-item",
+    onClick: () => goTo("worksheet")
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "PenLine",
+    size: 14
+  }), /*#__PURE__*/React.createElement("span", null, t.title, t.dueAt ? ` \u00b7 due ${t.dueAt}` : ""))))));
+}
+
 /* ===== quiz.jsx ===== */
 /* ------------------------------------------------------------------ */
 /* QUIZ QUESTION BUILDERS                                              */
@@ -756,13 +843,13 @@ function QuizTab({
   const [mode, setMode] = useState("accessfm");
   const [difficulty, setDifficulty] = useState("standard");
   const [started, setStarted] = useState(false);
+  const [phase, setPhase] = useState("answering"); // answering | reviewing | finished
   const [questions, setQuestions] = useState([]);
+  const [responses, setResponses] = useState([]); // {answer} for mcq/scenario, {text} for typed
+  const [checkedTyped, setCheckedTyped] = useState({}); // idx -> true, shows model answer inline (self-help only)
   const [idx, setIdx] = useState(0);
   const [score, setScore] = useState(0);
-  const [picked, setPicked] = useState(null);
-  const [typedValue, setTypedValue] = useState("");
-  const [typedChecked, setTypedChecked] = useState(false);
-  const [finished, setFinished] = useState(false);
+  const [finishedDetails, setFinishedDetails] = useState([]);
   const [history, setHistory] = useState([]);
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const [expandedHistoryId, setExpandedHistoryId] = useState(null);
@@ -770,7 +857,6 @@ function QuizTab({
   const [activeCustomSetId, setActiveCustomSetId] = useState(null);
   const [activeCustomSetName, setActiveCustomSetName] = useState("");
   const startTimeRef = useRef(null);
-  const answeredDetailsRef = useRef([]);
   function loadHistory() {
     apiGet("/api/quiz-attempts").then(rows => {
       setHistory(rows);
@@ -778,24 +864,26 @@ function QuizTab({
     }).catch(() => setHistoryLoaded(true));
   }
   useEffect(loadHistory, []);
-  useEffect(() => {
+  function loadCustomSets() {
     apiGet("/api/quiz-sets/available").then(setCustomSets).catch(() => {});
-  }, []);
-  function start() {
-    const keys = mode === "mixed" ? ["accessfm", "scamper"] : [mode];
-    const qs = buildQuiz(keys, difficulty);
+  }
+  useEffect(loadCustomSets, []);
+  function beginQuiz(qs, customId, customName) {
     setQuestions(qs);
+    setResponses(qs.map(() => ({})));
+    setCheckedTyped({});
     setIdx(0);
     setScore(0);
-    setPicked(null);
-    setTypedValue("");
-    setTypedChecked(false);
-    setFinished(false);
+    setFinishedDetails([]);
+    setPhase("answering");
     setStarted(true);
-    setActiveCustomSetId(null);
-    setActiveCustomSetName("");
+    setActiveCustomSetId(customId || null);
+    setActiveCustomSetName(customName || "");
     startTimeRef.current = Date.now();
-    answeredDetailsRef.current = [];
+  }
+  function start() {
+    const keys = mode === "mixed" ? ["accessfm", "scamper"] : [mode];
+    beginQuiz(buildQuiz(keys, difficulty), null, "");
   }
   async function startCustomSet(setSummary) {
     try {
@@ -805,74 +893,82 @@ function QuizTab({
         tint: q.tint || "#16324F",
         badge: q.badge || "?"
       }));
-      setQuestions(qs);
-      setIdx(0);
-      setScore(0);
-      setPicked(null);
-      setTypedValue("");
-      setTypedChecked(false);
-      setFinished(false);
-      setStarted(true);
-      setActiveCustomSetId(full.id);
-      setActiveCustomSetName(full.name);
-      startTimeRef.current = Date.now();
-      answeredDetailsRef.current = [];
+      beginQuiz(qs, full.id, full.name);
     } catch (e) {/* ignore */}
   }
-  function choose(option) {
-    if (picked) return;
-    setPicked(option);
-    const q = questions[idx];
-    const isCorrect = option === q.answer;
-    if (isCorrect) setScore(s => s + 1);
-    answeredDetailsRef.current.push({
-      qid: q.qid,
-      type: q.type,
-      prompt: q.prompt,
-      letter: q.badge,
-      studentAnswer: option,
-      correctAnswer: q.answer,
-      isCorrect
-    });
+  function selectOption(option) {
+    setResponses(rs => rs.map((r, i) => i === idx ? {
+      answer: option
+    } : r));
   }
-  function checkTyped() {
-    if (typedChecked) return;
-    setTypedChecked(true);
-    const q = questions[idx];
-    const isCorrect = typedAnswerLooksGood(typedValue, q.keywords);
-    if (isCorrect) setScore(s => s + 1);
-    answeredDetailsRef.current.push({
-      qid: q.qid,
-      type: q.type,
-      prompt: q.prompt,
-      letter: q.badge,
-      studentAnswer: typedValue,
-      correctAnswer: q.modelAnswer,
-      isCorrect
-    });
+  function setTypedText(text) {
+    setResponses(rs => rs.map((r, i) => i === idx ? {
+      ...r,
+      text
+    } : r));
   }
-  async function next() {
+  function toggleCheckTyped() {
+    setCheckedTyped(c => ({
+      ...c,
+      [idx]: !c[idx]
+    }));
+  }
+  function goNext() {
     if (idx + 1 >= questions.length) {
-      setFinished(true);
-      const durationSeconds = startTimeRef.current ? Math.round((Date.now() - startTimeRef.current) / 1000) : null;
-      try {
-        await apiPost("/api/quiz-attempts", {
-          quizSet: mode,
-          difficulty,
-          score,
-          total: questions.length,
-          durationSeconds,
-          details: answeredDetailsRef.current,
-          quizSetId: activeCustomSetId
-        });
-        loadHistory();
-      } catch (e) {/* non-fatal: quiz result just won't be saved */}
+      setPhase("reviewing");
     } else {
       setIdx(i => i + 1);
-      setPicked(null);
-      setTypedValue("");
-      setTypedChecked(false);
     }
+  }
+  function goPrev() {
+    if (idx > 0) setIdx(i => i - 1);
+  }
+  function jumpTo(i) {
+    setIdx(i);
+    setPhase("answering");
+  }
+  async function handIn() {
+    let newScore = 0;
+    const details = questions.map((q, i) => {
+      const r = responses[i] || {};
+      let isCorrect, studentAnswer, correctAnswer;
+      if (q.type === "typed") {
+        studentAnswer = r.text || "";
+        correctAnswer = q.modelAnswer || null;
+        isCorrect = typedAnswerLooksGood(studentAnswer, q.keywords);
+      } else {
+        studentAnswer = r.answer || "(not answered)";
+        correctAnswer = q.answer;
+        isCorrect = r.answer === q.answer;
+      }
+      if (isCorrect) newScore++;
+      return {
+        qid: q.qid,
+        type: q.type,
+        prompt: q.prompt,
+        letter: q.badge,
+        studentAnswer,
+        correctAnswer,
+        isCorrect
+      };
+    });
+    setScore(newScore);
+    setFinishedDetails(details);
+    setPhase("finished");
+    const durationSeconds = startTimeRef.current ? Math.round((Date.now() - startTimeRef.current) / 1000) : null;
+    try {
+      await apiPost("/api/quiz-attempts", {
+        quizSet: mode,
+        difficulty,
+        score: newScore,
+        total: questions.length,
+        durationSeconds,
+        details,
+        quizSetId: activeCustomSetId
+      });
+      loadHistory();
+      loadCustomSets();
+    } catch (e) {/* non-fatal: quiz result just won't be saved */}
   }
   if (!started) {
     return /*#__PURE__*/React.createElement("div", {
@@ -934,7 +1030,13 @@ function QuizTab({
       onClick: () => startCustomSet(s)
     }, /*#__PURE__*/React.createElement("span", {
       className: "quiz-custom-set-name"
-    }, s.name, " ", s.isPracticeBank && /*#__PURE__*/React.createElement("span", {
+    }, s.name, " ", s.isAssigned && /*#__PURE__*/React.createElement("span", {
+      className: "needs-marking-badge",
+      style: {
+        background: s.isCompleted ? "#EDF5EE" : "#FBEFC9",
+        color: s.isCompleted ? "#2A5B37" : "#8A6A1E"
+      }
+    }, s.isCompleted ? "done" : "assigned"), !s.isAssigned && s.isPracticeBank && /*#__PURE__*/React.createElement("span", {
       className: "needs-marking-badge",
       style: {
         background: "#EDF5EE",
@@ -975,7 +1077,7 @@ function QuizTab({
       className: "help-label"
     }, "Feedback from your teacher"), /*#__PURE__*/React.createElement("p", null, h.feedback))))))));
   }
-  if (finished) {
+  if (phase === "finished") {
     const pct = Math.round(score / questions.length * 100);
     return /*#__PURE__*/React.createElement("div", {
       className: "tab-panel"
@@ -989,7 +1091,25 @@ function QuizTab({
       }
     }, pct >= 70 ? "PASSED" : "TRY AGAIN"), /*#__PURE__*/React.createElement("h2", null, score, " / ", questions.length), /*#__PURE__*/React.createElement("p", {
       className: "sub"
-    }, "You scored ", pct, "% ", activeCustomSetName ? /*#__PURE__*/React.createElement(React.Fragment, null, "on \"", activeCustomSetName, "\"") : /*#__PURE__*/React.createElement(React.Fragment, null, "on ", DIFFICULTY_INFO[difficulty].label), ".", " ", pct >= 70 ? "Solid work \u2014 that's a strong grasp of the framework." : "Have another go and see if you can beat it."), /*#__PURE__*/React.createElement("div", {
+    }, "You scored ", pct, "% ", activeCustomSetName ? /*#__PURE__*/React.createElement(React.Fragment, null, "on \"", activeCustomSetName, "\"") : /*#__PURE__*/React.createElement(React.Fragment, null, "on ", DIFFICULTY_INFO[difficulty].label), ".", " ", pct >= 70 ? "Solid work \u2014 that's a strong grasp of the framework." : "Have another go and see if you can beat it."), /*#__PURE__*/React.createElement("details", {
+      className: "quiz-finished-review"
+    }, /*#__PURE__*/React.createElement("summary", null, "Review your answers"), /*#__PURE__*/React.createElement("div", {
+      className: "quiz-review-questions"
+    }, finishedDetails.map(d => /*#__PURE__*/React.createElement("div", {
+      key: d.qid,
+      className: "quiz-review-q" + (d.isCorrect ? " correct" : " wrong")
+    }, /*#__PURE__*/React.createElement("p", {
+      className: "quiz-review-prompt",
+      style: {
+        whiteSpace: "pre-line"
+      }
+    }, d.prompt), /*#__PURE__*/React.createElement("p", {
+      className: "quiz-review-answer"
+    }, /*#__PURE__*/React.createElement("strong", null, "Your answer:"), " ", d.studentAnswer, d.type !== "typed" && /*#__PURE__*/React.createElement("span", {
+      className: "mono"
+    }, " (correct: ", d.correctAnswer, ")")), d.type === "typed" && /*#__PURE__*/React.createElement("p", {
+      className: "quiz-review-answer"
+    }, /*#__PURE__*/React.createElement("strong", null, "Model answer:"), " ", d.correctAnswer))))), /*#__PURE__*/React.createElement("div", {
       className: "quiz-result-actions"
     }, /*#__PURE__*/React.createElement("button", {
       className: "btn-primary",
@@ -1005,9 +1125,59 @@ function QuizTab({
       onClick: () => setStarted(false)
     }, "Choose a different set"))));
   }
+  if (phase === "reviewing") {
+    const unansweredCount = responses.filter((r, i) => {
+      const q = questions[i];
+      return q.type === "typed" ? !(r.text || "").trim() : !r.answer;
+    }).length;
+    return /*#__PURE__*/React.createElement("div", {
+      className: "tab-panel"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "panel-head"
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "Check your answers"), /*#__PURE__*/React.createElement("p", {
+      className: "sub"
+    }, "Review everything below before you hand in \\u2014 tap any question to change your answer.", unansweredCount > 0 && /*#__PURE__*/React.createElement("strong", null, " ", unansweredCount, " question", unansweredCount === 1 ? "" : "s", " not answered yet.")))), /*#__PURE__*/React.createElement("div", {
+      className: "quiz-review-list"
+    }, questions.map((q, i) => {
+      const r = responses[i] || {};
+      const answered = q.type === "typed" ? !!(r.text || "").trim() : !!r.answer;
+      const summary = q.type === "typed" ? (r.text || "").slice(0, 60) || "Not answered yet" : r.answer || "Not answered yet";
+      return /*#__PURE__*/React.createElement("button", {
+        type: "button",
+        key: q.qid,
+        className: "quiz-review-item" + (answered ? "" : " unanswered"),
+        onClick: () => jumpTo(i)
+      }, /*#__PURE__*/React.createElement(LetterBadge, {
+        letter: q.badge,
+        tint: q.tint,
+        size: 30
+      }), /*#__PURE__*/React.createElement("span", {
+        className: "quiz-review-item-text"
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "quiz-review-item-prompt"
+      }, q.prompt.split("\n")[0]), /*#__PURE__*/React.createElement("span", {
+        className: "quiz-review-item-answer"
+      }, summary, q.type === "typed" && (r.text || "").length > 60 ? "\u2026" : "")), /*#__PURE__*/React.createElement(IconGlyph, {
+        name: "PenLine",
+        size: 14
+      }));
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "quiz-result-actions"
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "btn-primary",
+      onClick: handIn
+    }, /*#__PURE__*/React.createElement(IconGlyph, {
+      name: "Check",
+      size: 18
+    }), " Hand in quiz"), /*#__PURE__*/React.createElement("button", {
+      className: "btn-secondary",
+      onClick: () => jumpTo(questions.length - 1)
+    }, "Keep answering")));
+  }
+
+  // phase === "answering"
   const q = questions[idx];
-  const isCorrect = opt => picked && opt === q.answer;
-  const isWrongPick = opt => picked && opt === picked && opt !== q.answer;
+  const r = responses[idx] || {};
   return /*#__PURE__*/React.createElement("div", {
     className: "tab-panel"
   }, /*#__PURE__*/React.createElement("div", {
@@ -1016,14 +1186,12 @@ function QuizTab({
     className: "quiz-progress-bar"
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      width: `${idx / questions.length * 100}%`,
+      width: `${(idx + 1) / questions.length * 100}%`,
       background: q.tint
     }
   })), /*#__PURE__*/React.createElement("span", {
     className: "mono"
-  }, "Q", idx + 1, " / ", questions.length), /*#__PURE__*/React.createElement("span", {
-    className: "mono"
-  }, "Score ", score)), /*#__PURE__*/React.createElement("div", {
+  }, "Q", idx + 1, " / ", questions.length)), /*#__PURE__*/React.createElement("div", {
     className: "quiz-card"
   }, /*#__PURE__*/React.createElement(LetterBadge, {
     letter: q.badge,
@@ -1043,14 +1211,10 @@ function QuizTab({
     className: "quiz-options"
   }, q.options.map(opt => /*#__PURE__*/React.createElement("button", {
     key: opt,
-    className: "quiz-option" + (isCorrect(opt) ? " correct" : "") + (isWrongPick(opt) ? " wrong" : ""),
-    onClick: () => choose(opt),
-    disabled: !!picked
-  }, /*#__PURE__*/React.createElement("span", null, opt), isCorrect(opt) && /*#__PURE__*/React.createElement(IconGlyph, {
+    className: "quiz-option" + (r.answer === opt ? " picked" : ""),
+    onClick: () => selectOption(opt)
+  }, /*#__PURE__*/React.createElement("span", null, opt), r.answer === opt && /*#__PURE__*/React.createElement(IconGlyph, {
     name: "Check",
-    size: 18
-  }), isWrongPick(opt) && /*#__PURE__*/React.createElement(IconGlyph, {
-    name: "X",
     size: 18
   })))), q.type === "typed" && /*#__PURE__*/React.createElement("div", {
     className: "typed-question"
@@ -1063,27 +1227,39 @@ function QuizTab({
     label: "Read question aloud"
   })), /*#__PURE__*/React.createElement("textarea", {
     rows: 3,
-    value: typedValue,
-    onChange: e => setTypedValue(e.target.value),
-    placeholder: "Type a short answer...",
-    disabled: typedChecked
-  }), !typedChecked && /*#__PURE__*/React.createElement("button", {
+    value: r.text || "",
+    onChange: e => setTypedText(e.target.value),
+    placeholder: "Type a short answer..."
+  }), /*#__PURE__*/React.createElement("button", {
+    type: "button",
     className: "btn-secondary",
-    onClick: checkTyped,
-    disabled: !typedValue.trim()
-  }, "Check my answer"), typedChecked && /*#__PURE__*/React.createElement("div", {
-    className: "typed-feedback" + (typedAnswerLooksGood(typedValue, q.keywords) ? " good" : "")
+    onClick: toggleCheckTyped,
+    disabled: !(r.text || "").trim()
+  }, checkedTyped[idx] ? "Hide model answer" : "Check my answer"), checkedTyped[idx] && /*#__PURE__*/React.createElement("div", {
+    className: "typed-feedback"
   }, /*#__PURE__*/React.createElement("span", {
     className: "typed-feedback-label"
-  }, typedAnswerLooksGood(typedValue, q.keywords) ? "Nice \u2014 that counts! Compare with a model answer:" : "Have a look at a model answer \u2014 try adding more detail next time:"), /*#__PURE__*/React.createElement("span", {
+  }, "Model answer to compare against \u2014 you can still change yours before handing in:"), /*#__PURE__*/React.createElement("span", {
     className: "typed-feedback-text"
-  }, q.modelAnswer))), (picked || q.type === "typed" && typedChecked) && /*#__PURE__*/React.createElement("button", {
+  }, q.modelAnswer))), /*#__PURE__*/React.createElement("div", {
+    className: "quiz-nav-row"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn-secondary",
+    onClick: goPrev,
+    disabled: idx === 0
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16,
+    style: {
+      transform: "rotate(180deg)"
+    }
+  }), " Back"), /*#__PURE__*/React.createElement("button", {
     className: "btn-primary quiz-next",
-    onClick: next
-  }, idx + 1 >= questions.length ? "See results" : "Next question", " ", /*#__PURE__*/React.createElement(IconGlyph, {
+    onClick: goNext
+  }, idx + 1 >= questions.length ? "Review answers" : "Next question", " ", /*#__PURE__*/React.createElement(IconGlyph, {
     name: "ChevronRight",
     size: 18
-  }))));
+  })))));
 }
 
 /* ===== worksheet.jsx ===== */
@@ -1117,6 +1293,7 @@ function WorksheetTab({
   });
   const [currentId, setCurrentId] = useState(null);
   const [currentFeedback, setCurrentFeedback] = useState("");
+  const [currentStatus, setCurrentStatus] = useState("draft"); // draft | submitted
   const [savedList, setSavedList] = useState([]);
   const [savedListOpen, setSavedListOpen] = useState(false);
   const [saveState, setSaveState] = useState("idle"); // idle | saving | saved | error
@@ -1125,8 +1302,11 @@ function WorksheetTab({
   const textareaRefs = useRef({});
   const fw = FRAMEWORKS[fwKey];
   useEffect(() => {
-    apiGet("/api/tasks/available").then(setAvailableTasks).catch(() => {});
+    loadAvailableTasks();
   }, []);
+  function loadAvailableTasks() {
+    apiGet("/api/tasks/available").then(setAvailableTasks).catch(() => {});
+  }
   function refreshSavedList() {
     apiGet("/api/submissions").then(setSavedList).catch(() => {});
   }
@@ -1174,6 +1354,7 @@ function WorksheetTab({
     setAnswers({});
     setCurrentId(null);
     setCurrentFeedback("");
+    setCurrentStatus("draft");
     setActiveTask(null);
     setSaveState("idle");
   }
@@ -1195,6 +1376,7 @@ function WorksheetTab({
       setAnswers({});
       setCurrentId(null);
       setCurrentFeedback("");
+      setCurrentStatus("draft");
       setSaveState("idle");
       setActiveTask(full);
     } catch (e) {/* ignore */}
@@ -1209,6 +1391,7 @@ function WorksheetTab({
       setAnswers(full.answers || {});
       setCurrentId(full.id);
       setCurrentFeedback(full.feedback || "");
+      setCurrentStatus(full.status || "draft");
       setActiveTask(null);
       setSaveState("idle");
       setSavedListOpen(false);
@@ -1244,9 +1427,47 @@ function WorksheetTab({
           taskId: activeTask ? activeTask.id : null
         });
         setCurrentId(created.id);
+        setCurrentStatus("draft");
       }
       setSaveState("saved");
       refreshSavedList();
+    } catch (e) {
+      setSaveState("error");
+    }
+  }
+  async function handleHandIn() {
+    if (!window.confirm("Hand in this worksheet? Your teacher will be able to see it and mark it. You can still make changes afterwards if needed.")) {
+      return;
+    }
+    setSaveState("saving");
+    try {
+      let result;
+      if (currentId) {
+        result = await apiPost(`/api/submissions/${currentId}/hand-in`, {
+          productName,
+          brand,
+          answers
+        });
+      } else {
+        const created = await apiPost("/api/submissions", {
+          toolMode: mode,
+          framework: fwKey,
+          productName,
+          brand,
+          answers,
+          taskId: activeTask ? activeTask.id : null
+        });
+        result = await apiPost(`/api/submissions/${created.id}/hand-in`, {
+          productName,
+          brand,
+          answers
+        });
+      }
+      setCurrentId(result.id);
+      setCurrentStatus(result.status);
+      setSaveState("saved");
+      refreshSavedList();
+      if (activeTask) loadAvailableTasks();
     } catch (e) {
       setSaveState("error");
     }
@@ -1477,7 +1698,9 @@ function WorksheetTab({
     className: "task-active-image"
   }), activeTask.instructions && /*#__PURE__*/React.createElement("p", null, activeTask.instructions)), /*#__PURE__*/React.createElement("p", {
     className: "worksheet-editing-status sub no-print"
-  }, currentId ? /*#__PURE__*/React.createElement(React.Fragment, null, "Editing a saved worksheet", productName ? /*#__PURE__*/React.createElement(React.Fragment, null, " \u2014 ", /*#__PURE__*/React.createElement("strong", null, productName)) : null, ". Changes save to this same one unless you use \"New worksheet\" or \"Save as new copy\".") : /*#__PURE__*/React.createElement(React.Fragment, null, "Starting a new, unsaved worksheet", productName ? /*#__PURE__*/React.createElement(React.Fragment, null, " \u2014 ", /*#__PURE__*/React.createElement("strong", null, productName)) : null, ".")), savedListOpen && /*#__PURE__*/React.createElement("div", {
+  }, currentId ? /*#__PURE__*/React.createElement(React.Fragment, null, "Editing a saved worksheet", productName ? /*#__PURE__*/React.createElement(React.Fragment, null, " \u2014 ", /*#__PURE__*/React.createElement("strong", null, productName)) : null, ".", " ", /*#__PURE__*/React.createElement("span", {
+    className: "status-pill" + (currentStatus === "submitted" ? " submitted" : " draft")
+  }, currentStatus === "submitted" ? "Handed in" : "Draft"), " ", "Changes save to this same one unless you use \"New worksheet\" or \"Save as new copy\".") : /*#__PURE__*/React.createElement(React.Fragment, null, "Starting a new, unsaved worksheet", productName ? /*#__PURE__*/React.createElement(React.Fragment, null, " \u2014 ", /*#__PURE__*/React.createElement("strong", null, productName)) : null, ".")), savedListOpen && /*#__PURE__*/React.createElement("div", {
     className: "saved-panel no-print"
   }, savedList.length === 0 && /*#__PURE__*/React.createElement("p", {
     className: "sub"
@@ -1500,7 +1723,9 @@ function WorksheetTab({
       marginLeft: 6,
       verticalAlign: "-2px"
     }
-  })), /*#__PURE__*/React.createElement("span", {
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "status-pill" + (item.status === "submitted" ? " submitted" : " draft")
+  }, item.status === "submitted" ? "Handed in" : "Draft")), /*#__PURE__*/React.createElement("span", {
     className: "saved-row-mode"
   }, item.toolMode === "analyze" ? "Analysis" : "Design"), /*#__PURE__*/React.createElement("span", {
     className: "saved-row-date mono"
@@ -1625,13 +1850,20 @@ function WorksheetTab({
   }))), /*#__PURE__*/React.createElement("div", {
     className: "worksheet-actions no-print"
   }, /*#__PURE__*/React.createElement("button", {
-    className: "btn-primary",
+    className: "btn-secondary",
     onClick: () => handleSave(false),
     disabled: saveState === "saving"
   }, /*#__PURE__*/React.createElement(IconGlyph, {
     name: "Download",
     size: 18
-  }), " ", saveState === "saving" ? "Saving..." : currentId ? "Save changes" : "Save my work"), currentId && /*#__PURE__*/React.createElement("button", {
+  }), " ", saveState === "saving" ? "Saving..." : currentId ? "Save draft" : "Save my work"), /*#__PURE__*/React.createElement("button", {
+    className: "btn-primary",
+    onClick: handleHandIn,
+    disabled: saveState === "saving"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Check",
+    size: 18
+  }), " ", currentStatus === "submitted" ? "Update hand-in" : "Hand in"), currentId && /*#__PURE__*/React.createElement("button", {
     className: "btn-secondary",
     onClick: () => handleSave(true),
     disabled: saveState === "saving"
@@ -1656,17 +1888,11 @@ function WorksheetTab({
   }, /*#__PURE__*/React.createElement(IconGlyph, {
     name: "FileDown",
     size: 16
-  }), " ", exportState.word === "busy" ? "Preparing..." : "Export as Word (.doc)"), /*#__PURE__*/React.createElement("button", {
-    className: "btn-text",
-    onClick: () => window.print()
-  }, /*#__PURE__*/React.createElement(IconGlyph, {
-    name: "Printer",
-    size: 15
-  }), " Print instead")), exportState.pdf === "error" && /*#__PURE__*/React.createElement("p", {
+  }), " ", exportState.word === "busy" ? "Preparing..." : "Export as Word (.doc)")), exportState.pdf === "error" && /*#__PURE__*/React.createElement("p", {
     className: "export-error no-print"
-  }, "Couldn't generate the PDF (needs an internet connection to load once). Try \"Print instead\"."), exportState.word === "error" && /*#__PURE__*/React.createElement("p", {
+  }, "Couldn't generate the PDF (needs an internet connection to load once)."), exportState.word === "error" && /*#__PURE__*/React.createElement("p", {
     className: "export-error no-print"
-  }, "Something went wrong creating the Word file. Try again, or use \"Print instead\"."));
+  }, "Something went wrong creating the Word file. Try again."));
 }
 
 /* ===== login.jsx ===== */
@@ -1760,7 +1986,9 @@ function StudentApp({
     className: "app-sub"
   }, "Signed in as ", user.displayName, user.classGroup ? ` \u00b7 ${user.classGroup}` : "")), /*#__PURE__*/React.createElement("div", {
     className: "header-controls"
-  }, /*#__PURE__*/React.createElement("button", {
+  }, /*#__PURE__*/React.createElement(NotificationCenter, {
+    onNavigate: setTab
+  }), /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "simple-toggle",
     onClick: () => setSimpleMode(s => !s),
@@ -2821,10 +3049,12 @@ function GradebookPanel() {
       key: "t" + ti.assignmentId,
       className: "gradebook-cell empty"
     }, "Not started");
+    const label = cell.markedComplete ? "Marked" : cell.status === "submitted" ? "Submitted" : "Draft only";
+    const cellClass = cell.markedComplete ? "marked" : cell.status === "submitted" ? "unmarked" : "empty";
     return /*#__PURE__*/React.createElement("td", {
       key: "t" + ti.assignmentId,
-      className: "gradebook-cell" + (cell.markedComplete ? " marked" : " unmarked")
-    }, cell.markedComplete ? "Marked" : "Submitted", !cell.markedComplete && /*#__PURE__*/React.createElement(IconGlyph, {
+      className: "gradebook-cell " + cellClass
+    }, label, !cell.markedComplete && cell.status === "submitted" && /*#__PURE__*/React.createElement(IconGlyph, {
       name: "Lightbulb",
       size: 11,
       style: {

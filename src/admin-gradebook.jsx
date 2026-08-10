@@ -87,10 +87,12 @@ function GradebookPanel() {
                       {data.taskItems.map((ti) => {
                         const cell = data.taskCells[s.id] && data.taskCells[s.id][ti.taskId];
                         if (!cell) return <td key={"t" + ti.assignmentId} className="gradebook-cell empty">Not started</td>;
+                        const label = cell.markedComplete ? "Marked" : cell.status === "submitted" ? "Submitted" : "Draft only";
+                        const cellClass = cell.markedComplete ? "marked" : cell.status === "submitted" ? "unmarked" : "empty";
                         return (
-                          <td key={"t" + ti.assignmentId} className={"gradebook-cell" + (cell.markedComplete ? " marked" : " unmarked")}>
-                            {cell.markedComplete ? "Marked" : "Submitted"}
-                            {!cell.markedComplete && <IconGlyph name="Lightbulb" size={11} style={{ color: "#8A6A1E", marginLeft: 4 }} />}
+                          <td key={"t" + ti.assignmentId} className={"gradebook-cell " + cellClass}>
+                            {label}
+                            {!cell.markedComplete && cell.status === "submitted" && <IconGlyph name="Lightbulb" size={11} style={{ color: "#8A6A1E", marginLeft: 4 }} />}
                           </td>
                         );
                       })}

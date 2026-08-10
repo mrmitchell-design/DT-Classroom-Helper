@@ -20,6 +20,7 @@ function WorksheetTab({ simpleMode, currentUser }) {
   const [exportState, setExportState] = useState({ pdf: "idle", word: "idle" });
   const [currentId, setCurrentId] = useState(null);
   const [currentFeedback, setCurrentFeedback] = useState("");
+  const [currentStatus, setCurrentStatus] = useState("draft"); // draft | submitted
   const [savedList, setSavedList] = useState([]);
   const [savedListOpen, setSavedListOpen] = useState(false);
   const [saveState, setSaveState] = useState("idle"); // idle | saving | saved | error
@@ -29,8 +30,12 @@ function WorksheetTab({ simpleMode, currentUser }) {
   const fw = FRAMEWORKS[fwKey];
 
   useEffect(() => {
-    apiGet("/api/tasks/available").then(setAvailableTasks).catch(() => {});
+    loadAvailableTasks();
   }, []);
+
+  function loadAvailableTasks() {
+    apiGet("/api/tasks/available").then(setAvailableTasks).catch(() => {});
+  }
 
   function refreshSavedList() {
     apiGet("/api/submissions").then(setSavedList).catch(() => {});
@@ -63,6 +68,7 @@ function WorksheetTab({ simpleMode, currentUser }) {
     setAnswers({});
     setCurrentId(null);
     setCurrentFeedback("");
+    setCurrentStatus("draft");
     setActiveTask(null);
     setSaveState("idle");
   }
@@ -86,6 +92,7 @@ function WorksheetTab({ simpleMode, currentUser }) {
       setAnswers({});
       setCurrentId(null);
       setCurrentFeedback("");
+      setCurrentStatus("draft");
       setSaveState("idle");
       setActiveTask(full);
     } catch (e) { /* ignore */ }
@@ -101,6 +108,7 @@ function WorksheetTab({ simpleMode, currentUser }) {
       setAnswers(full.answers || {});
       setCurrentId(full.id);
       setCurrentFeedback(full.feedback || "");
+      setCurrentStatus(full.status || "draft");
       setActiveTask(null);
       setSaveState("idle");
       setSavedListOpen(false);
@@ -125,9 +133,33 @@ function WorksheetTab({ simpleMode, currentUser }) {
       } else {
         const created = await apiPost("/api/submissions", { toolMode: mode, framework: fwKey, productName, brand, answers, taskId: activeTask ? activeTask.id : null });
         setCurrentId(created.id);
+        setCurrentStatus("draft");
       }
       setSaveState("saved");
       refreshSavedList();
+    } catch (e) {
+      setSaveState("error");
+    }
+  }
+
+  async function handleHandIn() {
+    if (!window.confirm("Hand in this worksheet? Your teacher will be able to see it and mark it. You can still make changes afterwards if needed.")) {
+      return;
+    }
+    setSaveState("saving");
+    try {
+      let result;
+      if (currentId) {
+        result = await apiPost(`/api/submissions/${currentId}/hand-in`, { productName, brand, answers });
+      } else {
+        const created = await apiPost("/api/submissions", { toolMode: mode, framework: fwKey, productName, brand, answers, taskId: activeTask ? activeTask.id : null });
+        result = await apiPost(`/api/submissions/${created.id}/hand-in`, { productName, brand, answers });
+      }
+      setCurrentId(result.id);
+      setCurrentStatus(result.status);
+      setSaveState("saved");
+      refreshSavedList();
+      if (activeTask) loadAvailableTasks();
     } catch (e) {
       setSaveState("error");
     }
@@ -284,7 +316,9 @@ function WorksheetTab({ simpleMode, currentUser }) {
 
       <p className="worksheet-editing-status sub no-print">
         {currentId
-          ? <>Editing a saved worksheet{productName ? <> — <strong>{productName}</strong></> : null}. Changes save to this same one unless you use "New worksheet" or "Save as new copy".</>
+          ? <>Editing a saved worksheet{productName ? <> — <strong>{productName}</strong></> : null}.{" "}
+              <span className={"status-pill" + (currentStatus === "submitted" ? " submitted" : " draft")}>{currentStatus === "submitted" ? "Handed in" : "Draft"}</span>{" "}
+              Changes save to this same one unless you use "New worksheet" or "Save as new copy".</>
           : <>Starting a new, unsaved worksheet{productName ? <> — <strong>{productName}</strong></> : null}.</>}
       </p>
 
@@ -294,7 +328,11 @@ function WorksheetTab({ simpleMode, currentUser }) {
           {savedList.map((item) => (
             <div className="saved-row" key={item.id} onClick={() => openSaved(item)}>
               <span className="saved-row-fw" style={{ color: FRAMEWORKS[item.framework].tint }}>{FRAMEWORKS[item.framework].label}</span>
-              <span className="saved-row-name">{item.productName || "Untitled"}{item.feedback && <IconGlyph name="Lightbulb" size={13} style={{ color: "#8A6A1E", marginLeft: 6, verticalAlign: "-2px" }} />}</span>
+              <span className="saved-row-name">
+                {item.productName || "Untitled"}
+                {item.feedback && <IconGlyph name="Lightbulb" size={13} style={{ color: "#8A6A1E", marginLeft: 6, verticalAlign: "-2px" }} />}
+                <span className={"status-pill" + (item.status === "submitted" ? " submitted" : " draft")}>{item.status === "submitted" ? "Handed in" : "Draft"}</span>
+              </span>
               <span className="saved-row-mode">{item.toolMode === "analyze" ? "Analysis" : "Design"}</span>
               <span className="saved-row-date mono">{formatDate(item.updatedAt)}</span>
               <button type="button" className="saved-row-delete" onClick={(e) => deleteSaved(item, e)} aria-label="Delete"><IconGlyph name="Trash2" size={14} /></button>
@@ -383,8 +421,11 @@ function WorksheetTab({ simpleMode, currentUser }) {
       </div>
 
       <div className="worksheet-actions no-print">
-        <button className="btn-primary" onClick={() => handleSave(false)} disabled={saveState === "saving"}>
-          <IconGlyph name="Download" size={18} /> {saveState === "saving" ? "Saving..." : currentId ? "Save changes" : "Save my work"}
+        <button className="btn-secondary" onClick={() => handleSave(false)} disabled={saveState === "saving"}>
+          <IconGlyph name="Download" size={18} /> {saveState === "saving" ? "Saving..." : currentId ? "Save draft" : "Save my work"}
+        </button>
+        <button className="btn-primary" onClick={handleHandIn} disabled={saveState === "saving"}>
+          <IconGlyph name="Check" size={18} /> {currentStatus === "submitted" ? "Update hand-in" : "Hand in"}
         </button>
         {currentId && (
           <button className="btn-secondary" onClick={() => handleSave(true)} disabled={saveState === "saving"}>Save as new copy</button>
@@ -402,10 +443,9 @@ function WorksheetTab({ simpleMode, currentUser }) {
         <button className="btn-secondary" onClick={handleExportWord} disabled={exportState.word === "busy"}>
           <IconGlyph name="FileDown" size={16} /> {exportState.word === "busy" ? "Preparing..." : "Export as Word (.doc)"}
         </button>
-        <button className="btn-text" onClick={() => window.print()}><IconGlyph name="Printer" size={15} /> Print instead</button>
       </div>
-      {exportState.pdf === "error" && <p className="export-error no-print">Couldn't generate the PDF (needs an internet connection to load once). Try "Print instead".</p>}
-      {exportState.word === "error" && <p className="export-error no-print">Something went wrong creating the Word file. Try again, or use "Print instead".</p>}
+      {exportState.pdf === "error" && <p className="export-error no-print">Couldn't generate the PDF (needs an internet connection to load once).</p>}
+      {exportState.word === "error" && <p className="export-error no-print">Something went wrong creating the Word file. Try again.</p>}
     </div>
   );
 }

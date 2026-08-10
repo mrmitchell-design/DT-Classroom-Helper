@@ -51,7 +51,7 @@ router.get("/users", (req, res) => {
               (SELECT COUNT(*) FROM quiz_attempts q WHERE q.user_id = u.id) AS quiz_count,
               (SELECT MAX(taken_at) FROM quiz_attempts q WHERE q.user_id = u.id) AS last_quiz_at,
               (SELECT MAX(updated_at) FROM submissions s WHERE s.user_id = u.id) AS last_work_at,
-              (SELECT COUNT(*) FROM submissions s WHERE s.user_id = u.id AND s.marked_complete = 0) +
+              (SELECT COUNT(*) FROM submissions s WHERE s.user_id = u.id AND s.marked_complete = 0 AND s.status = 'submitted') +
               (SELECT COUNT(*) FROM quiz_attempts q WHERE q.user_id = u.id AND q.marked_complete = 0) AS needs_marking_count
        FROM users u WHERE u.role = 'student' ORDER BY u.year_group, u.class_group, u.display_name`
     )
@@ -221,6 +221,8 @@ router.get("/users/:id/submissions", (req, res) => {
       answers: JSON.parse(r.answers || "{}"),
       feedback: r.feedback || "",
       markedComplete: !!r.marked_complete,
+      status: r.status,
+      submittedAt: r.submitted_at,
       taskId: r.task_id,
       createdAt: r.created_at,
       updatedAt: r.updated_at,
@@ -383,7 +385,7 @@ router.get("/gradebook", (req, res) => {
     subs.forEach((s) => {
       taskCells[s.user_id] = taskCells[s.user_id] || {};
       if (!taskCells[s.user_id][s.task_id]) {
-        taskCells[s.user_id][s.task_id] = { submissionId: s.id, markedComplete: !!s.marked_complete, hasFeedback: !!s.feedback };
+        taskCells[s.user_id][s.task_id] = { submissionId: s.id, markedComplete: !!s.marked_complete, hasFeedback: !!s.feedback, status: s.status };
       }
     });
   }

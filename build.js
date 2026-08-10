@@ -16,6 +16,7 @@ const FILES_IN_ORDER = [
   "api.jsx",
   "shared.jsx",
   "changepassword.jsx",
+  "notifications.jsx",
   "quiz.jsx",
   "worksheet.jsx",
   "login.jsx",

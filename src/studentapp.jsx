@@ -16,6 +16,7 @@ function StudentApp({ user, onLogout }) {
           <p className="app-sub">Signed in as {user.displayName}{user.classGroup ? ` \u00b7 ${user.classGroup}` : ""}</p>
         </div>
         <div className="header-controls">
+          <NotificationCenter onNavigate={setTab} />
           <button type="button" className="simple-toggle" onClick={() => setSimpleMode((s) => !s)} aria-pressed={simpleMode}>
             <span>Simple English</span>
             <span className={"switch" + (simpleMode ? " on" : "")}><span className="switch-knob" /></span>

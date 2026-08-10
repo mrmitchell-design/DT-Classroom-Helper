@@ -14,6 +14,20 @@ router.use(requireAdmin);
 // - option1-4 and answer: used for mcq/scenario (answer must match one option)
 // - keywords: comma-separated, used for typed (quote the cell if it has commas)
 // - modelAnswer: used for typed
+// downloadable example CSV showing the expected quiz-question format
+router.get("/quiz-sets/import-template.csv", (req, res) => {
+  const rows = [
+    ["type", "prompt", "option1", "option2", "option3", "option4", "answer", "badge", "keywords", "modelAnswer"],
+    ["mcq", "What does the letter A stand for in ACCESSFM?", "Aesthetics", "Cost", "Safety", "Function", "Aesthetics", "A", "", ""],
+    ["scenario", "A kettle has rounded edges and a handle that stays cool. Which letter is this about?", "Aesthetics", "Safety", "Cost", "Function", "Safety", "S", "", ""],
+    ["typed", "Explain what Cost means in ACCESSFM, in your own words.", "", "", "", "", "", "C", "cheap, affordable, price, budget", "Cost is about how much a product costs to make and to buy."],
+  ];
+  const csv = rows.map((r) => r.map((c) => (c.includes(",") ? `"${c.replace(/"/g, '""')}"` : c)).join(",")).join("\n") + "\n";
+  res.setHeader("Content-Type", "text/csv");
+  res.setHeader("Content-Disposition", 'attachment; filename="quiz-import-template.csv"');
+  res.send(csv);
+});
+
 router.post("/quiz-sets/parse-csv", (req, res) => {
   const { csv } = req.body || {};
   if (!csv || typeof csv !== "string") return res.status(400).json({ error: "csv text is required." });

@@ -125,6 +125,13 @@ ensureColumn("submissions", "marked_complete", "INTEGER NOT NULL DEFAULT 0");
 ensureColumn("quiz_attempts", "marked_complete", "INTEGER NOT NULL DEFAULT 0");
 ensureColumn("submissions", "task_id", "INTEGER REFERENCES worksheet_tasks(id)");
 ensureColumn("quiz_attempts", "quiz_set_id", "INTEGER REFERENCES quiz_sets(id)");
+// draft/handed-in distinction for worksheets - existing rows default to
+// 'submitted' on migration (they predate this feature and were already
+// being treated as finished work), new rows default to 'draft' at the
+// database level so a save without an explicit status never accidentally
+// counts as handed in.
+ensureColumn("submissions", "status", "TEXT NOT NULL DEFAULT 'submitted'");
+ensureColumn("submissions", "submitted_at", "TEXT");
 
 
 // --- one-time admin bootstrap ---

@@ -22,7 +22,22 @@ function availableTasksForUser(userId) {
             (ta.year_group = '' OR ta.year_group = ?))
      ORDER BY wt.updated_at DESC`
   ).all(user.class_group || "", user.year_group || "", user.class_group || "", user.year_group || "");
-  return rows;
+
+  const assignedIds = new Set(
+    db.prepare(
+      `SELECT DISTINCT ta.task_id FROM task_assignments ta
+       WHERE (ta.class_group = '' OR ta.class_group = ?) AND (ta.year_group = '' OR ta.year_group = ?)`
+    ).all(user.class_group || "", user.year_group || "").map((r) => r.task_id)
+  );
+  const completedIds = new Set(
+    db.prepare("SELECT DISTINCT task_id FROM submissions WHERE user_id = ? AND task_id IS NOT NULL AND status = 'submitted'").all(userId).map((r) => r.task_id)
+  );
+
+  return rows.map((r) => ({
+    ...r,
+    is_assigned: assignedIds.has(r.id),
+    is_completed: completedIds.has(r.id),
+  }));
 }
 
 router.get("/available", (req, res) => {
@@ -35,6 +50,8 @@ router.get("/available", (req, res) => {
     instructions: r.instructions || "",
     imageUrl: r.image_path ? `/uploads/${r.image_path}` : null,
     isPracticeBank: !!r.is_practice_bank,
+    isAssigned: r.is_assigned,
+    isCompleted: r.is_completed,
     dueAt: r.due_at,
   })));
 });
