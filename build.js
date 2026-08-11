@@ -14,6 +14,7 @@ const FILES_IN_ORDER = [
   "content.js",
   "specbuilder-content.js",
   "dtf-content.js",
+  "dtf-u1s1-content.js",
   "icons.jsx",
   "api.jsx",
   "shared.jsx",

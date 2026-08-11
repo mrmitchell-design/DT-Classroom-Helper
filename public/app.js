@@ -671,6 +671,724 @@ function stageNextStepFeedback(stage) {
   }
 }
 
+/* ===== dtf-u1s1-content.js ===== */
+/* ------------------------------------------------------------------ */
+/* UNIT 1 / SECTION 1 - "PROBLEM BEFORE PRODUCT"                       */
+/* This is the reference-implementation content for the whole course - */
+/* every future section follows this same shape.                      */
+/* ------------------------------------------------------------------ */
+
+const U1S1_META = {
+  unitKey: "u1",
+  sectionKey: "s1",
+  number: "01",
+  title: "Problem Before Product",
+  sectionQuestion: "How do we make sure we are solving the right problem?",
+  fiveCFocus: "Critical Thinking",
+  gettingBetterAt: ["recognising a design problem, need or opportunity", "understanding what a design context is", "separating a problem from a solution", "identifying different design possibilities", "explaining why one problem can have several possible solutions", "avoiding jumping immediately to the first product idea", "recognising basic design fixation", "using evidence and investigation before making design decisions"],
+  successCriteria: ["I can identify a design problem.", "I can explain the difference between a problem and a solution.", "I can recognise when a solution has been hidden inside a design context.", "I can suggest different design possibilities.", "I can explain why designers investigate before choosing a product.", "I can recognise basic design fixation."]
+};
+const U1S1_VOCAB = [{
+  id: "u1s1-design",
+  term: "Design",
+  definition: "The process of developing ideas to solve a problem, meet a need or respond to an opportunity."
+}, {
+  id: "u1s1-context",
+  term: "Design Context",
+  definition: "The situation surrounding a design problem, need or opportunity."
+}, {
+  id: "u1s1-problem",
+  term: "Problem",
+  definition: "An issue or difficulty that could be improved or solved through design."
+}, {
+  id: "u1s1-need",
+  term: "Need",
+  definition: "Something necessary for a user or situation."
+}, {
+  id: "u1s1-opportunity",
+  term: "Opportunity",
+  definition: "A situation where design could improve something or create something useful."
+}, {
+  id: "u1s1-possibility",
+  term: "Design Possibility",
+  definition: "A possible solution or direction that could be developed from a design context."
+}, {
+  id: "u1s1-solution",
+  term: "Solution",
+  definition: "A way of responding to a problem, need or opportunity."
+}, {
+  id: "u1s1-fixation",
+  term: "Design Fixation",
+  definition: "Becoming too focused on one idea or type of solution and finding it difficult to explore alternatives."
+}];
+const U1S1_CARDS = [{
+  type: "content",
+  id: "opening-1",
+  heading: "Start with the problem",
+  body: "Students regularly lose stationery inside their school bags and struggle to find the equipment they need during lessons."
+}, {
+  type: "touchpoint",
+  id: "opening-predict",
+  kind: "pause_predict",
+  heading: "Pause & Predict",
+  prompt: "What would you design?"
+}, {
+  type: "content",
+  id: "opening-2",
+  heading: "Problem Before Product",
+  body: "You may already be thinking about pencil cases, organisers, pockets or storage boxes.\n\nThat's normal \u2014 but you've just done something designers need to be careful about. You've started thinking about the product before fully investigating the problem.\n\nGood designers don't start by asking \u201cWhat should I make?\u201d They start by asking \u201cWhat problem am I actually trying to solve?\u201d"
+}, {
+  type: "content",
+  id: "know-context",
+  heading: "What We Need to Know: Design Context",
+  body: "A design context is the situation surrounding a design problem, need or opportunity.",
+  compare: {
+    a: "Design a pencil case.",
+    b: "Students need a better way to organise and access the equipment they use during lessons."
+  }
+}, {
+  type: "touchpoint",
+  id: "which-stronger-1",
+  kind: "which_is_stronger",
+  heading: "Which Is Stronger?",
+  prompt: "Which gives the designer more opportunity to investigate?",
+  optionA: "Design a pencil case.",
+  optionB: "Students need a better way to organise and access the equipment they use during lessons.",
+  correct: "b",
+  feedbackCorrect: "Good thinking. B describes the situation and need without deciding what the final product must be.",
+  feedbackIncorrect: "A has already decided that the solution will be a pencil case. Look again at B. What other solutions could respond to that problem?"
+}, {
+  type: "content",
+  id: "example-possibilities",
+  heading: "One Problem, Many Possibilities",
+  body: "Students need a better way to organise and access equipment during lessons.\n\nThis one context could lead to many different directions:",
+  list: ["portable organiser", "modular bag insert", "desk storage", "classroom storage system", "equipment tray", "labelled storage", "wearable organiser", "equipment checking system"],
+  footer: "These are not eight finished designs. They are design possibilities \u2014 different directions we could investigate."
+}, {
+  type: "touchpoint",
+  id: "quick-check-1",
+  kind: "quick_check",
+  heading: "Quick Check",
+  prompt: "Which of these is a design possibility?",
+  options: ["Students lose stationery.", "Students are in Year 8.", "A modular bag organiser.", "The problem is annoying."],
+  correct: "A modular bag organiser.",
+  feedback: "A modular bag organiser is one possible way of responding to the problem."
+}, {
+  type: "content",
+  id: "problem-or-solution",
+  heading: "Problem or Solution?",
+  body: "Problem: an issue or difficulty that could be improved or solved through design.\n\nSolution: a way of responding to a problem, need or opportunity.\n\nMy phone keeps falling off my desk while I work.\n\nThe problem is NOT \u201cI don't have a phone stand.\u201d A phone stand is already a solution. Other possible solutions could include a non-slip surface, a desk pocket, a clip, a tray, an adjustable holder, or an attachment to another product.\n\nDon't hide the solution inside the problem."
+}, {
+  type: "touchpoint",
+  id: "stop-sort-1",
+  kind: "stop_sort",
+  heading: "Stop & Sort",
+  prompt: "Sort each statement into Problem or Solution.",
+  items: [{
+    text: "Students cannot easily find stationery in their bags.",
+    answer: "problem"
+  }, {
+    text: "Modular bag organiser.",
+    answer: "solution"
+  }, {
+    text: "Wet umbrellas leave water on the floor.",
+    answer: "problem"
+  }, {
+    text: "Umbrella rack with drip tray.",
+    answer: "solution"
+  }, {
+    text: "Water bottles are regularly knocked over.",
+    answer: "problem"
+  }, {
+    text: "Desk-mounted bottle holder.",
+    answer: "solution"
+  }, {
+    text: "Students struggle to carry specialist equipment.",
+    answer: "problem"
+  }, {
+    text: "Equipment trolley.",
+    answer: "solution"
+  }]
+}, {
+  type: "touchpoint",
+  id: "spot-hidden-1",
+  kind: "spot_hidden_solution",
+  heading: "Spot the Hidden Solution",
+  prompt: "Students need a wall-mounted rack to organise their equipment.\n\nWhat's wrong with this design context?",
+  modelExplanation: "\u201cWall-mounted rack\u201d has already specified the solution.",
+  improvedVersion: "Students need a better way to organise and access their equipment."
+}, {
+  type: "touchpoint",
+  id: "spot-hidden-2",
+  kind: "spot_hidden_solution",
+  heading: "Spot the Hidden Solution",
+  prompt: "Students need a lightweight plastic container to carry art equipment.\n\nWhat has already been decided here?",
+  modelExplanation: "\u201cContainer\u201d is a chosen product, and \u201cplastic\u201d is a chosen material \u2014 both decided before the problem was fully investigated.",
+  improvedVersion: "Students need a practical way to safely transport art equipment between classrooms."
+}, {
+  type: "touchpoint",
+  id: "think-try-test-1",
+  kind: "think_try_test",
+  heading: "Think, Try, Test",
+  scenario: "Students regularly leave reusable water bottles on the floor beside their desks, where they are knocked over.",
+  parts: [{
+    key: "problem",
+    label: "1. What is the actual problem?",
+    placeholder: "Describe the real problem, not a solution..."
+  }, {
+    key: "possibilities",
+    label: "2. Suggest three genuinely different design possibilities.",
+    placeholder: "List three different directions, not variations of one idea..."
+  }],
+  teacherGuidance: "Model guidance: students do not have a safe and convenient place to store bottles during lessons, resulting in bottles being knocked over. Three differently shaped desk-mounted bottle holders should not automatically count as three different design possibilities \u2014 we are looking for different approaches to the problem, e.g. a desk-mounted holder, storage attached to furniture, a central bottle-storage system, or a bag attachment."
+}, {
+  type: "content",
+  id: "notice-more-ideas",
+  heading: "What We Need to Notice",
+  body: "More ideas does not automatically mean better design thinking.\n\nA student produces a round pencil case, a square pencil case, a triangular pencil case, and a hexagonal pencil case.\n\nHave they explored four different design possibilities? Not necessarily \u2014 they have explored variations of the same solution.\n\nStronger exploration might compare a pencil case, a bag insert, a desk organiser and an equipment-storage system."
+}, {
+  type: "content",
+  id: "design-fixation-intro",
+  heading: "Design Fixation",
+  body: "Design Fixation: becoming too focused on one idea or type of solution and finding it difficult to explore alternatives.\n\nYour design context is: students need a better way to organise classroom equipment.\n\nYour first action is searching online for \u201cBest classroom storage boxes.\u201d"
+}, {
+  type: "touchpoint",
+  id: "spot-problem-fixation",
+  kind: "spot_the_problem",
+  heading: "Spot the Problem",
+  prompt: "What could be wrong with searching \u201cBest classroom storage boxes\u201d before investigating the problem?",
+  modelExplanation: "The search assumes that a storage box is the solution before the problem has been properly investigated. Looking at existing products is useful later, but the search terms we use can influence the solutions we discover."
+}, {
+  type: "touchpoint",
+  id: "decide-defend-1",
+  kind: "decide_defend",
+  heading: "Decide & Defend",
+  scenario: "Students regularly lose stationery inside their school bags.",
+  optionA: {
+    label: "Student A",
+    text: "\u201cLet's design a better pencil case.\u201d"
+  },
+  optionB: {
+    label: "Student B",
+    text: "\u201cLet's investigate why the stationery is getting lost first.\u201d"
+  },
+  correct: "b",
+  prompt: "Who is showing stronger design thinking, and why?",
+  modelResponse: "Student B, because they are investigating the cause of the problem before deciding which solution should be developed.",
+  acceptedIdeas: ["investigate first", "understand cause", "avoid choosing solution too early", "explore alternatives"]
+}];
+const U1S1_QUESTIONS = [{
+  qid: "U1-S1-R01",
+  category: "R",
+  type: "mcq",
+  prompt: "What is a design context?",
+  options: ["A drawing of the final product", "The situation surrounding a problem, need or opportunity", "A materials list", "Manufacturing instructions"],
+  correctAnswer: "The situation surrounding a problem, need or opportunity"
+}, {
+  qid: "U1-S1-R02",
+  category: "R",
+  type: "mcq",
+  prompt: "What is a design possibility?",
+  options: ["A finished product", "A possible solution or direction", "A manufacturing fault", "A customer complaint"],
+  correctAnswer: "A possible solution or direction"
+}, {
+  qid: "U1-S1-R03",
+  category: "R",
+  type: "true_false",
+  prompt: "True or false: a design context should always tell you exactly what to make.",
+  correctAnswer: "False",
+  feedback: "A context can stay broad so that different solutions can be investigated."
+}, {
+  qid: "U1-S1-R04",
+  category: "R",
+  type: "mcq",
+  prompt: "Which of these is a design context?",
+  options: ["Make a wooden pencil case.", "Use plywood.", "Students need a better way to organise equipment during lessons.", "Draw three storage boxes."],
+  correctAnswer: "Students need a better way to organise equipment during lessons."
+}, {
+  qid: "U1-S1-R05",
+  category: "R",
+  type: "mcq",
+  prompt: "Which of these is a solution?",
+  options: ["Students lose stationery.", "Wet umbrellas make floors slippery.", "Wall-mounted umbrella storage.", "Students struggle to carry equipment."],
+  correctAnswer: "Wall-mounted umbrella storage."
+}, {
+  qid: "U1-S1-R06",
+  category: "R",
+  type: "fill_gap",
+  prompt: "Complete: good designers investigate the ______ before choosing the ______.",
+  acceptedAnswers: ["problem, solution", "problem, product", "context, solution", "context, product"],
+  feedback: "Good designers investigate the problem (or context) before choosing the solution (or product)."
+}, {
+  qid: "U1-S1-R07",
+  category: "R",
+  type: "short_response",
+  prompt: "What is a design problem?",
+  modelResponse: "An issue or difficulty that could be improved or solved through design.",
+  expectedKnowledge: "The definition of 'problem' as distinct from a solution.",
+  acceptedIdeas: ["issue", "difficulty", "something that could be improved", "something that needs solving"],
+  marksAvailable: 1,
+  markingGuidance: "Accept any answer that identifies an issue/difficulty rather than a product.",
+  stageGuidance: {
+    beginning: "Gives an unrelated or unclear answer.",
+    emerging: "Mentions something being wrong but doesn't clearly define it as an issue to be solved.",
+    developing: "Clearly identifies a problem as an issue or difficulty that design could address.",
+    mastering: "Defines the problem clearly and distinguishes it from a solution."
+  }
+}, {
+  qid: "U1-S1-R08",
+  category: "R",
+  type: "mcq",
+  prompt: "Which of these is a design opportunity?",
+  options: ["A product has been manufactured.", "Students could benefit from a better way to transport equipment.", "A product is blue.", "A sketch has been completed."],
+  correctAnswer: "Students could benefit from a better way to transport equipment."
+}, {
+  qid: "U1-S1-R09",
+  category: "R",
+  type: "true_false",
+  prompt: "True or false: there can be several suitable solutions to the same design problem.",
+  correctAnswer: "True",
+  feedback: "Different products or systems can meet the same underlying need in different ways."
+}, {
+  qid: "U1-S1-R10",
+  category: "R",
+  type: "mcq",
+  prompt: "Which should normally happen first?",
+  options: ["Manufacture", "Choose material", "Investigate context", "Decorate"],
+  correctAnswer: "Investigate context"
+}, {
+  qid: "U1-S1-E01",
+  category: "E",
+  type: "extended_response",
+  prompt: "Why shouldn't a designer immediately choose their first idea?",
+  modelResponse: "The first idea may not be the best solution. Investigating alternatives allows the designer to compare possibilities and make a better-informed decision.",
+  expectedKnowledge: "First ideas are not automatically the best; comparison requires investigation.",
+  acceptedIdeas: ["may miss better solution", "insufficient investigation", "first idea may not meet need", "need alternatives", "comparison"],
+  marksAvailable: 2,
+  markingGuidance: "1 mark for identifying the risk of the first idea being weak; 1 mark for explaining why investigation/comparison helps.",
+  stageGuidance: {
+    beginning: "States that you shouldn't rush, without explaining why.",
+    emerging: "Mentions that other ideas might be better but doesn't explain how investigation helps.",
+    developing: "Explains that investigating alternatives allows fair comparison before deciding.",
+    mastering: "Explains the risk of the first idea clearly and connects it to using evidence to compare options."
+  }
+}, {
+  qid: "U1-S1-E02",
+  category: "E",
+  type: "short_response",
+  prompt: "Explain the difference between a problem and a solution.",
+  modelResponse: "A problem is the issue that needs addressing. A solution is a possible way of addressing it.",
+  expectedKnowledge: "Problem vs solution distinction.",
+  acceptedIdeas: ["problem is the issue", "solution is the response", "problem comes before solution"],
+  marksAvailable: 2,
+  markingGuidance: "1 mark for explaining problem; 1 mark for explaining solution.",
+  stageGuidance: {
+    beginning: "Defines only one of the two terms, or confuses them.",
+    emerging: "Attempts both definitions but they overlap or are unclear.",
+    developing: "Clearly explains both problem and solution as distinct ideas.",
+    mastering: "Clearly distinguishes both terms and shows how one leads to the other."
+  }
+}, {
+  qid: "U1-S1-E03",
+  category: "E",
+  type: "short_response",
+  prompt: "Why is \u201cI am going to make a pencil case\u201d a weak starting point?",
+  modelResponse: "It chooses the product before investigating the problem or considering alternatives.",
+  expectedKnowledge: "Choosing a product early prevents investigation.",
+  acceptedIdeas: ["chooses product early", "no investigation", "limits alternatives", "design fixation risk"],
+  marksAvailable: 2,
+  markingGuidance: "1 mark for identifying the product was chosen early; 1 mark for explaining the consequence.",
+  stageExemplars: {
+    beginning: {
+      text: "Because it isn't a good context.",
+      note: "Limited relevant understanding."
+    },
+    emerging: {
+      text: "Because it already says to make a pencil case.",
+      note: "Recognises the issue."
+    },
+    developing: {
+      text: "It has already chosen the product, so the designer has less opportunity to explore different ways of solving the problem.",
+      note: "Applies and explains the knowledge."
+    },
+    mastering: {
+      text: "It specifies the product before the underlying problem has been investigated, which could cause design fixation. A broader context would allow the designer to gather evidence and compare different possible solutions before deciding what to develop.",
+      note: "Applies, connects and justifies the design thinking."
+    }
+  },
+  stageGuidance: {
+    beginning: "Says it's weak without explaining what's wrong.",
+    emerging: "Notices the product was named but doesn't explain the consequence.",
+    developing: "Explains that naming the product early limits exploration.",
+    mastering: "Connects this to design fixation and the value of investigating first."
+  }
+}, {
+  qid: "U1-S1-E04",
+  category: "E",
+  type: "short_response",
+  prompt: "Why is \u201cStudents need a better way to organise equipment during lessons\u201d a stronger starting point?",
+  modelResponse: "It identifies a need without deciding the final product, allowing different solutions to be explored.",
+  expectedKnowledge: "Broad contexts preserve room for investigation.",
+  acceptedIdeas: ["no product decided", "allows exploration", "describes need not solution"],
+  marksAvailable: 2,
+  markingGuidance: "1 mark for noticing no product is named; 1 mark for explaining why that's useful.",
+  stageGuidance: {
+    beginning: "States it is stronger without explaining why.",
+    emerging: "Notices no product is mentioned but doesn't explain the benefit.",
+    developing: "Explains that it allows different solutions to be explored.",
+    mastering: "Explains the benefit and links it to avoiding design fixation."
+  }
+}, {
+  qid: "U1-S1-E05",
+  category: "E",
+  type: "short_response",
+  prompt: "Why can one problem have several successful solutions?",
+  modelResponse: "Different products or systems can meet the same underlying need in different ways.",
+  expectedKnowledge: "Multiple valid solutions can meet one need.",
+  acceptedIdeas: ["different approaches", "same need met differently", "no single correct solution"],
+  marksAvailable: 1,
+  markingGuidance: "Accept any answer explaining that different approaches can meet the same need.",
+  stageGuidance: {
+    beginning: "States that there can be more than one solution, without explaining why.",
+    emerging: "Gives an example but doesn't generalise the reasoning.",
+    developing: "Explains that different approaches can meet the same underlying need.",
+    mastering: "Explains this clearly with a justified example."
+  }
+}, {
+  qid: "U1-S1-E06",
+  category: "E",
+  type: "decide_defend_short",
+  prompt: "A student draws four different pencil cases. Have they necessarily explored four different design possibilities?",
+  correctAnswer: "No",
+  modelResponse: "They have explored variations of one solution rather than different approaches to the problem.",
+  expectedKnowledge: "Variations of one idea are not the same as different design possibilities.",
+  acceptedIdeas: ["variations of one solution", "not genuinely different approaches", "same product type"],
+  marksAvailable: 2,
+  markingGuidance: "1 mark for 'No'; 1 mark for explaining why.",
+  stageGuidance: {
+    beginning: "Answers No or Yes without a clear reason.",
+    emerging: "Says they are similar but doesn't explain why that's a problem.",
+    developing: "Explains that these are variations of one solution, not different approaches.",
+    mastering: "Explains this and links it to broader exploration of possibilities."
+  }
+}, {
+  qid: "U1-S1-E07",
+  category: "E",
+  type: "short_response",
+  prompt: "Why might a designer keep a design context broad?",
+  modelResponse: "To allow investigation and exploration before committing to a solution.",
+  expectedKnowledge: "Purpose of keeping context broad.",
+  acceptedIdeas: ["allows investigation", "avoids early commitment", "keeps options open"],
+  marksAvailable: 1,
+  markingGuidance: "Accept any answer linking breadth to investigation/exploration.",
+  stageGuidance: {
+    beginning: "States that broad is better without explaining why.",
+    emerging: "Mentions more options but doesn't connect this to investigation.",
+    developing: "Explains that it allows investigation before committing to a solution.",
+    mastering: "Explains this and connects it to evidence-based decision-making."
+  }
+}, {
+  qid: "U1-S1-E08",
+  category: "E",
+  type: "short_response",
+  prompt: "Explain what \u201cproblem before product\u201d means.",
+  modelResponse: "Understand the problem first, then decide what type of solution is most appropriate.",
+  expectedKnowledge: "The core principle of the section.",
+  acceptedIdeas: ["understand problem first", "decide solution after", "investigate before deciding"],
+  marksAvailable: 2,
+  markingGuidance: "1 mark for the sequence (problem then product); 1 mark for explaining why.",
+  stageGuidance: {
+    beginning: "Repeats the phrase without explaining it.",
+    emerging: "Shows a general sense of the idea but not clearly.",
+    developing: "Explains that the problem should be understood before choosing a solution.",
+    mastering: "Explains the sequence clearly and why it leads to better design decisions."
+  }
+}, {
+  qid: "U1-S1-A01",
+  category: "A",
+  type: "short_response",
+  scenario: "Students leave bottles beside desks where they are regularly knocked over.",
+  prompt: "Identify the design problem in this scenario.",
+  modelResponse: "Students do not have a safe/convenient place to store bottles during lessons.",
+  expectedKnowledge: "Identifying a problem from a scenario, not naming a product.",
+  acceptedIdeas: ["no safe place to store bottles", "bottles get knocked over", "no convenient storage"],
+  marksAvailable: 1,
+  markingGuidance: "Accept any answer describing the underlying issue, not a product.",
+  stageGuidance: {
+    beginning: "Names a product (e.g. \u201ca bottle holder\u201d) instead of a problem.",
+    emerging: "Identifies something relevant but doesn't fully describe the problem.",
+    developing: "Clearly identifies the lack of safe/convenient storage as the problem.",
+    mastering: "Identifies the problem clearly and links it to the consequence (bottles being knocked over)."
+  }
+}, {
+  qid: "U1-S1-A02",
+  category: "A",
+  type: "extended_response",
+  scenario: "Students leave bottles beside desks where they are regularly knocked over.",
+  prompt: "Suggest three different design possibilities that could respond to this problem.",
+  modelResponse: "Desk-mounted holder, central storage, or a bag attachment are all different approaches.",
+  expectedKnowledge: "Generating genuinely different possibilities, not variations of one idea.",
+  acceptedIdeas: ["desk-mounted holder", "side storage", "central storage", "bag attachment", "under-desk storage"],
+  marksAvailable: 3,
+  markingGuidance: "1 mark per genuinely different possibility (up to 3). Variations of the same idea only count once.",
+  stageGuidance: {
+    beginning: "Suggests one idea, or several variations of the same idea.",
+    emerging: "Suggests two different directions.",
+    developing: "Suggests three different directions with brief explanation.",
+    mastering: "Suggests three clearly different directions and explains why they differ."
+  }
+}, {
+  qid: "U1-S1-A03",
+  category: "A",
+  type: "extended_response",
+  scenario: "Students struggle to carry books, stationery and specialist equipment between classrooms.",
+  prompt: "Suggest four different design directions that could respond to this problem.",
+  modelResponse: "Modular bag insert, portable organiser, trolley, wearable system, or classroom storage are all different directions.",
+  expectedKnowledge: "Generating a range of genuinely different possibilities.",
+  acceptedIdeas: ["modular bag insert", "portable organiser", "trolley", "wearable system", "classroom storage", "equipment organisation system"],
+  marksAvailable: 4,
+  markingGuidance: "1 mark per genuinely different direction (up to 4).",
+  stageGuidance: {
+    beginning: "Suggests one or two similar ideas.",
+    emerging: "Suggests two or three ideas with some overlap.",
+    developing: "Suggests four different directions.",
+    mastering: "Suggests four clearly different directions with brief justification for each."
+  }
+}, {
+  qid: "U1-S1-A04",
+  category: "A",
+  type: "improve_it",
+  prompt: "Rewrite \u201cDesign a laptop stand\u201d as a broader design context.",
+  modelResponse: "Laptop users need a comfortable and practical way to position their laptop while working.",
+  expectedKnowledge: "Removing the named product while keeping the underlying need.",
+  acceptedIdeas: ["removes named product", "keeps underlying need", "broadens the context"],
+  marksAvailable: 2,
+  markingGuidance: "1 mark for removing the product; 1 mark for a sensible broader need.",
+  stageGuidance: {
+    beginning: "Barely changes the original sentence.",
+    emerging: "Removes the product name but the context is still narrow.",
+    developing: "Rewrites as a genuinely broader context.",
+    mastering: "Rewrites as a broad, well-worded context that clearly opens up investigation."
+  }
+}, {
+  qid: "U1-S1-A05",
+  category: "A",
+  type: "improve_it",
+  prompt: "Rewrite \u201cMake a box for classroom stationery\u201d as a broader design context.",
+  modelResponse: "Students and teachers need a practical way to organise and access frequently used classroom stationery.",
+  expectedKnowledge: "Removing the named product while keeping the underlying need.",
+  acceptedIdeas: ["removes named product (box)", "keeps underlying need", "broadens the context"],
+  marksAvailable: 2,
+  markingGuidance: "1 mark for removing 'box'; 1 mark for a sensible broader need.",
+  stageGuidance: {
+    beginning: "Barely changes the original sentence.",
+    emerging: "Removes 'box' but the context is still narrow.",
+    developing: "Rewrites as a genuinely broader context.",
+    mastering: "Rewrites as a broad, well-worded context that clearly opens up investigation."
+  }
+}, {
+  qid: "U1-S1-A06",
+  category: "A",
+  type: "extended_response",
+  scenario: "Students often can't hear teacher instructions clearly because of background noise, and cheap headphones get tangled or lost in bags.",
+  prompt: "Identify the underlying problem, then suggest two different design possibilities.",
+  modelResponse: "The problem is that students don't have a reliable way to keep headphones tidy and accessible. Possibilities include a desk cable-tidy, a labelled storage pouch, or a class charging/storage station.",
+  expectedKnowledge: "Separating the problem (tangled/lost headphones) from possible responses.",
+  acceptedIdeas: ["headphones get tangled or lost", "no accessible storage", "cable tidy", "storage pouch", "charging station", "labelled storage"],
+  marksAvailable: 3,
+  markingGuidance: "1 mark for identifying the real problem; 2 marks for two genuinely different possibilities.",
+  stageGuidance: {
+    beginning: "Names a product instead of the problem.",
+    emerging: "Identifies the problem but possibilities are similar to each other.",
+    developing: "Identifies the problem and suggests two different possibilities.",
+    mastering: "Identifies the problem clearly and justifies why the two possibilities are genuinely different."
+  }
+}, {
+  qid: "U1-S1-A07",
+  category: "A",
+  type: "extended_response",
+  scenario: "PE equipment (bibs, cones, balls) is often left scattered around the sports hall at the end of lessons, making the next class late starting.",
+  prompt: "Identify the underlying problem, then suggest two different design possibilities.",
+  modelResponse: "The problem is that there isn't an efficient way to collect and store equipment at the end of a lesson. Possibilities include a wheeled equipment trolley, colour-coded storage nets, or a class equipment-checklist system.",
+  expectedKnowledge: "Separating the problem from possible responses in an unfamiliar scenario.",
+  acceptedIdeas: ["equipment left scattered", "slow collection", "wheeled trolley", "storage nets", "checklist system", "colour-coding"],
+  marksAvailable: 3,
+  markingGuidance: "1 mark for identifying the real problem; 2 marks for two genuinely different possibilities.",
+  stageGuidance: {
+    beginning: "Names a product instead of the problem.",
+    emerging: "Identifies the problem but possibilities are similar to each other.",
+    developing: "Identifies the problem and suggests two different possibilities.",
+    mastering: "Identifies the problem clearly and justifies why the two possibilities are genuinely different."
+  }
+}, {
+  qid: "U1-S1-A08",
+  category: "A",
+  type: "improve_it",
+  prompt: "Rewrite \u201cDesign a phone case\u201d as a broader design context.",
+  modelResponse: "Phone users need a practical way to protect their phone from everyday drops and scratches.",
+  expectedKnowledge: "Removing the named product while keeping the underlying need.",
+  acceptedIdeas: ["removes named product", "keeps underlying need", "protection from damage"],
+  marksAvailable: 2,
+  markingGuidance: "1 mark for removing the product; 1 mark for a sensible broader need.",
+  stageGuidance: {
+    beginning: "Barely changes the original sentence.",
+    emerging: "Removes the product name but the context is still narrow.",
+    developing: "Rewrites as a genuinely broader context.",
+    mastering: "Rewrites as a broad, well-worded context that clearly opens up investigation."
+  }
+}, {
+  qid: "U1-S1-D01",
+  category: "D",
+  type: "decide_defend_short",
+  scenario: "Student A: \u201cLet's design a better pencil case.\u201d Student B: \u201cLet's investigate why stationery is getting lost first.\u201d",
+  prompt: "Who shows stronger design thinking?",
+  correctAnswer: "B",
+  modelResponse: "Student B, because they investigate the cause before choosing the solution.",
+  expectedKnowledge: "Investigating cause before solving.",
+  acceptedIdeas: ["investigates cause first", "avoids early solution", "evidence before decision"],
+  marksAvailable: 2,
+  markingGuidance: "1 mark for choosing B; 1 mark for a correct reason.",
+  stageGuidance: {
+    beginning: "Chooses without a clear reason.",
+    emerging: "Gives a vague reason for the choice.",
+    developing: "Explains that B investigates the cause before choosing a solution.",
+    mastering: "Explains this clearly and connects it to avoiding design fixation."
+  }
+}, {
+  qid: "U1-S1-D02",
+  category: "D",
+  type: "decide_defend_short",
+  scenario: "A. \u201cDesign a storage box for art equipment.\u201d B. \u201cStudents need a safer and more organised way to transport art equipment between classrooms.\u201d",
+  prompt: "Which is the stronger design context?",
+  correctAnswer: "B",
+  modelResponse: "B, because it doesn't decide the product and allows different solutions to be explored.",
+  expectedKnowledge: "Recognising a hidden solution vs an open context.",
+  acceptedIdeas: ["no product named", "allows exploration", "broader context"],
+  marksAvailable: 2,
+  markingGuidance: "1 mark for choosing B; 1 mark for a correct reason.",
+  stageGuidance: {
+    beginning: "Chooses without a clear reason.",
+    emerging: "Gives a vague reason for the choice.",
+    developing: "Explains that B doesn't name a product and stays open to investigation.",
+    mastering: "Explains this clearly with reference to design fixation or evidence."
+  }
+}, {
+  qid: "U1-S1-D03",
+  category: "D",
+  type: "short_response",
+  prompt: "A designer finds one solution that seems to work. Should they immediately stop exploring? Explain your answer.",
+  modelResponse: "Not necessarily. They should compare the idea with alternatives and use evidence to decide which is most appropriate.",
+  expectedKnowledge: "One workable idea isn't necessarily the best idea.",
+  acceptedIdeas: ["should compare alternatives", "one idea isn't necessarily best", "use evidence to decide"],
+  marksAvailable: 2,
+  markingGuidance: "1 mark for 'not necessarily'; 1 mark for explaining why comparison still matters.",
+  stageGuidance: {
+    beginning: "Answers yes or no without explanation.",
+    emerging: "Suggests more exploring is good but doesn't explain why.",
+    developing: "Explains that comparing alternatives helps confirm the best choice.",
+    mastering: "Explains this and connects it to using evidence to justify the final decision."
+  }
+}, {
+  qid: "U1-S1-D04",
+  category: "D",
+  type: "decide_defend_short",
+  scenario: "A. \u201cLet's design a better umbrella stand.\u201d B. \u201cLet's find out why umbrellas end up dripping water across the classroom floor.\u201d",
+  prompt: "Who shows stronger design thinking?",
+  correctAnswer: "B",
+  modelResponse: "Student B, because they're investigating the actual problem (water on the floor) rather than assuming the solution is a stand.",
+  expectedKnowledge: "Investigating cause before solving, applied to a new scenario.",
+  acceptedIdeas: ["investigates cause first", "avoids early solution", "doesn't assume the product"],
+  marksAvailable: 2,
+  markingGuidance: "1 mark for choosing B; 1 mark for a correct reason.",
+  stageGuidance: {
+    beginning: "Chooses without a clear reason.",
+    emerging: "Gives a vague reason for the choice.",
+    developing: "Explains that B investigates the real problem rather than assuming a stand is needed.",
+    mastering: "Explains this clearly and connects it to avoiding an early, unjustified solution."
+  }
+}, {
+  qid: "U1-S1-C01",
+  category: "C",
+  type: "short_response",
+  prompt: "Why can choosing a product too early lead to design fixation?",
+  modelResponse: "The designer can become attached to one solution and stop considering other potentially better approaches.",
+  expectedKnowledge: "Link between early product choice and fixation.",
+  acceptedIdeas: ["becomes attached to one idea", "stops considering alternatives", "narrows thinking early"],
+  marksAvailable: 2,
+  markingGuidance: "1 mark for the link to attachment; 1 mark for the consequence (missed alternatives).",
+  stageGuidance: {
+    beginning: "States that it's bad without explaining the link.",
+    emerging: "Mentions fixation but the connection to early choice is unclear.",
+    developing: "Explains that early choice makes it harder to consider alternatives.",
+    mastering: "Explains the mechanism clearly and links it back to investigating the problem first."
+  }
+}, {
+  qid: "U1-S1-C02",
+  category: "C",
+  type: "short_response",
+  prompt: "A designer immediately searches \u201cClassroom storage boxes\u201d after being asked to improve classroom organisation. What problem could this create?",
+  modelResponse: "The search assumes that a storage box is the solution and may limit exploration of other possibilities.",
+  expectedKnowledge: "Search terms can pre-select the solution space.",
+  acceptedIdeas: ["assumes the solution", "limits what's discovered", "search terms bias results"],
+  marksAvailable: 2,
+  markingGuidance: "1 mark for identifying the assumption; 1 mark for explaining the consequence.",
+  stageGuidance: {
+    beginning: "States it's a bad idea without explaining why.",
+    emerging: "Mentions the search but doesn't explain the effect on exploration.",
+    developing: "Explains that the search term already assumes the solution.",
+    mastering: "Explains this and connects it to how search terms narrow what gets discovered."
+  }
+}, {
+  qid: "U1-S1-C03",
+  category: "C",
+  type: "short_response",
+  prompt: "How can investigating a problem early save time later in the design process?",
+  modelResponse: "It reduces the chance of developing and prototyping something that does not solve the actual problem.",
+  expectedKnowledge: "Early investigation prevents wasted development effort.",
+  acceptedIdeas: ["avoids wasted development", "prevents building the wrong thing", "saves time overall"],
+  marksAvailable: 2,
+  markingGuidance: "1 mark for the general benefit; 1 mark for explaining the mechanism (avoiding wasted work).",
+  stageGuidance: {
+    beginning: "States it saves time without explaining how.",
+    emerging: "Mentions avoiding mistakes but not clearly linked to time.",
+    developing: "Explains that it prevents developing something that doesn't solve the problem.",
+    mastering: "Explains this clearly, connecting early investigation to reduced wasted effort later."
+  }
+}, {
+  qid: "U1-S1-C04",
+  category: "C",
+  type: "decide_defend_short",
+  prompt: "Is a successful product always evidence that the correct problem was solved?",
+  correctAnswer: "No",
+  modelResponse: "A product may function well but still address the wrong problem or fail to meet the user's actual need.",
+  expectedKnowledge: "Functioning well is not the same as solving the right problem.",
+  acceptedIdeas: ["may solve wrong problem", "functions well but not needed", "success is not the same as correct problem"],
+  marksAvailable: 2,
+  markingGuidance: "1 mark for 'No'; 1 mark for a correct explanation.",
+  stageGuidance: {
+    beginning: "Answers without a clear reason.",
+    emerging: "Suggests it might not be evidence but reasoning is unclear.",
+    developing: "Explains that a product can work well but still miss the real problem.",
+    mastering: "Explains this clearly with reference to investigating the actual user need."
+  }
+}, {
+  qid: "U1-S1-C05",
+  category: "C",
+  type: "extended_response",
+  prompt: "\u201cIf a designer investigates for too long, they'll never actually design anything.\u201d Do you agree? Explain your thinking.",
+  modelResponse: "There's some truth to this \u2014 investigation shouldn't go on forever \u2014 but rushing past it to avoid wasting time often costs more time later, because the designer risks solving the wrong problem. Good designers balance enough investigation to be confident in the problem with moving on to explore solutions.",
+  expectedKnowledge: "Balancing investigation against progress \u2014 a genuinely open, higher-order question.",
+  acceptedIdeas: ["investigation has a limit", "rushing risks wrong problem", "balance needed", "some evidence is enough to proceed"],
+  marksAvailable: 3,
+  markingGuidance: "Reward genuine reasoning in either direction if it's justified with reference to problem/solution thinking; do not require a single 'correct' side.",
+  stageGuidance: {
+    beginning: "Gives an opinion with no reasoning.",
+    emerging: "Gives an opinion with limited reasoning.",
+    developing: "Explains their view with a reason connected to problem/solution thinking.",
+    mastering: "Weighs both sides and reaches a justified, balanced conclusion."
+  }
+}];
+
 /* ===== icons.jsx ===== */
 /* ------------------------------------------------------------------ */
 /* ICONS \u2014 served from local /icons/*.svg (no external CDN needed)    */
@@ -3240,7 +3958,8 @@ function DTFStagePill({
   }, info.label);
 }
 function DTFDashboard({
-  sections
+  sections,
+  onOpenSection
 }) {
   const [progress, setProgress] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -3299,12 +4018,21 @@ function DTFDashboard({
     className: "help-label"
   }, "Sections"), sections.map(s => {
     const p = byKey[s.key];
-    return /*#__PURE__*/React.createElement("div", {
-      className: "dtf-section-row",
-      key: s.key
+    const available = !!s.available;
+    return /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      key: s.key,
+      className: "dtf-section-row" + (available ? " clickable" : " disabled"),
+      onClick: () => available && onOpenSection(s.key),
+      disabled: !available
     }, /*#__PURE__*/React.createElement("span", {
       className: "dtf-section-name"
-    }, s.number, ". ", s.title), /*#__PURE__*/React.createElement(DTFStagePill, {
+    }, s.number, ". ", s.title, !available && /*#__PURE__*/React.createElement("span", {
+      className: "status-pill draft",
+      style: {
+        marginLeft: 8
+      }
+    }, "Coming soon")), /*#__PURE__*/React.createElement(DTFStagePill, {
       stage: p ? p.confirmedStage || p.suggestedStage : null
     }));
   })));
@@ -3312,7 +4040,8 @@ function DTFDashboard({
 const UNIT_1_SECTIONS = [{
   key: "s1",
   number: "01",
-  title: "Problem Before Product"
+  title: "Problem Before Product",
+  available: true
 }, {
   key: "s2",
   number: "02",
@@ -3378,10 +4107,748 @@ const UNIT_1_SECTIONS = [{
   number: "17",
   title: "Specific Before Successful"
 }];
+
+/* ------------------------------------------------------------------ */
+/* TOUCHPOINT RENDERERS (the interactive moments inside a section)      */
+/* ------------------------------------------------------------------ */
+
+function saveTouchpointResponse(sectionKey, kind, text) {
+  if (!text || !text.trim()) return;
+  apiPost(`/api/dtf/responses/U1-${sectionKey.toUpperCase()}-TP-${kind}`, {
+    text
+  }).catch(() => {});
+}
+function TP_PausePredict({
+  card,
+  sectionKey,
+  onContinue
+}) {
+  const [text, setText] = useState("");
+  return /*#__PURE__*/React.createElement("div", {
+    className: "dtf-touchpoint"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dtf-touchpoint-label"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Lightbulb",
+    size: 14
+  }), " ", card.heading), /*#__PURE__*/React.createElement("p", {
+    className: "dtf-touchpoint-prompt"
+  }, card.prompt), /*#__PURE__*/React.createElement("textarea", {
+    rows: 3,
+    value: text,
+    onChange: e => setText(e.target.value),
+    placeholder: "Type what you're thinking..."
+  }), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: () => {
+      saveTouchpointResponse(sectionKey, "pause_predict", text);
+      onContinue();
+    }
+  }, "Continue ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  })));
+}
+function TP_WhichIsStronger({
+  card,
+  onContinue
+}) {
+  const [picked, setPicked] = useState(null);
+  const isCorrect = picked === card.correct;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "dtf-touchpoint"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dtf-touchpoint-label"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ArrowLeftRight",
+    size: 14
+  }), " ", card.heading), /*#__PURE__*/React.createElement("p", {
+    className: "dtf-touchpoint-prompt"
+  }, card.prompt), /*#__PURE__*/React.createElement("div", {
+    className: "dtf-choice-grid"
+  }, ["a", "b"].map(key => /*#__PURE__*/React.createElement("button", {
+    key: key,
+    type: "button",
+    className: "dtf-choice-card" + (picked === key ? isCorrect ? " correct" : " wrong" : ""),
+    onClick: () => !picked && setPicked(key),
+    disabled: !!picked
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dtf-choice-letter"
+  }, key.toUpperCase()), /*#__PURE__*/React.createElement("span", null, key === "a" ? card.optionA : card.optionB)))), picked && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "dtf-feedback" + (isCorrect ? " correct" : "")
+  }, isCorrect ? card.feedbackCorrect : card.feedbackIncorrect), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: onContinue
+  }, "Continue ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  }))));
+}
+function TP_QuickCheck({
+  card,
+  onContinue
+}) {
+  const [picked, setPicked] = useState(null);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "dtf-touchpoint"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dtf-touchpoint-label"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Check",
+    size: 14
+  }), " ", card.heading), /*#__PURE__*/React.createElement("p", {
+    className: "dtf-touchpoint-prompt"
+  }, card.prompt), /*#__PURE__*/React.createElement("div", {
+    className: "quiz-options"
+  }, card.options.map(opt => /*#__PURE__*/React.createElement("button", {
+    key: opt,
+    className: "quiz-option" + (picked === opt ? opt === card.correct ? " correct" : " wrong" : ""),
+    onClick: () => !picked && setPicked(opt),
+    disabled: !!picked
+  }, /*#__PURE__*/React.createElement("span", null, opt)))), picked && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "dtf-feedback correct"
+  }, card.feedback), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: onContinue
+  }, "Continue ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  }))));
+}
+function TP_StopSort({
+  card,
+  onContinue
+}) {
+  const [answers, setAnswers] = useState({});
+  const allDone = card.items.every((_, i) => answers[i] !== undefined);
+  function pick(i, val) {
+    if (answers[i] !== undefined) return;
+    setAnswers(a => ({
+      ...a,
+      [i]: val
+    }));
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "dtf-touchpoint"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dtf-touchpoint-label"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "SlidersHorizontal",
+    size: 14
+  }), " ", card.heading), /*#__PURE__*/React.createElement("p", {
+    className: "dtf-touchpoint-prompt"
+  }, card.prompt), /*#__PURE__*/React.createElement("div", {
+    className: "dtf-sort-list"
+  }, card.items.map((item, i) => /*#__PURE__*/React.createElement("div", {
+    className: "dtf-sort-row",
+    key: i
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dtf-sort-text"
+  }, item.text), /*#__PURE__*/React.createElement("div", {
+    className: "dtf-sort-buttons"
+  }, ["problem", "solution"].map(val => /*#__PURE__*/React.createElement("button", {
+    key: val,
+    type: "button",
+    className: "chip" + (answers[i] === val ? val === item.answer ? " active-correct" : " active-wrong" : ""),
+    onClick: () => pick(i, val),
+    disabled: answers[i] !== undefined
+  }, val === "problem" ? "Problem" : "Solution")))))), allDone && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: onContinue
+  }, "Continue ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  })));
+}
+function TP_RevealExplanation({
+  card,
+  sectionKey,
+  onContinue
+}) {
+  const [text, setText] = useState("");
+  const [revealed, setRevealed] = useState(false);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "dtf-touchpoint"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dtf-touchpoint-label"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Search",
+    size: 14
+  }), " ", card.heading), /*#__PURE__*/React.createElement("p", {
+    className: "dtf-touchpoint-prompt",
+    style: {
+      whiteSpace: "pre-line"
+    }
+  }, card.prompt), /*#__PURE__*/React.createElement("textarea", {
+    rows: 2,
+    value: text,
+    onChange: e => setText(e.target.value),
+    placeholder: "Have a go first...",
+    disabled: revealed
+  }), !revealed && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: () => {
+      saveTouchpointResponse(sectionKey, card.id, text);
+      setRevealed(true);
+    },
+    disabled: !text.trim()
+  }, "Check my thinking"), revealed && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "dtf-feedback correct"
+  }, card.modelExplanation), card.improvedVersion && /*#__PURE__*/React.createElement("div", {
+    className: "dtf-improved-version"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "help-label"
+  }, "Improved version"), /*#__PURE__*/React.createElement("p", null, card.improvedVersion)), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: onContinue
+  }, "Continue ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  }))));
+}
+function TP_ThinkTryTest({
+  card,
+  sectionKey,
+  onContinue
+}) {
+  const [values, setValues] = useState({});
+  const [revealed, setRevealed] = useState(false);
+  const allFilled = card.parts.every(p => (values[p.key] || "").trim());
+  return /*#__PURE__*/React.createElement("div", {
+    className: "dtf-touchpoint"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dtf-touchpoint-label"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Wrench",
+    size: 14
+  }), " ", card.heading), /*#__PURE__*/React.createElement("p", {
+    className: "dtf-touchpoint-prompt"
+  }, card.scenario), card.parts.map(p => /*#__PURE__*/React.createElement("label", {
+    key: p.key,
+    className: "dtf-ttt-part"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "spec-field-label requirement"
+  }, p.label), /*#__PURE__*/React.createElement("textarea", {
+    rows: 2,
+    value: values[p.key] || "",
+    onChange: e => setValues(v => ({
+      ...v,
+      [p.key]: e.target.value
+    })),
+    placeholder: p.placeholder,
+    disabled: revealed
+  }))), !revealed && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: () => {
+      saveTouchpointResponse(sectionKey, "think_try_test", Object.values(values).join("\n\n"));
+      setRevealed(true);
+    },
+    disabled: !allFilled
+  }, "Check my thinking"), revealed && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "dtf-feedback correct"
+  }, card.teacherGuidance), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: onContinue
+  }, "Continue ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  }))));
+}
+function TP_DecideDefend({
+  card,
+  sectionKey,
+  onContinue
+}) {
+  const [picked, setPicked] = useState(null);
+  const [why, setWhy] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const isCorrect = picked === card.correct;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "dtf-touchpoint"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dtf-touchpoint-label"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "GitMerge",
+    size: 14
+  }), " ", card.heading), /*#__PURE__*/React.createElement("p", {
+    className: "dtf-touchpoint-prompt"
+  }, card.scenario), /*#__PURE__*/React.createElement("div", {
+    className: "dtf-choice-grid"
+  }, ["a", "b"].map(key => {
+    const opt = key === "a" ? card.optionA : card.optionB;
+    return /*#__PURE__*/React.createElement("button", {
+      key: key,
+      type: "button",
+      className: "dtf-choice-card" + (picked === key ? key === card.correct ? " correct" : " wrong" : ""),
+      onClick: () => !picked && setPicked(key),
+      disabled: !!picked
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "dtf-choice-letter"
+    }, opt.label), /*#__PURE__*/React.createElement("span", null, opt.text));
+  })), picked && !submitted && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "spec-field-label requirement"
+  }, card.prompt), /*#__PURE__*/React.createElement("textarea", {
+    rows: 2,
+    value: why,
+    onChange: e => setWhy(e.target.value),
+    placeholder: "Explain your thinking..."
+  })), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: () => {
+      saveTouchpointResponse(sectionKey, "decide_defend", why);
+      setSubmitted(true);
+    },
+    disabled: !why.trim()
+  }, "Check my thinking")), submitted && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "dtf-feedback" + (isCorrect ? " correct" : "")
+  }, card.modelResponse), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: onContinue
+  }, "Continue ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  }))));
+}
+const TOUCHPOINT_RENDERERS = {
+  pause_predict: TP_PausePredict,
+  which_is_stronger: TP_WhichIsStronger,
+  quick_check: TP_QuickCheck,
+  stop_sort: TP_StopSort,
+  spot_hidden_solution: TP_RevealExplanation,
+  spot_the_problem: TP_RevealExplanation,
+  think_try_test: TP_ThinkTryTest,
+  decide_defend: TP_DecideDefend
+};
+
+/* ------------------------------------------------------------------ */
+/* GUIDED CARD FLOW                                                     */
+/* ------------------------------------------------------------------ */
+
+function DTFCardFlow({
+  meta,
+  cards,
+  onFinished,
+  onBack
+}) {
+  const [idx, setIdx] = useState(0);
+  const card = cards[idx];
+  const canAutoAdvance = card.type === "content";
+  function next() {
+    if (idx + 1 >= cards.length) onFinished();else setIdx(i => i + 1);
+  }
+  const Touchpoint = card.type === "touchpoint" ? TOUCHPOINT_RENDERERS[card.kind] : null;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "spec-wizard-progress"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "quiz-history-label"
+  }, "Section ", meta.number, " of 17 \xB7 ", meta.title), /*#__PURE__*/React.createElement("div", {
+    className: "quiz-progress-bar"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: `${(idx + 1) / cards.length * 100}%`,
+      background: "var(--blue)"
+    }
+  }))), card.type === "content" && /*#__PURE__*/React.createElement("div", {
+    className: "dtf-content-card"
+  }, /*#__PURE__*/React.createElement("h2", null, card.heading), /*#__PURE__*/React.createElement("p", {
+    className: "dtf-card-body",
+    style: {
+      whiteSpace: "pre-line"
+    }
+  }, card.body), card.compare && /*#__PURE__*/React.createElement("div", {
+    className: "dtf-compare-grid"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dtf-compare-item"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dtf-choice-letter"
+  }, "A"), /*#__PURE__*/React.createElement("p", null, card.compare.a)), /*#__PURE__*/React.createElement("div", {
+    className: "dtf-compare-item"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dtf-choice-letter"
+  }, "B"), /*#__PURE__*/React.createElement("p", null, card.compare.b))), card.list && /*#__PURE__*/React.createElement("div", {
+    className: "chip-row"
+  }, card.list.map((item, i) => /*#__PURE__*/React.createElement("span", {
+    key: i,
+    className: "chip chip-word"
+  }, item))), card.footer && /*#__PURE__*/React.createElement("p", {
+    className: "sub",
+    style: {
+      marginTop: 10
+    }
+  }, card.footer)), Touchpoint && /*#__PURE__*/React.createElement(Touchpoint, {
+    card: card,
+    sectionKey: meta.sectionKey,
+    onContinue: next
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "quiz-nav-row",
+    style: {
+      marginTop: 20
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: () => idx === 0 ? onBack() : setIdx(i => i - 1)
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16,
+    style: {
+      transform: "rotate(180deg)"
+    }
+  }), " Back"), canAutoAdvance && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: next
+  }, idx + 1 >= cards.length ? "Continue" : "Next", " ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  }))));
+}
+
+/* ------------------------------------------------------------------ */
+/* SECTION CHECK - 5 randomly drawn questions (2R/1E/1A/1(D-or-C))      */
+/* ------------------------------------------------------------------ */
+
+function pickSectionCheckQuestions(bank) {
+  const byCat = {
+    R: [],
+    E: [],
+    A: [],
+    D: [],
+    C: []
+  };
+  bank.forEach(q => byCat[q.category].push(q));
+  const dOrC = shuffle([...byCat.D, ...byCat.C]);
+  return [...shuffle(byCat.R).slice(0, 2), ...shuffle(byCat.E).slice(0, 1), ...shuffle(byCat.A).slice(0, 1), ...dOrC.slice(0, 1)].filter(Boolean);
+}
+const OPEN_TYPES = ["short_response", "extended_response", "improve_it", "decide_defend_short"];
+function DTFQuestionRenderer({
+  question,
+  response,
+  onRespond
+}) {
+  const [text, setText] = useState(response ? response.text : "");
+  const [picked, setPicked] = useState(response ? response.picked : null);
+  function submitObjective(answer, isCorrect) {
+    onRespond({
+      picked: answer,
+      isCorrect,
+      text: ""
+    });
+  }
+  function submitOpen() {
+    const suggestion = suggestDTStage(text, question);
+    onRespond({
+      text,
+      picked: null,
+      isCorrect: null,
+      suggestion
+    });
+    apiPost(`/api/dtf/responses/${question.qid}`, {
+      text,
+      suggestedStage: suggestion.stage,
+      stageReasoning: suggestion.reasoning
+    }).catch(() => {});
+  }
+  if (response) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "dtf-answered"
+    }, question.type === "mcq" && /*#__PURE__*/React.createElement("p", {
+      className: "dtf-feedback" + (response.isCorrect ? " correct" : "")
+    }, "You answered: ", response.picked, !response.isCorrect && /*#__PURE__*/React.createElement(React.Fragment, null, " \u2014 correct answer: ", question.correctAnswer)), question.type === "true_false" && /*#__PURE__*/React.createElement("p", {
+      className: "dtf-feedback" + (response.isCorrect ? " correct" : "")
+    }, question.feedback), question.type === "fill_gap" && /*#__PURE__*/React.createElement("p", {
+      className: "dtf-feedback" + (response.isCorrect ? " correct" : "")
+    }, question.feedback), OPEN_TYPES.includes(question.type) && response.suggestion && /*#__PURE__*/React.createElement("div", {
+      className: "dtf-stage-suggestion"
+    }, /*#__PURE__*/React.createElement(DTFStagePill, {
+      stage: response.suggestion.stage
+    }), /*#__PURE__*/React.createElement("p", {
+      className: "sub"
+    }, stageNextStepFeedback(response.suggestion.stage))));
+  }
+  if (question.type === "mcq") {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "quiz-options"
+    }, question.options.map(opt => /*#__PURE__*/React.createElement("button", {
+      key: opt,
+      className: "quiz-option",
+      onClick: () => submitObjective(opt, opt === question.correctAnswer)
+    }, opt)));
+  }
+  if (question.type === "true_false") {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "quiz-options"
+    }, ["True", "False"].map(opt => /*#__PURE__*/React.createElement("button", {
+      key: opt,
+      className: "quiz-option",
+      onClick: () => submitObjective(opt, opt === question.correctAnswer)
+    }, opt)));
+  }
+  if (question.type === "fill_gap") {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "dtf-fillgap"
+    }, /*#__PURE__*/React.createElement("input", {
+      value: text,
+      onChange: e => setText(e.target.value),
+      placeholder: "Type your answer..."
+    }), /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      className: "btn-primary",
+      onClick: () => {
+        const isCorrect = question.acceptedAnswers.some(a => a.toLowerCase().replace(/\s+/g, "") === text.toLowerCase().replace(/\s+/g, ""));
+        onRespond({
+          picked: text,
+          isCorrect,
+          text
+        });
+      }
+    }, "Submit"));
+  }
+  // open response types
+  return /*#__PURE__*/React.createElement("div", {
+    className: "dtf-open-response"
+  }, /*#__PURE__*/React.createElement("textarea", {
+    rows: 3,
+    value: text,
+    onChange: e => setText(e.target.value),
+    placeholder: "Type your answer..."
+  }), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: submitOpen,
+    disabled: !text.trim()
+  }, "Submit"));
+}
+function DTFSectionCheck({
+  meta,
+  bank,
+  onFinished,
+  onBack
+}) {
+  const [questions] = useState(() => pickSectionCheckQuestions(bank));
+  const [responses, setResponses] = useState({});
+  const startTimeRef = useRef(Date.now());
+  const allAnswered = questions.every(q => responses[q.qid]);
+  function respond(qid, r) {
+    setResponses(rs => ({
+      ...rs,
+      [qid]: r
+    }));
+  }
+  async function finish() {
+    const objective = questions.filter(q => !OPEN_TYPES.includes(q.type));
+    const score = objective.filter(q => responses[q.qid] && responses[q.qid].isCorrect).length;
+    const details = questions.map(q => ({
+      qid: q.qid,
+      prompt: q.prompt,
+      studentAnswer: responses[q.qid] ? responses[q.qid].text || responses[q.qid].picked : "",
+      correctAnswer: q.correctAnswer || null,
+      isCorrect: responses[q.qid] ? responses[q.qid].isCorrect : null
+    }));
+
+    // Aggregate the open-response stage suggestions collected during this
+    // check into one section-level suggestion (the DT stage never comes
+    // from the MCQ score alone - it comes from how the open responses
+    // showed the student thinking, per section 5/6 of the brief).
+    const openStages = questions.filter(q => OPEN_TYPES.includes(q.type)).map(q => responses[q.qid] && responses[q.qid].suggestion && responses[q.qid].suggestion.stage).filter(Boolean);
+    let suggestedStage = null;
+    let stageReasoning = "";
+    if (openStages.length) {
+      const counts = {};
+      openStages.forEach(s => {
+        counts[s] = (counts[s] || 0) + 1;
+      });
+      suggestedStage = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+      stageReasoning = `Based on ${openStages.length} open response${openStages.length === 1 ? "" : "s"} in this Section Check, most closely matching the "${DT_STAGE_INFO[suggestedStage].label}" stage.`;
+    }
+    try {
+      await apiPost("/api/dtf/attempts", {
+        unitKey: meta.unitKey,
+        sectionKey: meta.sectionKey,
+        attemptType: "section",
+        score,
+        total: objective.length || 1,
+        details,
+        durationSeconds: Math.round((Date.now() - startTimeRef.current) / 1000)
+      });
+      const knowledgeScore = objective.length ? Math.round(score / objective.length * 100) : null;
+      await apiPut(`/api/dtf/progress/${meta.unitKey}/${meta.sectionKey}`, {
+        knowledgeScore,
+        suggestedStage,
+        stageReasoning,
+        completed: true
+      });
+    } catch (e) {/* ignore */}
+    onFinished();
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "Section Check"), /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, meta.title, " \u2014 a quick check across what you've just learned."))), /*#__PURE__*/React.createElement("div", {
+    className: "dtf-section-check-list"
+  }, questions.map((q, i) => /*#__PURE__*/React.createElement("div", {
+    className: "dtf-question-block",
+    key: q.qid
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dtf-question-number"
+  }, "Q", i + 1, " \xB7 ", QUESTION_CATEGORIES[q.category].label), q.scenario && /*#__PURE__*/React.createElement("p", {
+    className: "sub dtf-scenario"
+  }, q.scenario), /*#__PURE__*/React.createElement("p", {
+    className: "dtf-question-prompt"
+  }, q.prompt), /*#__PURE__*/React.createElement(DTFQuestionRenderer, {
+    question: q,
+    response: responses[q.qid],
+    onRespond: r => respond(q.qid, r)
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "quiz-result-actions",
+    style: {
+      marginTop: 20
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: onBack
+  }, "Back"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: finish,
+    disabled: !allAnswered
+  }, allAnswered ? "See results" : `Answer all ${questions.length} to continue`, " ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  }))));
+}
+
+/* ------------------------------------------------------------------ */
+/* REFLECT & REFINE (section closing screen)                           */
+/* ------------------------------------------------------------------ */
+
+function DTFReflect({
+  meta,
+  onDone
+}) {
+  const [understand, setUnderstand] = useState("");
+  const [practise, setPractise] = useState("");
+  const [saved, setSaved] = useState(false);
+  async function handleSave() {
+    if (understand.trim()) saveTouchpointResponse(meta.sectionKey, "reflect_understand", understand);
+    if (practise.trim()) saveTouchpointResponse(meta.sectionKey, "reflect_practise", practise);
+    setSaved(true);
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "Reflect & Refine"), /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "What We Are Getting Better At"))), /*#__PURE__*/React.createElement("div", {
+    className: "spec-strength-grid",
+    style: {
+      marginBottom: 20
+    }
+  }, meta.successCriteria.map((c, i) => /*#__PURE__*/React.createElement("span", {
+    key: i,
+    className: "dtf-success-criterion"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Check",
+    size: 13
+  }), " ", c))), /*#__PURE__*/React.createElement("div", {
+    className: "spec-setup-form"
+  }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", null, "Something I understand better now is\u2026"), /*#__PURE__*/React.createElement("textarea", {
+    rows: 2,
+    value: understand,
+    onChange: e => setUnderstand(e.target.value)
+  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", null, "Something I still need to practise is\u2026"), /*#__PURE__*/React.createElement("textarea", {
+    rows: 2,
+    value: practise,
+    onChange: e => setPractise(e.target.value)
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "qb-save-row",
+    style: {
+      marginTop: 14
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: handleSave,
+    disabled: saved
+  }, saved ? "Saved" : "Save my reflection"), saved && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: onDone
+  }, "Back to Design Fundamentals ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  }))));
+}
+
+/* ------------------------------------------------------------------ */
+/* SECTION SHELL - orchestrates cards \u2192 section check \u2192 reflect        */
+/* ------------------------------------------------------------------ */
+
+function DTFSectionShell({
+  meta,
+  cards,
+  bank,
+  onExit
+}) {
+  const [phase, setPhase] = useState("cards"); // cards | check | reflect
+
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "tool-subheader no-print"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-text back-btn",
+    onClick: onExit
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 15,
+    style: {
+      transform: "rotate(180deg)"
+    }
+  }), " Design Fundamentals")), phase === "cards" && /*#__PURE__*/React.createElement(DTFCardFlow, {
+    meta: meta,
+    cards: cards,
+    onFinished: () => setPhase("check"),
+    onBack: onExit
+  }), phase === "check" && /*#__PURE__*/React.createElement(DTFSectionCheck, {
+    meta: meta,
+    bank: bank,
+    onFinished: () => setPhase("reflect"),
+    onBack: () => setPhase("cards")
+  }), phase === "reflect" && /*#__PURE__*/React.createElement(DTFReflect, {
+    meta: meta,
+    onDone: onExit
+  }));
+}
 function DesignFundamentalsTool({
   user,
   onBack
 }) {
+  const [openSectionKey, setOpenSectionKey] = useState(null);
+  if (openSectionKey === "s1") {
+    return /*#__PURE__*/React.createElement(DTFSectionShell, {
+      meta: U1S1_META,
+      cards: U1S1_CARDS,
+      bank: U1S1_QUESTIONS,
+      onExit: () => setOpenSectionKey(null)
+    });
+  }
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "tool-subheader no-print"
   }, /*#__PURE__*/React.createElement("button", {
@@ -3395,7 +4862,8 @@ function DesignFundamentalsTool({
       transform: "rotate(180deg)"
     }
   }), " All tools")), /*#__PURE__*/React.createElement(DTFDashboard, {
-    sections: UNIT_1_SECTIONS
+    sections: UNIT_1_SECTIONS,
+    onOpenSection: setOpenSectionKey
   }));
 }
 
