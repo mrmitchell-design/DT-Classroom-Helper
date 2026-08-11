@@ -228,13 +228,13 @@ const FRAMEWORKS = {
     label: "ACCESSFM",
     full: "A checklist for designing new products and evaluating existing ones",
     items: ACCESSFM,
-    tint: "#2F8FA6"
+    tint: "#0071E3"
   },
   scamper: {
     label: "SCAMPER",
     full: "A toolkit for generating new ideas and improving existing designs",
     items: SCAMPER,
-    tint: "#E2601B"
+    tint: "#FF9500"
   }
 };
 
