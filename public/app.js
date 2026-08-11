@@ -238,6 +238,169 @@ const FRAMEWORKS = {
   }
 };
 
+/* ===== specbuilder-content.js ===== */
+/* ------------------------------------------------------------------ */
+/* SPECIFICATION BUILDER CONTENT                                       */
+/* ------------------------------------------------------------------ */
+
+const SPEC_CATEGORIES = [{
+  key: "user",
+  label: "User",
+  icon: "Users",
+  question: "Who will use the product?",
+  prompts: ["Who is the target user?", "What does the user need?", "Are there any age, ability or accessibility considerations?", "What would make the product easy or comfortable for them to use?"],
+  example: {
+    weak: "It should be easy to use.",
+    better: "The product must have controls that a Year 7 student with limited hand strength can operate one-handed."
+  }
+}, {
+  key: "function",
+  label: "Function",
+  icon: "Settings",
+  question: "What must the product actually do?",
+  prompts: ["What is the main purpose?", "What does the product need to hold, support, protect, display or perform?", "Are there secondary functions?", "What would make it successful?"],
+  example: {
+    weak: "It should work well.",
+    better: "The organiser must hold at least 6 pens and 3 pencils upright."
+  }
+}, {
+  key: "size",
+  label: "Size & Ergonomics",
+  icon: "Ruler",
+  question: "What size and shape does it need to be?",
+  prompts: ["Are there maximum or minimum dimensions?", "Does it need to fit somewhere?", "Does it need to fit a person, object or piece of equipment?", "Are there measurements from user research that should be used?", "Does it need to be comfortable or easy to operate?"],
+  example: {
+    weak: "The product should not be too big.",
+    better: "The product must be less than 250mm wide so it fits inside the user's school locker."
+  }
+}, {
+  key: "materials",
+  label: "Materials",
+  icon: "Layers",
+  question: "What properties do the materials need?",
+  prompts: ["Does the product need to be strong, flexible, lightweight, waterproof, transparent, or heat resistant?", "Are there materials that should or should not be used, and why?"],
+  example: {
+    weak: "The product must be made from acrylic.",
+    better: "The main body should use a rigid material that can be accurately laser cut and is resistant to moisture."
+  }
+}, {
+  key: "manufacturing",
+  label: "Manufacturing",
+  icon: "Wrench",
+  question: "How will it be made?",
+  prompts: ["How accurately does the product need to be made?", "Are there manufacturing processes that may be appropriate?", "Will it be made as a one-off, batch or mass-produced product?", "Does it need to be easy to assemble?", "Are there limitations caused by available equipment?"],
+  example: {
+    weak: "It should be easy to make.",
+    better: "All parts must be cuttable on the school's laser cutter (max sheet size 600 x 400mm)."
+  }
+}, {
+  key: "safety",
+  label: "Safety",
+  icon: "ShieldCheck",
+  question: "How could this product cause harm, and how will you prevent it?",
+  prompts: ["Could any part of the product injure the user?", "Are there sharp edges? Could it tip over? Are there small parts?", "Will it carry weight? Does it involve electricity, heat or moving parts?"],
+  example: {
+    weak: "It should be safe.",
+    better: "All exposed corners must have a radius of at least 3mm to reduce sharp edges."
+  }
+}, {
+  key: "sustainability",
+  label: "Sustainability",
+  icon: "Leaf",
+  question: "What is the environmental impact?",
+  prompts: ["Can material use be reduced?", "Could recycled or recyclable materials be used?", "Can components be repaired or replaced?", "Could the product be disassembled? What happens at the end of its life?"],
+  example: {
+    weak: "It should be eco-friendly.",
+    better: "At least 50% of the material used must be recycled or from a certified sustainable source."
+  }
+}, {
+  key: "aesthetics",
+  label: "Aesthetics",
+  icon: "Palette",
+  question: "What should it look like?",
+  prompts: ["What style would appeal to the intended user?", "Are there colours, shapes, textures or finishes that would be suitable?", "Does it need to match an existing environment or brand?"],
+  example: {
+    weak: "It should look nice.",
+    better: "The product should use bright, bold colours that appeal to primary-school-aged children."
+  }
+}, {
+  key: "cost",
+  label: "Cost",
+  icon: "Coins",
+  question: "What are the cost constraints?",
+  prompts: ["Is there a maximum budget?", "Should the product use inexpensive materials?", "Does manufacturing time affect cost?", "If commercially produced, what might the target selling price be?"],
+  example: {
+    weak: "It should be cheap.",
+    better: "The total material cost must not exceed \u00a35 per unit."
+  }
+}];
+function specCategoryByKey(key) {
+  return SPEC_CATEGORIES.find(c => c.key === key);
+}
+
+/* Rule-based quality checker. Deliberately simple and deterministic (no
+   AI/LLM involved) - it pattern-matches a handful of common vague phrases
+   per the brief, plus a couple of generic length/number heuristics, and
+   returns a Socratic follow-up question rather than rewriting anything. */
+function checkSpecQuality(text) {
+  const t = (text || "").trim();
+  if (!t) return null;
+  const lower = t.toLowerCase();
+  const rules = [{
+    test: /\b(good size|right size|not too big|not too small|appropriate size)\b/,
+    message: "Can you add a measurement, or a maximum/minimum size?"
+  }, {
+    test: /\b(nice|good|attractive|appealing)\b/,
+    message: "This is hard to measure. What colours, style, shape or finish would appeal to your intended user?"
+  }, {
+    test: /\bstrong\b/,
+    message: "Strong enough for what? Consider what weight, force or type of use the product needs to withstand."
+  }, {
+    test: /\bcheap\b/,
+    message: "Could you define a maximum material cost or target selling price?"
+  }, {
+    test: /\b(safe|safely)\b/,
+    message: "What specifically makes it safe? Think about edges, weight, moving parts or electricity."
+  }, {
+    test: /\beasy to use\b/,
+    message: "Easy for whom, and in what way? What would make it easy for your specific user?"
+  }, {
+    test: /\beco.?friendly\b/,
+    message: "What specifically makes it eco-friendly \u2014 recycled content, reduced material, repairability?"
+  }, {
+    test: /\bdurable\b/,
+    message: "Durable against what? Consider drops, daily use, weather, or a specific number of uses."
+  }, {
+    test: /\bcomfortable\b/,
+    message: "Comfortable how? Think about grip, weight, texture or how long it will be used for."
+  }];
+  for (const rule of rules) {
+    if (rule.test.test(lower)) return rule.message;
+  }
+  const hasNumber = /\d/.test(t);
+  const wordCount = t.split(/\s+/).filter(Boolean).length;
+  if (!hasNumber && wordCount <= 6) {
+    return "Try adding a specific detail or measurement \u2014 specifications that include a number are usually easier to test later.";
+  }
+  return null;
+}
+
+/* Simple strength check: a category counts as covered once it has at least
+   one point. This is guidance, not a checklist - no category is compulsory,
+   and there's no "correct" number of points per category. */
+function specStrength(points) {
+  const byCategory = {};
+  (points || []).forEach(p => {
+    byCategory[p.category] = (byCategory[p.category] || 0) + 1;
+  });
+  return SPEC_CATEGORIES.map(c => ({
+    key: c.key,
+    label: c.label,
+    count: byCategory[c.key] || 0,
+    status: byCategory[c.key] >= 2 ? "strong" : byCategory[c.key] === 1 ? "partial" : "empty"
+  }));
+}
+
 /* ===== icons.jsx ===== */
 /* ------------------------------------------------------------------ */
 /* ICONS \u2014 served from local /icons/*.svg (no external CDN needed)    */
@@ -1895,6 +2058,791 @@ function WorksheetTab({
   }, "Something went wrong creating the Word file. Try again."));
 }
 
+/* ===== specbuilder.jsx ===== */
+/* ------------------------------------------------------------------ */
+/* SPEC LIST - "My specifications"                                     */
+/* ------------------------------------------------------------------ */
+
+function SpecList({
+  onOpen,
+  onCreate
+}) {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  function load() {
+    setLoading(true);
+    apiGet("/api/specs").then(setProjects).catch(() => {}).finally(() => setLoading(false));
+  }
+  useEffect(load, []);
+  async function handleDelete(project, ev) {
+    ev.stopPropagation();
+    if (!window.confirm(`Delete "${project.projectName}"? This can't be undone.`)) return;
+    try {
+      await apiDelete(`/api/specs/${project.id}`);
+      load();
+    } catch (e) {/* ignore */}
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "My Specifications"), /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "Build a clear and measurable design specification, step by step.")), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: onCreate
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "PenLine",
+    size: 16
+  }), " New specification")), loading && /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "Loading..."), !loading && projects.length === 0 && /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "You haven't started a specification yet. Click \"New specification\" to begin \u2014 you'll be guided through it category by category."), /*#__PURE__*/React.createElement("div", {
+    className: "spec-list"
+  }, projects.map(p => /*#__PURE__*/React.createElement("div", {
+    className: "spec-list-row",
+    key: p.id,
+    onClick: () => onOpen(p.id)
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "spec-list-name"
+  }, p.projectName || "Untitled", p.feedback && /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Lightbulb",
+    size: 13,
+    style: {
+      color: "#B25E00",
+      marginLeft: 6,
+      verticalAlign: "-2px"
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "status-pill" + (p.status === "submitted" ? " submitted" : " draft")
+  }, p.status === "submitted" ? "Handed in" : "Draft")), /*#__PURE__*/React.createElement("span", {
+    className: "mono"
+  }, p.pointCount, " point", p.pointCount === 1 ? "" : "s"), /*#__PURE__*/React.createElement("span", {
+    className: "saved-row-date mono"
+  }, formatDate(p.updatedAt)), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "saved-row-delete",
+    onClick: e => handleDelete(p, e),
+    "aria-label": "Delete"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Trash2",
+    size: 14
+  }))))));
+}
+
+/* ------------------------------------------------------------------ */
+/* SPEC SETUP - project name / problem / user                          */
+/* ------------------------------------------------------------------ */
+
+function SpecSetup({
+  existing,
+  onSaved,
+  onCancel
+}) {
+  const [projectName, setProjectName] = useState(existing ? existing.projectName : "");
+  const [designProblem, setDesignProblem] = useState(existing ? existing.designProblem : "");
+  const [intendedUser, setIntendedUser] = useState(existing ? existing.intendedUser : "");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  async function handleSave() {
+    if (!projectName.trim()) {
+      setError("Give your project a name.");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      const payload = {
+        projectName,
+        designProblem,
+        intendedUser
+      };
+      const saved = existing ? await apiPut(`/api/specs/${existing.id}`, payload) : await apiPost("/api/specs", payload);
+      onSaved(saved);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, existing ? "Edit project details" : "Start a new specification"), /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "These stay visible while you build your specification, and you can edit them any time."))), /*#__PURE__*/React.createElement("div", {
+    className: "spec-setup-form"
+  }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", null, "Project / product name"), /*#__PURE__*/React.createElement("input", {
+    value: projectName,
+    onChange: e => setProjectName(e.target.value),
+    placeholder: "e.g. Desk organiser for a secondary school student",
+    autoFocus: true
+  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", null, "Design problem \u2014 what are you designing, and why?"), /*#__PURE__*/React.createElement("textarea", {
+    rows: 3,
+    value: designProblem,
+    onChange: e => setDesignProblem(e.target.value),
+    placeholder: "A short explanation of the problem you're solving..."
+  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", null, "Intended user \u2014 who is this for?"), /*#__PURE__*/React.createElement("textarea", {
+    rows: 2,
+    value: intendedUser,
+    onChange: e => setIntendedUser(e.target.value),
+    placeholder: "e.g. Year 10 secondary school student"
+  }))), error && /*#__PURE__*/React.createElement("p", {
+    className: "login-error"
+  }, error), /*#__PURE__*/React.createElement("div", {
+    className: "qb-save-row"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: handleSave,
+    disabled: saving
+  }, saving ? "Saving..." : existing ? "Save changes" : "Start building"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-text",
+    onClick: onCancel
+  }, "Cancel")));
+}
+
+/* ------------------------------------------------------------------ */
+/* SPEC POINT FORM - Requirement / Reason / Testing, with live checker  */
+/* ------------------------------------------------------------------ */
+
+function SpecPointForm({
+  category,
+  onAdd
+}) {
+  const [requirement, setRequirement] = useState("");
+  const [reason, setReason] = useState("");
+  const [testingMethod, setTestingMethod] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [touched, setTouched] = useState(false);
+  const hint = touched ? checkSpecQuality(requirement) : null;
+  async function handleAdd() {
+    if (!requirement.trim()) return;
+    setBusy(true);
+    try {
+      await onAdd({
+        category: category.key,
+        requirement,
+        reason,
+        testingMethod
+      });
+      setRequirement("");
+      setReason("");
+      setTestingMethod("");
+      setTouched(false);
+    } catch (e) {/* ignore */}
+    setBusy(false);
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "spec-point-form"
+  }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "spec-field-label requirement"
+  }, "1. Requirement \u2014 what must the product do?"), /*#__PURE__*/React.createElement("textarea", {
+    rows: 2,
+    value: requirement,
+    onChange: e => setRequirement(e.target.value),
+    onBlur: () => setTouched(true),
+    placeholder: category.example.better
+  }), hint && /*#__PURE__*/React.createElement("div", {
+    className: "spec-hint"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Lightbulb",
+    size: 14,
+    style: {
+      color: "#B25E00",
+      flexShrink: 0
+    }
+  }), /*#__PURE__*/React.createElement("span", null, hint))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "spec-field-label reason"
+  }, "2. Reason \u2014 why is this important?"), /*#__PURE__*/React.createElement("textarea", {
+    rows: 2,
+    value: reason,
+    onChange: e => setReason(e.target.value),
+    placeholder: "e.g. The user only has this amount of space available."
+  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "spec-field-label testing"
+  }, "3. Testing \u2014 how could you check this later?"), /*#__PURE__*/React.createElement("textarea", {
+    rows: 2,
+    value: testingMethod,
+    onChange: e => setTestingMethod(e.target.value),
+    placeholder: "e.g. Measure the final prototype and check it fits."
+  })), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: handleAdd,
+    disabled: busy || !requirement.trim()
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Check",
+    size: 16
+  }), " ", busy ? "Adding..." : "Add this point"));
+}
+
+/* ------------------------------------------------------------------ */
+/* SPEC WIZARD - one category at a time                                */
+/* ------------------------------------------------------------------ */
+
+function SpecWizard({
+  project,
+  onPointsChanged,
+  onGoToReview,
+  onBack
+}) {
+  const [categoryIndex, setCategoryIndex] = useState(0);
+  const [points, setPoints] = useState(project.points || []);
+  const category = SPEC_CATEGORIES[categoryIndex];
+  const pointsInCategory = points.filter(p => p.category === category.key);
+  async function handleAdd(payload) {
+    const created = await apiPost(`/api/specs/${project.id}/points`, payload);
+    const next = [...points, created];
+    setPoints(next);
+    onPointsChanged(next);
+  }
+  async function handleRemove(point) {
+    if (!window.confirm("Remove this specification point?")) return;
+    try {
+      await apiDelete(`/api/specs/${project.id}/points/${point.id}`);
+      const next = points.filter(p => p.id !== point.id);
+      setPoints(next);
+      onPointsChanged(next);
+    } catch (e) {/* ignore */}
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "spec-context-banner no-print"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "spec-context-name"
+  }, project.projectName), project.intendedUser && /*#__PURE__*/React.createElement("span", {
+    className: "sub"
+  }, "For: ", project.intendedUser)), /*#__PURE__*/React.createElement("div", {
+    className: "spec-wizard-progress"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "quiz-history-label"
+  }, "Category ", categoryIndex + 1, " of ", SPEC_CATEGORIES.length), /*#__PURE__*/React.createElement("div", {
+    className: "quiz-progress-bar"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: `${(categoryIndex + 1) / SPEC_CATEGORIES.length * 100}%`,
+      background: "var(--blue)"
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "spec-category-head"
+  }, /*#__PURE__*/React.createElement(LetterBadge, {
+    letter: category.label[0],
+    tint: "var(--blue)",
+    size: 40
+  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      marginBottom: 2
+    }
+  }, category.label), /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, category.question))), /*#__PURE__*/React.createElement("div", {
+    className: "spec-help-block"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "help-label"
+  }, "Things to think about"), /*#__PURE__*/React.createElement("ul", {
+    className: "spec-prompt-list"
+  }, category.prompts.map((p, i) => /*#__PURE__*/React.createElement("li", {
+    key: i
+  }, p))), /*#__PURE__*/React.createElement("div", {
+    className: "spec-example"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "spec-example-weak"
+  }, /*#__PURE__*/React.createElement("strong", null, "Weak:"), " ", category.example.weak), /*#__PURE__*/React.createElement("span", {
+    className: "spec-example-better"
+  }, /*#__PURE__*/React.createElement("strong", null, "Better:"), " ", category.example.better))), pointsInCategory.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "spec-added-points"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "help-label"
+  }, "Added to ", category.label, " so far"), pointsInCategory.map(p => /*#__PURE__*/React.createElement("div", {
+    className: "spec-added-point",
+    key: p.id
+  }, /*#__PURE__*/React.createElement("span", null, p.requirement), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "saved-row-delete",
+    onClick: () => handleRemove(p),
+    "aria-label": "Remove"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Trash2",
+    size: 13
+  }))))), /*#__PURE__*/React.createElement(SpecPointForm, {
+    category: category,
+    onAdd: handleAdd
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "quiz-nav-row",
+    style: {
+      marginTop: 24
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: () => setCategoryIndex(i => Math.max(0, i - 1)),
+    disabled: categoryIndex === 0
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16,
+    style: {
+      transform: "rotate(180deg)"
+    }
+  }), " Previous"), categoryIndex + 1 < SPEC_CATEGORIES.length ? /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: () => setCategoryIndex(i => i + 1)
+  }, "Next category ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  })) : /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: onGoToReview
+  }, "Review my specification ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "spec-wizard-footer no-print"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-text",
+    onClick: onGoToReview
+  }, "Skip to review"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-text",
+    onClick: onBack
+  }, "Save and exit")));
+}
+
+/* ------------------------------------------------------------------ */
+/* SPEC POINT ROW (review screen) - edit / delete / move / recategorise */
+/* ------------------------------------------------------------------ */
+
+function SpecPointRow({
+  point,
+  index,
+  onUpdated,
+  onDeleted,
+  onMove
+}) {
+  const [editing, setEditing] = useState(false);
+  const [requirement, setRequirement] = useState(point.requirement);
+  const [reason, setReason] = useState(point.reason);
+  const [testingMethod, setTestingMethod] = useState(point.testingMethod);
+  const [category, setCategory] = useState(point.category);
+  const [saving, setSaving] = useState(false);
+  async function handleSave() {
+    setSaving(true);
+    try {
+      const updated = await apiPut(`/api/specs/${point.projectId}/points/${point.id}`, {
+        requirement,
+        reason,
+        testingMethod,
+        category
+      });
+      onUpdated(updated);
+      setEditing(false);
+    } catch (e) {/* ignore */}
+    setSaving(false);
+  }
+  async function handleDelete() {
+    if (!window.confirm("Delete this specification point?")) return;
+    try {
+      await apiDelete(`/api/specs/${point.projectId}/points/${point.id}`);
+      onDeleted(point.id);
+    } catch (e) {/* ignore */}
+  }
+  if (editing) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "spec-point-card editing"
+    }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+      className: "spec-field-label requirement"
+    }, "Requirement"), /*#__PURE__*/React.createElement("textarea", {
+      rows: 2,
+      value: requirement,
+      onChange: e => setRequirement(e.target.value)
+    })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+      className: "spec-field-label reason"
+    }, "Reason"), /*#__PURE__*/React.createElement("textarea", {
+      rows: 2,
+      value: reason,
+      onChange: e => setReason(e.target.value)
+    })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+      className: "spec-field-label testing"
+    }, "Testing"), /*#__PURE__*/React.createElement("textarea", {
+      rows: 2,
+      value: testingMethod,
+      onChange: e => setTestingMethod(e.target.value)
+    })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+      className: "spec-field-label"
+    }, "Category"), /*#__PURE__*/React.createElement("select", {
+      value: category,
+      onChange: e => setCategory(e.target.value)
+    }, SPEC_CATEGORIES.map(c => /*#__PURE__*/React.createElement("option", {
+      key: c.key,
+      value: c.key
+    }, c.label)))), /*#__PURE__*/React.createElement("div", {
+      className: "qb-save-row"
+    }, /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      className: "btn-primary",
+      onClick: handleSave,
+      disabled: saving
+    }, saving ? "Saving..." : "Save"), /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      className: "btn-text",
+      onClick: () => setEditing(false)
+    }, "Cancel")));
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "spec-point-card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "spec-point-number"
+  }, index + 1), /*#__PURE__*/React.createElement("div", {
+    className: "spec-point-body"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "spec-point-line"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "spec-field-label requirement"
+  }, "Requirement"), " ", point.requirement), point.reason && /*#__PURE__*/React.createElement("p", {
+    className: "spec-point-line"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "spec-field-label reason"
+  }, "Reason"), " ", point.reason), point.testingMethod && /*#__PURE__*/React.createElement("p", {
+    className: "spec-point-line"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "spec-field-label testing"
+  }, "Testing"), " ", point.testingMethod)), /*#__PURE__*/React.createElement("div", {
+    className: "spec-point-actions no-print"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "icon-btn",
+    title: "Move up",
+    onClick: () => onMove(point, "up")
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronDown",
+    size: 14,
+    style: {
+      transform: "rotate(180deg)"
+    }
+  })), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "icon-btn",
+    title: "Move down",
+    onClick: () => onMove(point, "down")
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronDown",
+    size: 14
+  })), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "icon-btn",
+    title: "Edit",
+    onClick: () => setEditing(true)
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "PenLine",
+    size: 14
+  })), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "icon-btn danger",
+    title: "Delete",
+    onClick: handleDelete
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Trash2",
+    size: 14
+  }))));
+}
+
+/* ------------------------------------------------------------------ */
+/* SPEC REVIEW                                                          */
+/* ------------------------------------------------------------------ */
+
+function SpecReview({
+  project,
+  onProjectUpdated,
+  onEditDetails,
+  onAddMore,
+  onBack,
+  onExport
+}) {
+  const [points, setPoints] = useState(project.points || []);
+  const [saveState, setSaveState] = useState("idle");
+  function reload() {
+    apiGet(`/api/specs/${project.id}`).then(full => {
+      setPoints(full.points);
+      onProjectUpdated(full);
+    }).catch(() => {});
+  }
+  async function handleMove(point, direction) {
+    try {
+      await apiPost(`/api/specs/${project.id}/points/${point.id}/move`, {
+        direction
+      });
+      reload();
+    } catch (e) {/* ignore */}
+  }
+  function handlePointUpdated(updated) {
+    setPoints(ps => ps.map(p => p.id === updated.id ? updated : p));
+  }
+  function handlePointDeleted(id) {
+    setPoints(ps => ps.filter(p => p.id !== id));
+  }
+  async function handleHandIn() {
+    if (!window.confirm("Hand in this specification? Your teacher will be able to see it and give feedback. You can still make changes afterwards if needed.")) return;
+    setSaveState("saving");
+    try {
+      const updated = await apiPost(`/api/specs/${project.id}/hand-in`);
+      onProjectUpdated(updated);
+      setSaveState("saved");
+    } catch (e) {
+      setSaveState("error");
+    }
+  }
+  const strength = specStrength(points);
+  const grouped = SPEC_CATEGORIES.map(c => ({
+    category: c,
+    items: points.filter(p => p.category === c.key).sort((a, b) => a.order - b.order)
+  })).filter(g => g.items.length > 0);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head no-print"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "Design Specification"), /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "Review, edit and organise your points before you hand it in.")), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-text",
+    onClick: onEditDetails
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "PenLine",
+    size: 14
+  }), " Edit project details")), /*#__PURE__*/React.createElement("div", {
+    className: "spec-context-banner"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "spec-context-name"
+  }, project.projectName), project.designProblem && /*#__PURE__*/React.createElement("p", {
+    className: "sub",
+    style: {
+      margin: "4px 0 0 0"
+    }
+  }, project.designProblem), project.intendedUser && /*#__PURE__*/React.createElement("p", {
+    className: "sub",
+    style: {
+      margin: "2px 0 0 0"
+    }
+  }, "For: ", project.intendedUser), /*#__PURE__*/React.createElement("span", {
+    className: "status-pill" + (project.status === "submitted" ? " submitted" : " draft"),
+    style: {
+      marginTop: 8
+    }
+  }, project.status === "submitted" ? "Handed in" : "Draft")), project.feedback && /*#__PURE__*/React.createElement("div", {
+    className: "worksheet-feedback-callout no-print"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Lightbulb",
+    size: 16,
+    style: {
+      color: "#B25E00"
+    }
+  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+    className: "worksheet-feedback-label"
+  }, "Feedback from your teacher"), /*#__PURE__*/React.createElement("p", null, project.feedback))), /*#__PURE__*/React.createElement("div", {
+    className: "spec-strength no-print"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "help-label"
+  }, "Specification strength (guidance, not a checklist)"), /*#__PURE__*/React.createElement("div", {
+    className: "spec-strength-grid"
+  }, strength.map(s => /*#__PURE__*/React.createElement("span", {
+    key: s.key,
+    className: "spec-strength-item " + s.status
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: s.status === "strong" ? "Check" : s.status === "partial" ? "Lightbulb" : "X",
+    size: 12
+  }), s.label)))), grouped.length === 0 && /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "No specification points yet \u2014 add some from the wizard."), grouped.map(g => /*#__PURE__*/React.createElement("div", {
+    className: "spec-review-group",
+    key: g.category.key
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: "spec-review-group-title"
+  }, g.category.label), g.items.map((p, i) => /*#__PURE__*/React.createElement(SpecPointRow, {
+    key: p.id,
+    point: p,
+    index: i,
+    onUpdated: handlePointUpdated,
+    onDeleted: handlePointDeleted,
+    onMove: handleMove
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "quiz-result-actions no-print",
+    style: {
+      marginTop: 20
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: onAddMore
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "PenLine",
+    size: 16
+  }), " Add more points"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: handleHandIn,
+    disabled: saveState === "saving"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Check",
+    size: 16
+  }), " ", project.status === "submitted" ? "Update hand-in" : "Hand in"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: onExport
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "FileDown",
+    size: 16
+  }), " View / print"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-text",
+    onClick: onBack
+  }, "Back to my specifications")));
+}
+
+/* ------------------------------------------------------------------ */
+/* SPEC EXPORT / PRINT VIEW                                             */
+/* ------------------------------------------------------------------ */
+
+function SpecExportView({
+  project,
+  points,
+  onBack
+}) {
+  const grouped = SPEC_CATEGORIES.map(c => ({
+    category: c,
+    items: points.filter(p => p.category === c.key).sort((a, b) => a.order - b.order)
+  })).filter(g => g.items.length > 0);
+  let n = 0;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content spec-export"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "worksheet-actions no-print",
+    style: {
+      padding: 0,
+      marginBottom: 20
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: () => window.print()
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Printer",
+    size: 16
+  }), " Print / save as PDF"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-text",
+    onClick: onBack
+  }, "Back to review")), /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontSize: 26
+    }
+  }, "Design Specification"), /*#__PURE__*/React.createElement("p", {
+    className: "spec-export-meta"
+  }, /*#__PURE__*/React.createElement("strong", null, "Project:"), " ", project.projectName), project.intendedUser && /*#__PURE__*/React.createElement("p", {
+    className: "spec-export-meta"
+  }, /*#__PURE__*/React.createElement("strong", null, "User:"), " ", project.intendedUser), project.designProblem && /*#__PURE__*/React.createElement("p", {
+    className: "spec-export-meta"
+  }, /*#__PURE__*/React.createElement("strong", null, "Design problem:"), " ", project.designProblem), grouped.map(g => /*#__PURE__*/React.createElement("div", {
+    key: g.category.key,
+    className: "spec-export-group"
+  }, /*#__PURE__*/React.createElement("h3", null, g.category.label), g.items.map(p => {
+    n++;
+    return /*#__PURE__*/React.createElement("div", {
+      key: p.id,
+      className: "spec-export-point"
+    }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("strong", null, n, ". ", p.requirement)), p.reason && /*#__PURE__*/React.createElement("p", {
+      className: "spec-export-sub"
+    }, "Reason: ", p.reason), p.testingMethod && /*#__PURE__*/React.createElement("p", {
+      className: "spec-export-sub"
+    }, "Test: ", p.testingMethod));
+  }))));
+}
+
+/* ------------------------------------------------------------------ */
+/* SPEC BUILDER TOOL - orchestrates the views above                    */
+/* ------------------------------------------------------------------ */
+
+function SpecBuilderTool({
+  user,
+  onBack
+}) {
+  const [view, setView] = useState("list"); // list | setup | wizard | review | export
+  const [project, setProject] = useState(null);
+  async function openProject(id) {
+    try {
+      const full = await apiGet(`/api/specs/${id}`);
+      setProject(full);
+      setView("review");
+    } catch (e) {/* ignore */}
+  }
+  function handleCreated(newProject) {
+    setProject({
+      ...newProject,
+      points: []
+    });
+    setView("wizard");
+  }
+  function handleSetupSaved(updated) {
+    setProject(p => p ? {
+      ...p,
+      ...updated
+    } : updated);
+    setView(project && project.points ? "review" : "wizard");
+  }
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "tool-subheader no-print"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-text back-btn",
+    onClick: onBack
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 15,
+    style: {
+      transform: "rotate(180deg)"
+    }
+  }), " All tools")), view === "list" && /*#__PURE__*/React.createElement(SpecList, {
+    onOpen: openProject,
+    onCreate: () => {
+      setProject(null);
+      setView("setup");
+    }
+  }), view === "setup" && /*#__PURE__*/React.createElement(SpecSetup, {
+    existing: project,
+    onSaved: project ? handleSetupSaved : handleCreated,
+    onCancel: () => setView(project ? "review" : "list")
+  }), view === "wizard" && project && /*#__PURE__*/React.createElement(SpecWizard, {
+    project: project,
+    onPointsChanged: points => setProject(p => ({
+      ...p,
+      points
+    })),
+    onGoToReview: () => setView("review"),
+    onBack: () => setView("list")
+  }), view === "review" && project && /*#__PURE__*/React.createElement(SpecReview, {
+    project: project,
+    onProjectUpdated: updated => setProject(p => ({
+      ...p,
+      ...updated
+    })),
+    onEditDetails: () => setView("setup"),
+    onAddMore: () => setView("wizard"),
+    onBack: () => setView("list"),
+    onExport: () => setView("export")
+  }), view === "export" && project && /*#__PURE__*/React.createElement(SpecExportView, {
+    project: project,
+    points: project.points || [],
+    onBack: () => setView("review")
+  }));
+}
+
 /* ===== login.jsx ===== */
 function LoginScreen({
   onLogin
@@ -1960,11 +2908,12 @@ function LoginScreen({
 }
 
 /* ===== studentapp.jsx ===== */
-function StudentApp({
+function AccessfmScamperTool({
   user,
-  onLogout
+  tab,
+  setTab,
+  onBack
 }) {
-  const [tab, setTab] = useState("learn");
   const [simpleMode, setSimpleMode] = useState(false);
   const tabs = useMemo(() => [{
     key: "learn",
@@ -1976,19 +2925,19 @@ function StudentApp({
     key: "worksheet",
     label: "Worksheet"
   }], []);
-  return /*#__PURE__*/React.createElement("div", {
-    className: "app-root"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "app-header no-print"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", {
-    className: "app-title"
-  }, "DT Classroom ", /*#__PURE__*/React.createElement("span", null, "Helper")), /*#__PURE__*/React.createElement("p", {
-    className: "app-sub"
-  }, "Signed in as ", user.displayName, user.classGroup ? ` \u00b7 ${user.classGroup}` : "")), /*#__PURE__*/React.createElement("div", {
-    className: "header-controls"
-  }, /*#__PURE__*/React.createElement(NotificationCenter, {
-    onNavigate: setTab
-  }), /*#__PURE__*/React.createElement("button", {
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "tool-subheader no-print"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-text back-btn",
+    onClick: onBack
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 15,
+    style: {
+      transform: "rotate(180deg)"
+    }
+  }), " All tools"), /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "simple-toggle",
     onClick: () => setSimpleMode(s => !s),
@@ -1997,14 +2946,7 @@ function StudentApp({
     className: "switch" + (simpleMode ? " on" : "")
   }, /*#__PURE__*/React.createElement("span", {
     className: "switch-knob"
-  }))), /*#__PURE__*/React.createElement(ChangePasswordForm, null), /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    className: "btn-text logout-btn",
-    onClick: onLogout
-  }, /*#__PURE__*/React.createElement(IconGlyph, {
-    name: "LogOut",
-    size: 15
-  }), " Log out"))), /*#__PURE__*/React.createElement("div", {
+  })))), /*#__PURE__*/React.createElement("div", {
     className: "tabs no-print"
   }, tabs.map(t => /*#__PURE__*/React.createElement("button", {
     key: t.key,
@@ -2020,6 +2962,85 @@ function StudentApp({
     simpleMode: simpleMode,
     currentUser: user
   })));
+}
+function ToolPicker({
+  onSelect
+}) {
+  const tools = [{
+    key: "accessfm-scamper",
+    title: "ACCESSFM & SCAMPER",
+    icon: "Wrench",
+    description: "Learn, quiz yourself, and apply these two design tools to your own ideas or an existing product."
+  }, {
+    key: "spec-builder",
+    title: "Specification Builder",
+    icon: "ClipboardList",
+    description: "Turn your research into a clear, measurable design specification \u2014 step by step, not a blank text box."
+  }];
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content tool-picker no-print"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "Design Tools"), /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "Pick what you want to work on."))), /*#__PURE__*/React.createElement("div", {
+    className: "tool-picker-grid"
+  }, tools.map(t => /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    key: t.key,
+    className: "tool-picker-card",
+    onClick: () => onSelect(t.key)
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "tool-picker-icon"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: t.icon,
+    size: 26
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "tool-picker-title"
+  }, t.title), /*#__PURE__*/React.createElement("span", {
+    className: "tool-picker-desc"
+  }, t.description)))));
+}
+function StudentApp({
+  user,
+  onLogout
+}) {
+  const [activeTool, setActiveTool] = useState(null); // null | "accessfm-scamper" | "spec-builder"
+  const [accessfmTab, setAccessfmTab] = useState("learn");
+  function handleNotificationNavigate(tabKey) {
+    setActiveTool("accessfm-scamper");
+    setAccessfmTab(tabKey);
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "app-root"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "app-header no-print"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", {
+    className: "app-title"
+  }, "DT Classroom ", /*#__PURE__*/React.createElement("span", null, "Helper")), /*#__PURE__*/React.createElement("p", {
+    className: "app-sub"
+  }, "Signed in as ", user.displayName, user.classGroup ? ` \u00b7 ${user.classGroup}` : "")), /*#__PURE__*/React.createElement("div", {
+    className: "header-controls"
+  }, /*#__PURE__*/React.createElement(NotificationCenter, {
+    onNavigate: handleNotificationNavigate
+  }), /*#__PURE__*/React.createElement(ChangePasswordForm, null), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-text logout-btn",
+    onClick: onLogout
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "LogOut",
+    size: 15
+  }), " Log out"))), activeTool === null && /*#__PURE__*/React.createElement(ToolPicker, {
+    onSelect: setActiveTool
+  }), activeTool === "accessfm-scamper" && /*#__PURE__*/React.createElement(AccessfmScamperTool, {
+    user: user,
+    tab: accessfmTab,
+    setTab: setAccessfmTab,
+    onBack: () => setActiveTool(null)
+  }), activeTool === "spec-builder" && /*#__PURE__*/React.createElement(SpecBuilderTool, {
+    user: user,
+    onBack: () => setActiveTool(null)
+  }));
 }
 
 /* ===== admin-csvimport.jsx ===== */

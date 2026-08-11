@@ -12,6 +12,7 @@ const PUBLIC = path.join(ROOT, "public");
 
 const FILES_IN_ORDER = [
   "content.js",
+  "specbuilder-content.js",
   "icons.jsx",
   "api.jsx",
   "shared.jsx",
@@ -19,6 +20,7 @@ const FILES_IN_ORDER = [
   "notifications.jsx",
   "quiz.jsx",
   "worksheet.jsx",
+  "specbuilder.jsx",
   "login.jsx",
   "studentapp.jsx",
   "admin-csvimport.jsx",

@@ -101,6 +101,40 @@ CREATE TABLE IF NOT EXISTS task_assignments (
 
 CREATE INDEX IF NOT EXISTS idx_quiz_assignments_class ON quiz_assignments(year_group, class_group);
 CREATE INDEX IF NOT EXISTS idx_task_assignments_class ON task_assignments(year_group, class_group);
+
+-- Specification Builder. A student can have multiple projects over time
+-- (like worksheets); each project holds an ordered list of spec points.
+-- Points are stored as structured rows (not one text blob) specifically so
+-- other future tools (Concept Generation, Decision Matrix, Final Evaluation
+-- etc.) can query and reference individual requirements later.
+CREATE TABLE IF NOT EXISTS spec_projects (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  project_name TEXT NOT NULL DEFAULT '',
+  design_problem TEXT DEFAULT '',
+  intended_user TEXT DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'draft',
+  submitted_at TEXT,
+  feedback TEXT DEFAULT '',
+  marked_complete INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS spec_points (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER NOT NULL REFERENCES spec_projects(id) ON DELETE CASCADE,
+  category TEXT NOT NULL,
+  requirement TEXT NOT NULL DEFAULT '',
+  reason TEXT DEFAULT '',
+  testing_method TEXT DEFAULT '',
+  order_index INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_spec_projects_user ON spec_projects(user_id);
+CREATE INDEX IF NOT EXISTS idx_spec_points_project ON spec_points(project_id);
 `);
 
 // --- lightweight migrations: add columns to existing tables if missing ---
