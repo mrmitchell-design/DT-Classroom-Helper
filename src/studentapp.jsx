@@ -44,6 +44,10 @@ function ToolPicker({ onSelect }) {
       key: "spec-builder", title: "Specification Builder", icon: "ClipboardList",
       description: "Turn your research into a clear, measurable design specification \u2014 step by step, not a blank text box.",
     },
+    {
+      key: "design-fundamentals", title: "Discovering Design", icon: "GraduationCap",
+      description: "A KS3 course on how designers move from problem to evidence to a measurable specification.",
+    },
   ];
   return (
     <div className="tab-content tool-picker no-print">
@@ -97,6 +101,10 @@ function StudentApp({ user, onLogout }) {
 
       {activeTool === "spec-builder" && (
         <SpecBuilderTool user={user} onBack={() => setActiveTool(null)} />
+      )}
+
+      {activeTool === "design-fundamentals" && (
+        <DesignFundamentalsTool user={user} onBack={() => setActiveTool(null)} />
       )}
     </div>
   );

@@ -152,3 +152,60 @@ function specStrength(points) {
     status: byCategory[c.key] >= 2 ? "strong" : byCategory[c.key] === 1 ? "partial" : "empty",
   }));
 }
+
+/* Builds a rough written-prose DRAFT of the specification from the
+   student's own structured points - a starting point for the kind of
+   written summary a design portfolio needs, not a finished piece of work.
+   Deliberately template-based (no AI) so it's fast, free, and predictable,
+   and always framed to the student as something to rewrite in their own
+   words rather than hand in as-is. */
+function generateSpecSummaryDraft(project, points) {
+  const lines = [];
+  const name = (project.projectName || "this product").trim();
+  const user = (project.intendedUser || "").trim();
+  const problem = (project.designProblem || "").trim();
+
+  let intro = `This specification is for ${name}`;
+  if (user) intro += `, designed for ${user}`;
+  intro += ".";
+  if (problem) intro += ` ${problem}`;
+  lines.push(intro);
+
+  SPEC_CATEGORIES.forEach((cat) => {
+    const items = (points || []).filter((p) => p.category === cat.key).sort((a, b) => a.order - b.order);
+    if (items.length === 0) return;
+
+    const sentences = items.map((p, i) => {
+      const lead = i === 0 ? "The product must" : "It must also";
+      const body = stripLeadingRequirementPhrase(p.requirement);
+      let s = `${lead} ${body}`;
+      if (p.reason && p.reason.trim()) s += `, because ${lowerFirst(p.reason.trim())}`;
+      s += ".";
+      if (p.testingMethod && p.testingMethod.trim()) {
+        s += ` This will be checked by ${lowerFirst(p.testingMethod.trim())}.`;
+      }
+      return s;
+    });
+
+    lines.push(`${cat.label}: ${sentences.join(" ")}`);
+  });
+
+  return lines.join("\n\n");
+}
+
+/* Students often write requirements already starting with "The product
+   must..." / "Must..." (matching the worked examples they're shown) - strip
+   that off so it doesn't collide with the sentence lead-in we add. */
+function stripLeadingRequirementPhrase(text) {
+  const t = (text || "").trim();
+  const stripped = t.replace(/^(the product|it)\s+(must|should)\s+/i, "").replace(/^(must|should)\s+/i, "");
+  return lowerFirst(stripped || t);
+}
+
+function lowerFirst(text) {
+  const t = (text || "").trim();
+  if (!t) return t;
+  // don't lowercase things that look like they start with a proper noun/number/acronym
+  if (/^[A-Z]{2,}/.test(t) || /^\d/.test(t)) return t;
+  return t.charAt(0).toLowerCase() + t.slice(1);
+}

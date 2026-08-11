@@ -15,6 +15,7 @@ function serializeProject(row, points) {
     submittedAt: row.submitted_at,
     feedback: row.feedback || "",
     markedComplete: !!row.marked_complete,
+    summaryText: row.summary_text || "",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     points: points ? points.map(serializePoint) : undefined,
@@ -96,6 +97,16 @@ router.post("/:id/hand-in", (req, res) => {
   if (!project) return res.status(404).json({ error: "Not found" });
   const submittedAt = project.submitted_at || new Date().toISOString().replace("T", " ").slice(0, 19);
   db.prepare("UPDATE spec_projects SET status = 'submitted', submitted_at = ?, updated_at = datetime('now') WHERE id = ?").run(submittedAt, project.id);
+  const row = db.prepare("SELECT * FROM spec_projects WHERE id = ?").get(project.id);
+  res.json(serializeProject(row));
+});
+
+// save the student's written summary draft (separate from the structured points)
+router.put("/:id/summary", (req, res) => {
+  const project = ownProject(req.session.userId, req.params.id);
+  if (!project) return res.status(404).json({ error: "Not found" });
+  const { summaryText } = req.body || {};
+  db.prepare("UPDATE spec_projects SET summary_text = ?, updated_at = datetime('now') WHERE id = ?").run(summaryText || "", project.id);
   const row = db.prepare("SELECT * FROM spec_projects WHERE id = ?").get(project.id);
   res.json(serializeProject(row));
 });

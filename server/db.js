@@ -135,6 +135,81 @@ CREATE TABLE IF NOT EXISTS spec_points (
 
 CREATE INDEX IF NOT EXISTS idx_spec_projects_user ON spec_projects(user_id);
 CREATE INDEX IF NOT EXISTS idx_spec_points_project ON spec_points(project_id);
+
+-- Design Fundamentals (KS3 course). Knowledge score and DT stage are
+-- deliberately separate columns everywhere - the app must never derive a
+-- stage purely from a quiz percentage. "suggested" fields come from a
+-- deterministic heuristic (matched against each question's stored
+-- acceptedIdeas/expectedKnowledge, never a live AI call); "confirmed"/
+-- teacher_* fields are the teacher's own judgement and always win when set.
+
+CREATE TABLE IF NOT EXISTS dtf_section_progress (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  unit_key TEXT NOT NULL,
+  section_key TEXT NOT NULL,
+  knowledge_score REAL,
+  suggested_stage TEXT,
+  confirmed_stage TEXT,
+  stage_reasoning TEXT DEFAULT '',
+  completed_at TEXT,
+  updated_at TEXT DEFAULT (datetime('now')),
+  UNIQUE(user_id, unit_key, section_key)
+);
+
+-- One row per quiz-style attempt: Micro Check, Section Check, Checkpoint,
+-- End-of-Unit, or Final Challenge. The details column mirrors
+-- quiz_attempts.details - a JSON array of {qid, prompt, studentAnswer,
+-- correctAnswer, isCorrect} so a teacher can review and override any
+-- individual question later.
+CREATE TABLE IF NOT EXISTS dtf_attempts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  unit_key TEXT NOT NULL,
+  section_key TEXT,
+  attempt_type TEXT NOT NULL,
+  score INTEGER NOT NULL DEFAULT 0,
+  total INTEGER NOT NULL DEFAULT 0,
+  details TEXT DEFAULT '[]',
+  duration_seconds INTEGER,
+  taken_at TEXT DEFAULT (datetime('now'))
+);
+
+-- Open/extended responses. first_response is set once and never overwritten;
+-- refined_response is filled in only after the student revises following
+-- feedback. suggested_* comes from the deterministic heuristic; teacher_*
+-- is the override and always takes precedence when present.
+CREATE TABLE IF NOT EXISTS dtf_responses (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  question_id TEXT NOT NULL,
+  first_response TEXT NOT NULL DEFAULT '',
+  refined_response TEXT,
+  suggested_stage TEXT,
+  stage_reasoning TEXT DEFAULT '',
+  teacher_feedback TEXT DEFAULT '',
+  teacher_stage TEXT,
+  marked_complete INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now')),
+  UNIQUE(user_id, question_id)
+);
+
+CREATE TABLE IF NOT EXISTS dtf_vocab_progress (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  term_id TEXT NOT NULL,
+  familiarity TEXT NOT NULL DEFAULT 'new',
+  correct_count INTEGER NOT NULL DEFAULT 0,
+  attempt_count INTEGER NOT NULL DEFAULT 0,
+  updated_at TEXT DEFAULT (datetime('now')),
+  UNIQUE(user_id, term_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_dtf_progress_user ON dtf_section_progress(user_id);
+CREATE INDEX IF NOT EXISTS idx_dtf_attempts_user ON dtf_attempts(user_id);
+CREATE INDEX IF NOT EXISTS idx_dtf_responses_user ON dtf_responses(user_id);
+CREATE INDEX IF NOT EXISTS idx_dtf_vocab_user ON dtf_vocab_progress(user_id);
 `);
 
 // --- lightweight migrations: add columns to existing tables if missing ---
@@ -166,6 +241,7 @@ ensureColumn("quiz_attempts", "quiz_set_id", "INTEGER REFERENCES quiz_sets(id)")
 // counts as handed in.
 ensureColumn("submissions", "status", "TEXT NOT NULL DEFAULT 'submitted'");
 ensureColumn("submissions", "submitted_at", "TEXT");
+ensureColumn("spec_projects", "summary_text", "TEXT DEFAULT ''");
 
 
 // --- one-time admin bootstrap ---

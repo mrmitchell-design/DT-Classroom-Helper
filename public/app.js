@@ -401,6 +401,276 @@ function specStrength(points) {
   }));
 }
 
+/* Builds a rough written-prose DRAFT of the specification from the
+   student's own structured points - a starting point for the kind of
+   written summary a design portfolio needs, not a finished piece of work.
+   Deliberately template-based (no AI) so it's fast, free, and predictable,
+   and always framed to the student as something to rewrite in their own
+   words rather than hand in as-is. */
+function generateSpecSummaryDraft(project, points) {
+  const lines = [];
+  const name = (project.projectName || "this product").trim();
+  const user = (project.intendedUser || "").trim();
+  const problem = (project.designProblem || "").trim();
+  let intro = `This specification is for ${name}`;
+  if (user) intro += `, designed for ${user}`;
+  intro += ".";
+  if (problem) intro += ` ${problem}`;
+  lines.push(intro);
+  SPEC_CATEGORIES.forEach(cat => {
+    const items = (points || []).filter(p => p.category === cat.key).sort((a, b) => a.order - b.order);
+    if (items.length === 0) return;
+    const sentences = items.map((p, i) => {
+      const lead = i === 0 ? "The product must" : "It must also";
+      const body = stripLeadingRequirementPhrase(p.requirement);
+      let s = `${lead} ${body}`;
+      if (p.reason && p.reason.trim()) s += `, because ${lowerFirst(p.reason.trim())}`;
+      s += ".";
+      if (p.testingMethod && p.testingMethod.trim()) {
+        s += ` This will be checked by ${lowerFirst(p.testingMethod.trim())}.`;
+      }
+      return s;
+    });
+    lines.push(`${cat.label}: ${sentences.join(" ")}`);
+  });
+  return lines.join("\n\n");
+}
+
+/* Students often write requirements already starting with "The product
+   must..." / "Must..." (matching the worked examples they're shown) - strip
+   that off so it doesn't collide with the sentence lead-in we add. */
+function stripLeadingRequirementPhrase(text) {
+  const t = (text || "").trim();
+  const stripped = t.replace(/^(the product|it)\s+(must|should)\s+/i, "").replace(/^(must|should)\s+/i, "");
+  return lowerFirst(stripped || t);
+}
+function lowerFirst(text) {
+  const t = (text || "").trim();
+  if (!t) return t;
+  // don't lowercase things that look like they start with a proper noun/number/acronym
+  if (/^[A-Z]{2,}/.test(t) || /^\d/.test(t)) return t;
+  return t.charAt(0).toLowerCase() + t.slice(1);
+}
+
+/* ===== dtf-content.js ===== */
+/* ------------------------------------------------------------------ */
+/* DESIGN FUNDAMENTALS - COURSE ARCHITECTURE (Phase 1)                 */
+/* No unit/section content lives here yet - that's Phase 2/3. This file*/
+/* holds the reusable scaffolding every section will be built on:      */
+/* the DT stage system, grade boundaries, question categories/types,   */
+/* randomisation counts, and the deterministic (non-AI) stage-         */
+/* suggestion heuristic used for open responses.                       */
+/* ------------------------------------------------------------------ */
+
+// Canonical DT stages. Do not introduce alternative labels anywhere in
+// this course - these four are the only ones the app should ever show.
+const DT_STAGES = ["beginning", "emerging", "developing", "mastering"];
+const DT_STAGE_INFO = {
+  beginning: {
+    label: "Beginning",
+    verb: "Identify",
+    tint: "#FF3B30"
+  },
+  emerging: {
+    label: "Emerging",
+    verb: "Explain",
+    tint: "#FF9500"
+  },
+  developing: {
+    label: "Developing",
+    verb: "Apply",
+    tint: "#0071E3"
+  },
+  mastering: {
+    label: "Mastering",
+    verb: "Justify",
+    tint: "#34C759"
+  }
+};
+
+// Existing DT grade boundaries (do not change these numbers - they're the
+// school's own reporting scale, kept here as reference/documentation for
+// the teacher dashboard; the course itself only ever assigns a DT stage).
+const DT_GRADE_BOUNDARIES = [{
+  band: "9.0+",
+  grade: "A*",
+  percent: 83,
+  stage: "mastering"
+}, {
+  band: "8.0\u20138.9",
+  grade: "A",
+  percent: 78,
+  stage: "mastering"
+}, {
+  band: "7.0\u20137.9",
+  grade: "A-",
+  percent: 72,
+  stage: "mastering"
+}, {
+  band: "6.0\u20136.9",
+  grade: "B",
+  percent: 62,
+  stage: "developing"
+}, {
+  band: "5.0\u20135.9",
+  grade: "C+",
+  percent: 54,
+  stage: "developing"
+}, {
+  band: "4.0\u20134.9",
+  grade: "C-",
+  percent: 49,
+  stage: "developing"
+}, {
+  band: "3.0\u20133.9",
+  grade: "D",
+  percent: 45,
+  stage: "emerging"
+}, {
+  band: "2.0\u20132.9",
+  grade: "E",
+  percent: 36,
+  stage: "emerging"
+}, {
+  band: "1.0\u20131.9",
+  grade: "F",
+  percent: 29,
+  stage: "beginning"
+}, {
+  band: "Below 1.0",
+  grade: "G",
+  percent: 22,
+  stage: "beginning"
+}];
+const FIVE_CS = ["Creativity", "Collaboration", "Critical Thinking", "Community", "Character"];
+
+// Cognitive question categories (section 12)
+const QUESTION_CATEGORIES = {
+  R: {
+    label: "Remember & Recognise",
+    description: "Recall and basic recognition."
+  },
+  E: {
+    label: "Explain & Examine",
+    description: "Understanding and explanation."
+  },
+  A: {
+    label: "Apply & Analyse",
+    description: "Application to a context."
+  },
+  D: {
+    label: "Decide & Defend",
+    description: "Decision-making and justification."
+  },
+  C: {
+    label: "Challenge & Connect",
+    description: "Higher-order connections."
+  }
+};
+
+// Supported question types (section 11). Each maps to a renderer component
+// name; Phase 1 wires the plumbing, Phase 3 supplies real questions of
+// each type for Section 1.
+const QUESTION_TYPES = ["multiple_choice", "multiple_select", "true_false", "matching", "sorting", "fill_gap", "short_response", "extended_response", "improve_it", "decide_defend", "scenario_response"];
+const OPEN_RESPONSE_TYPES = ["short_response", "extended_response", "improve_it", "decide_defend", "scenario_response"];
+
+// Randomisation targets (section 16)
+const ATTEMPT_TYPE_INFO = {
+  micro: {
+    label: "Micro Check",
+    count: 2
+  },
+  section: {
+    label: "Section Check",
+    count: 5
+  },
+  checkpoint: {
+    label: "Checkpoint Quiz",
+    countRange: [8, 10]
+  },
+  endofunit: {
+    label: "End-of-Unit Quiz",
+    countRange: [15, 20]
+  },
+  final: {
+    label: "Final Challenge",
+    count: null
+  } // not a random draw - a single integrated task
+};
+
+/* ------------------------------------------------------------------ */
+/* DETERMINISTIC STAGE-SUGGESTION HEURISTIC                            */
+/* No AI call. Compares a student's response text against the         */
+/* question's own curated acceptedIdeas/expectedKnowledge, exactly as  */
+/* section 9/55 require - the heuristic works against approved content,*/
+/* it never invents its own judgement of what's correct. Always        */
+/* produces a plain-language reason a teacher can read and override.   */
+/* ------------------------------------------------------------------ */
+
+const REASONING_CONNECTORS = /\b(because|so that|this means|therefore|as a result|due to|which means|in order to)\b/i;
+const JUSTIFICATION_SIGNALS = /\b(evidence|test(ed|ing)?|measur(e|ed|ing)|compar(e|ed|ison)|justif\w*|research|data|survey|user(s)? (said|found|showed|reported)|percent|%|\d+)\b/i;
+function countAcceptedIdeaMatches(text, acceptedIdeas) {
+  const lower = (text || "").toLowerCase();
+  return (acceptedIdeas || []).filter(idea => {
+    const key = idea.toLowerCase().split(/\s+/).slice(0, 3).join(" "); // match on the idea's leading phrase
+    return lower.includes(key) || idea.toLowerCase().split(/\s+/).some(w => w.length > 4 && lower.includes(w));
+  }).length;
+}
+function suggestDTStage(responseText, question) {
+  const text = (responseText || "").trim();
+  const acceptedIdeas = question && question.acceptedIdeas || [];
+  const wordCount = text ? text.split(/\s+/).filter(Boolean).length : 0;
+  const keywordHits = text ? countAcceptedIdeaMatches(text, acceptedIdeas) : 0;
+  const hasReasoning = REASONING_CONNECTORS.test(text);
+  const hasJustification = JUSTIFICATION_SIGNALS.test(text);
+  if (!text || keywordHits === 0 || wordCount < 4) {
+    return {
+      stage: "beginning",
+      reasoning: acceptedIdeas.length ? "Doesn't yet clearly connect to the DT knowledge this question is looking for. Look again at what's being asked and identify the relevant idea." : "The response is very short or unclear \u2014 there isn't enough here yet to identify the key idea."
+    };
+  }
+  if (keywordHits >= 2 && hasReasoning && wordCount >= 15 && hasJustification) {
+    return {
+      stage: "mastering",
+      reasoning: `Identifies ${keywordHits} relevant idea${keywordHits === 1 ? "" : "s"}, explains the reasoning, and includes evidence, testing or comparison language \u2014 the hallmark of justifying a decision.`
+    };
+  }
+  if (keywordHits >= 2 && hasReasoning && wordCount >= 15) {
+    return {
+      stage: "developing",
+      reasoning: `Applies ${keywordHits} relevant ideas and explains the thinking within the design context, but doesn't yet reference evidence, testing or comparison to justify it.`
+    };
+  }
+  if (keywordHits >= 1 && (hasReasoning || wordCount >= 8)) {
+    return {
+      stage: "emerging",
+      reasoning: "Identifies a relevant idea and begins to explain it, but the reasoning is still limited \u2014 try developing why it matters in this specific situation."
+    };
+  }
+  return {
+    stage: "beginning",
+    reasoning: "Identifies something relevant, but the answer isn't yet connected clearly to the design situation."
+  };
+}
+
+// Section 7's feedback language, generated from the suggested stage. Kept
+// separate from suggestDTStage's `reasoning` (which explains *why* to a
+// teacher) - this is what the *student* sees, phrased as a next step.
+function stageNextStepFeedback(stage) {
+  switch (stage) {
+    case "beginning":
+      return "You've started to identify the idea. Look again at what the question is asking and identify the DT knowledge that could help.";
+    case "emerging":
+      return "You've identified a relevant point. Develop your answer by explaining why it matters in this situation.";
+    case "developing":
+      return "You've applied the idea clearly. To move towards Mastering, justify your decision using evidence, measurements, research or testing.";
+    case "mastering":
+      return "You've applied the knowledge and justified your decision clearly using the design context.";
+    default:
+      return "";
+  }
+}
+
 /* ===== icons.jsx ===== */
 /* ------------------------------------------------------------------ */
 /* ICONS \u2014 served from local /icons/*.svg (no external CDN needed)    */
@@ -441,7 +711,8 @@ const ICON_KEBAB = {
   UsersRound: "users-round",
   ClipboardList: "clipboard-list",
   LogOut: "log-out",
-  Shield: "shield"
+  Shield: "shield",
+  GraduationCap: "graduation-cap"
 };
 const ICON_SVG_CACHE = {};
 function useIconSvg(name) {
@@ -2289,6 +2560,7 @@ function SpecWizard({
   project,
   onPointsChanged,
   onGoToReview,
+  onGoToSummary,
   onBack
 }) {
   const [categoryIndex, setCategoryIndex] = useState(0);
@@ -2399,8 +2671,8 @@ function SpecWizard({
   })) : /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "btn-primary",
-    onClick: onGoToReview
-  }, "Review my specification ", /*#__PURE__*/React.createElement(IconGlyph, {
+    onClick: onGoToSummary
+  }, "Write my summary ", /*#__PURE__*/React.createElement(IconGlyph, {
     name: "ChevronRight",
     size: 16
   }))), /*#__PURE__*/React.createElement("div", {
@@ -2414,6 +2686,91 @@ function SpecWizard({
     className: "btn-text",
     onClick: onBack
   }, "Save and exit")));
+}
+
+/* ------------------------------------------------------------------ */
+/* SPEC SUMMARY - editable written-prose draft, generated from points   */
+/* ------------------------------------------------------------------ */
+
+function SpecSummary({
+  project,
+  points,
+  onSaved,
+  onContinue,
+  onBack
+}) {
+  const [text, setText] = useState(project.summaryText || "");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const hasGenerated = useRef(false);
+  useEffect(() => {
+    if (!project.summaryText && !hasGenerated.current) {
+      hasGenerated.current = true;
+      setText(generateSpecSummaryDraft(project, points));
+    }
+  }, []);
+  function handleRegenerate() {
+    if (text.trim() && !window.confirm("Replace your current text with a fresh draft from your points? This can't be undone.")) return;
+    setText(generateSpecSummaryDraft(project, points));
+    setSaved(false);
+  }
+  async function handleSave() {
+    setSaving(true);
+    try {
+      const updated = await apiPut(`/api/specs/${project.id}/summary`, {
+        summaryText: text
+      });
+      onSaved(updated);
+      setSaved(true);
+    } catch (e) {/* ignore */}
+    setSaving(false);
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "Write your summary"), /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "This draft is put together automatically from the points you've written \u2014 it's a starting point, not a finished specification. Read it through and rewrite it in your own words before you're done.")), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: handleRegenerate
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "RotateCcw",
+    size: 15
+  }), " Regenerate from my points")), /*#__PURE__*/React.createElement("textarea", {
+    className: "spec-summary-textarea",
+    rows: 16,
+    value: text,
+    onChange: e => {
+      setText(e.target.value);
+      setSaved(false);
+    },
+    placeholder: "Your written specification summary will appear here once you've added some points."
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "qb-save-row",
+    style: {
+      marginTop: 14
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: handleSave,
+    disabled: saving
+  }, saving ? "Saving..." : "Save summary"), saved && /*#__PURE__*/React.createElement("span", {
+    className: "change-password-success"
+  }, "Saved \u2713"), onContinue && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: onContinue
+  }, "Continue to review ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  })), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-text",
+    onClick: onBack
+  }, "Back")));
 }
 
 /* ------------------------------------------------------------------ */
@@ -2563,6 +2920,7 @@ function SpecReview({
   onProjectUpdated,
   onEditDetails,
   onAddMore,
+  onGoToSummary,
   onBack,
   onExport
 }) {
@@ -2686,6 +3044,13 @@ function SpecReview({
     size: 16
   }), " Add more points"), /*#__PURE__*/React.createElement("button", {
     type: "button",
+    className: "btn-secondary",
+    onClick: onGoToSummary
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ClipboardList",
+    size: 16
+  }), " Write-up / summary"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
     className: "btn-primary",
     onClick: handleHandIn,
     disabled: saveState === "saving"
@@ -2749,7 +3114,11 @@ function SpecExportView({
     className: "spec-export-meta"
   }, /*#__PURE__*/React.createElement("strong", null, "User:"), " ", project.intendedUser), project.designProblem && /*#__PURE__*/React.createElement("p", {
     className: "spec-export-meta"
-  }, /*#__PURE__*/React.createElement("strong", null, "Design problem:"), " ", project.designProblem), grouped.map(g => /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("strong", null, "Design problem:"), " ", project.designProblem), project.summaryText && /*#__PURE__*/React.createElement("div", {
+    className: "spec-export-summary"
+  }, /*#__PURE__*/React.createElement("h3", null, "Summary"), project.summaryText.split("\n\n").map((para, i) => /*#__PURE__*/React.createElement("p", {
+    key: i
+  }, para))), grouped.map(g => /*#__PURE__*/React.createElement("div", {
     key: g.category.key,
     className: "spec-export-group"
   }, /*#__PURE__*/React.createElement("h3", null, g.category.label), g.items.map(p => {
@@ -2773,7 +3142,7 @@ function SpecBuilderTool({
   user,
   onBack
 }) {
-  const [view, setView] = useState("list"); // list | setup | wizard | review | export
+  const [view, setView] = useState("list"); // list | setup | wizard | summary | review | export
   const [project, setProject] = useState(null);
   async function openProject(id) {
     try {
@@ -2825,7 +3194,17 @@ function SpecBuilderTool({
       points
     })),
     onGoToReview: () => setView("review"),
+    onGoToSummary: () => setView("summary"),
     onBack: () => setView("list")
+  }), view === "summary" && project && /*#__PURE__*/React.createElement(SpecSummary, {
+    project: project,
+    points: project.points || [],
+    onSaved: updated => setProject(p => ({
+      ...p,
+      ...updated
+    })),
+    onContinue: () => setView("review"),
+    onBack: () => setView("review")
   }), view === "review" && project && /*#__PURE__*/React.createElement(SpecReview, {
     project: project,
     onProjectUpdated: updated => setProject(p => ({
@@ -2834,12 +3213,189 @@ function SpecBuilderTool({
     })),
     onEditDetails: () => setView("setup"),
     onAddMore: () => setView("wizard"),
+    onGoToSummary: () => setView("summary"),
     onBack: () => setView("list"),
     onExport: () => setView("export")
   }), view === "export" && project && /*#__PURE__*/React.createElement(SpecExportView, {
     project: project,
     points: project.points || [],
     onBack: () => setView("review")
+  }));
+}
+
+/* ===== dtf.jsx ===== */
+function DTFStagePill({
+  stage
+}) {
+  if (!stage) return /*#__PURE__*/React.createElement("span", {
+    className: "status-pill draft"
+  }, "Not enough evidence yet");
+  const info = DT_STAGE_INFO[stage];
+  return /*#__PURE__*/React.createElement("span", {
+    className: "dtf-stage-pill",
+    style: {
+      background: info.tint + "22",
+      color: info.tint
+    }
+  }, info.label);
+}
+function DTFDashboard({
+  sections
+}) {
+  const [progress, setProgress] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    apiGet("/api/dtf/progress").then(setProgress).catch(() => {}).finally(() => setLoading(false));
+  }, []);
+  const byKey = {};
+  progress.forEach(p => {
+    byKey[p.sectionKey] = p;
+  });
+  const completedCount = sections.filter(s => byKey[s.key] && byKey[s.key].completedAt).length;
+  const coursePct = sections.length ? Math.round(completedCount / sections.length * 100) : 0;
+  const scored = progress.filter(p => p.knowledgeScore !== null && p.knowledgeScore !== undefined);
+  const knowledgeConfidence = scored.length ? Math.round(scored.reduce((sum, p) => sum + p.knowledgeScore, 0) / scored.length) : null;
+  const stagedSections = progress.filter(p => p.confirmedStage || p.suggestedStage);
+  let currentStage = null;
+  if (stagedSections.length) {
+    const counts = {};
+    stagedSections.forEach(p => {
+      const s = p.confirmedStage || p.suggestedStage;
+      counts[s] = (counts[s] || 0) + 1;
+    });
+    currentStage = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "Discovering Design"), /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "Big Question: How do designers discover the right problem to solve?"))), loading && /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "Loading..."), !loading && /*#__PURE__*/React.createElement("div", {
+    className: "dtf-summary-grid"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dtf-summary-card"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "help-label"
+  }, "Course progress"), /*#__PURE__*/React.createElement("span", {
+    className: "dtf-summary-value"
+  }, coursePct, "%")), /*#__PURE__*/React.createElement("div", {
+    className: "dtf-summary-card"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "help-label"
+  }, "Knowledge confidence"), /*#__PURE__*/React.createElement("span", {
+    className: "dtf-summary-value"
+  }, knowledgeConfidence !== null ? `${knowledgeConfidence}%` : "\u2014")), /*#__PURE__*/React.createElement("div", {
+    className: "dtf-summary-card"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "help-label"
+  }, "Current DT stage"), /*#__PURE__*/React.createElement(DTFStagePill, {
+    stage: currentStage
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "dtf-section-list"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "help-label"
+  }, "Sections"), sections.map(s => {
+    const p = byKey[s.key];
+    return /*#__PURE__*/React.createElement("div", {
+      className: "dtf-section-row",
+      key: s.key
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "dtf-section-name"
+    }, s.number, ". ", s.title), /*#__PURE__*/React.createElement(DTFStagePill, {
+      stage: p ? p.confirmedStage || p.suggestedStage : null
+    }));
+  })));
+}
+const UNIT_1_SECTIONS = [{
+  key: "s1",
+  number: "01",
+  title: "Problem Before Product"
+}, {
+  key: "s2",
+  number: "02",
+  title: "People Before Products"
+}, {
+  key: "s3",
+  number: "03",
+  title: "Needs Before Nice-to-Haves"
+}, {
+  key: "s4",
+  number: "04",
+  title: "Profiling People"
+}, {
+  key: "s5",
+  number: "05",
+  title: "Research Before Response"
+}, {
+  key: "s6",
+  number: "06",
+  title: "Question, Query, Qualify"
+}, {
+  key: "s7",
+  number: "07",
+  title: "Surveys Seek Scale"
+}, {
+  key: "s8",
+  number: "08",
+  title: "Watch, Wonder, Work It Out"
+}, {
+  key: "s9",
+  number: "09",
+  title: "Measure Before Making"
+}, {
+  key: "s10",
+  number: "10",
+  title: "Products Provide Proof"
+}, {
+  key: "s11",
+  number: "11",
+  title: "Analyse, Don't Imitate"
+}, {
+  key: "s12",
+  number: "12",
+  title: "Discuss, Debate, Decide"
+}, {
+  key: "s13",
+  number: "13",
+  title: "Culture Changes Context"
+}, {
+  key: "s14",
+  number: "14",
+  title: "Evidence Before Decisions"
+}, {
+  key: "s15",
+  number: "15",
+  title: "Brief Before Build"
+}, {
+  key: "s16",
+  number: "16",
+  title: "Limits Lead Design"
+}, {
+  key: "s17",
+  number: "17",
+  title: "Specific Before Successful"
+}];
+function DesignFundamentalsTool({
+  user,
+  onBack
+}) {
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "tool-subheader no-print"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-text back-btn",
+    onClick: onBack
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 15,
+    style: {
+      transform: "rotate(180deg)"
+    }
+  }), " All tools")), /*#__PURE__*/React.createElement(DTFDashboard, {
+    sections: UNIT_1_SECTIONS
   }));
 }
 
@@ -2976,6 +3532,11 @@ function ToolPicker({
     title: "Specification Builder",
     icon: "ClipboardList",
     description: "Turn your research into a clear, measurable design specification \u2014 step by step, not a blank text box."
+  }, {
+    key: "design-fundamentals",
+    title: "Discovering Design",
+    icon: "GraduationCap",
+    description: "A KS3 course on how designers move from problem to evidence to a measurable specification."
   }];
   return /*#__PURE__*/React.createElement("div", {
     className: "tab-content tool-picker no-print"
@@ -3038,6 +3599,9 @@ function StudentApp({
     setTab: setAccessfmTab,
     onBack: () => setActiveTool(null)
   }), activeTool === "spec-builder" && /*#__PURE__*/React.createElement(SpecBuilderTool, {
+    user: user,
+    onBack: () => setActiveTool(null)
+  }), activeTool === "design-fundamentals" && /*#__PURE__*/React.createElement(DesignFundamentalsTool, {
     user: user,
     onBack: () => setActiveTool(null)
   }));

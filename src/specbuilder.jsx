@@ -172,7 +172,7 @@ function SpecPointForm({ category, onAdd }) {
 /* SPEC WIZARD - one category at a time                                */
 /* ------------------------------------------------------------------ */
 
-function SpecWizard({ project, onPointsChanged, onGoToReview, onBack }) {
+function SpecWizard({ project, onPointsChanged, onGoToReview, onGoToSummary, onBack }) {
   const [categoryIndex, setCategoryIndex] = useState(0);
   const [points, setPoints] = useState(project.points || []);
   const category = SPEC_CATEGORIES[categoryIndex];
@@ -249,14 +249,78 @@ function SpecWizard({ project, onPointsChanged, onGoToReview, onBack }) {
             Next category <IconGlyph name="ChevronRight" size={16} />
           </button>
         ) : (
-          <button type="button" className="btn-primary" onClick={onGoToReview}>
-            Review my specification <IconGlyph name="ChevronRight" size={16} />
+          <button type="button" className="btn-primary" onClick={onGoToSummary}>
+            Write my summary <IconGlyph name="ChevronRight" size={16} />
           </button>
         )}
       </div>
       <div className="spec-wizard-footer no-print">
         <button type="button" className="btn-text" onClick={onGoToReview}>Skip to review</button>
         <button type="button" className="btn-text" onClick={onBack}>Save and exit</button>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* SPEC SUMMARY - editable written-prose draft, generated from points   */
+/* ------------------------------------------------------------------ */
+
+function SpecSummary({ project, points, onSaved, onContinue, onBack }) {
+  const [text, setText] = useState(project.summaryText || "");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const hasGenerated = useRef(false);
+
+  useEffect(() => {
+    if (!project.summaryText && !hasGenerated.current) {
+      hasGenerated.current = true;
+      setText(generateSpecSummaryDraft(project, points));
+    }
+  }, []);
+
+  function handleRegenerate() {
+    if (text.trim() && !window.confirm("Replace your current text with a fresh draft from your points? This can't be undone.")) return;
+    setText(generateSpecSummaryDraft(project, points));
+    setSaved(false);
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    try {
+      const updated = await apiPut(`/api/specs/${project.id}/summary`, { summaryText: text });
+      onSaved(updated);
+      setSaved(true);
+    } catch (e) { /* ignore */ }
+    setSaving(false);
+  }
+
+  return (
+    <div className="tab-content">
+      <div className="panel-head">
+        <div>
+          <h2>Write your summary</h2>
+          <p className="sub">
+            This draft is put together automatically from the points you've written — it's a starting point, not a
+            finished specification. Read it through and rewrite it in your own words before you're done.
+          </p>
+        </div>
+        <button type="button" className="btn-secondary" onClick={handleRegenerate}><IconGlyph name="RotateCcw" size={15} /> Regenerate from my points</button>
+      </div>
+
+      <textarea
+        className="spec-summary-textarea"
+        rows={16}
+        value={text}
+        onChange={(e) => { setText(e.target.value); setSaved(false); }}
+        placeholder="Your written specification summary will appear here once you've added some points."
+      />
+
+      <div className="qb-save-row" style={{ marginTop: 14 }}>
+        <button type="button" className="btn-primary" onClick={handleSave} disabled={saving}>{saving ? "Saving..." : "Save summary"}</button>
+        {saved && <span className="change-password-success">Saved ✓</span>}
+        {onContinue && <button type="button" className="btn-secondary" onClick={onContinue}>Continue to review <IconGlyph name="ChevronRight" size={16} /></button>}
+        <button type="button" className="btn-text" onClick={onBack}>Back</button>
       </div>
     </div>
   );
@@ -340,7 +404,7 @@ function SpecPointRow({ point, index, onUpdated, onDeleted, onMove }) {
 /* SPEC REVIEW                                                          */
 /* ------------------------------------------------------------------ */
 
-function SpecReview({ project, onProjectUpdated, onEditDetails, onAddMore, onBack, onExport }) {
+function SpecReview({ project, onProjectUpdated, onEditDetails, onAddMore, onGoToSummary, onBack, onExport }) {
   const [points, setPoints] = useState(project.points || []);
   const [saveState, setSaveState] = useState("idle");
 
@@ -433,6 +497,7 @@ function SpecReview({ project, onProjectUpdated, onEditDetails, onAddMore, onBac
 
       <div className="quiz-result-actions no-print" style={{ marginTop: 20 }}>
         <button type="button" className="btn-secondary" onClick={onAddMore}><IconGlyph name="PenLine" size={16} /> Add more points</button>
+        <button type="button" className="btn-secondary" onClick={onGoToSummary}><IconGlyph name="ClipboardList" size={16} /> Write-up / summary</button>
         <button type="button" className="btn-primary" onClick={handleHandIn} disabled={saveState === "saving"}>
           <IconGlyph name="Check" size={16} /> {project.status === "submitted" ? "Update hand-in" : "Hand in"}
         </button>
@@ -465,6 +530,13 @@ function SpecExportView({ project, points, onBack }) {
       {project.intendedUser && <p className="spec-export-meta"><strong>User:</strong> {project.intendedUser}</p>}
       {project.designProblem && <p className="spec-export-meta"><strong>Design problem:</strong> {project.designProblem}</p>}
 
+      {project.summaryText && (
+        <div className="spec-export-summary">
+          <h3>Summary</h3>
+          {project.summaryText.split("\n\n").map((para, i) => <p key={i}>{para}</p>)}
+        </div>
+      )}
+
       {grouped.map((g) => (
         <div key={g.category.key} className="spec-export-group">
           <h3>{g.category.label}</h3>
@@ -489,7 +561,7 @@ function SpecExportView({ project, points, onBack }) {
 /* ------------------------------------------------------------------ */
 
 function SpecBuilderTool({ user, onBack }) {
-  const [view, setView] = useState("list"); // list | setup | wizard | review | export
+  const [view, setView] = useState("list"); // list | setup | wizard | summary | review | export
   const [project, setProject] = useState(null);
 
   async function openProject(id) {
@@ -535,7 +607,18 @@ function SpecBuilderTool({ user, onBack }) {
           project={project}
           onPointsChanged={(points) => setProject((p) => ({ ...p, points }))}
           onGoToReview={() => setView("review")}
+          onGoToSummary={() => setView("summary")}
           onBack={() => setView("list")}
+        />
+      )}
+
+      {view === "summary" && project && (
+        <SpecSummary
+          project={project}
+          points={project.points || []}
+          onSaved={(updated) => setProject((p) => ({ ...p, ...updated }))}
+          onContinue={() => setView("review")}
+          onBack={() => setView("review")}
         />
       )}
 
@@ -545,6 +628,7 @@ function SpecBuilderTool({ user, onBack }) {
           onProjectUpdated={(updated) => setProject((p) => ({ ...p, ...updated }))}
           onEditDetails={() => setView("setup")}
           onAddMore={() => setView("wizard")}
+          onGoToSummary={() => setView("summary")}
           onBack={() => setView("list")}
           onExport={() => setView("export")}
         />

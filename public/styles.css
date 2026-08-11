@@ -575,9 +575,24 @@ body {
 .spec-strength-item.partial { background:var(--amber-tint); color:var(--amber-text); }
 .spec-strength-item.empty { background:var(--border-light); color:var(--ink-tertiary); }
 
+.spec-summary-textarea { width:100%; font-family:inherit; font-size:14.5px; line-height:1.6; padding:16px; border:1px solid var(--border); border-radius:var(--radius-md); color:var(--ink); background:var(--surface); resize:vertical; }
+
+.spec-export-summary { margin-top:16px; padding-top:14px; border-top:1px solid var(--border-light); }
+.spec-export-summary h3 { font-size:16px; font-weight:700; color:var(--blue); margin-bottom:8px; }
+.spec-export-summary p { font-size:13.5px; line-height:1.6; margin:0 0 10px 0; }
+
 .spec-export-meta { margin: 4px 0; font-size:14px; color:var(--ink); }
 .spec-export-group { margin-top:22px; }
 .spec-export-group h3 { font-size:16px; font-weight:700; color:var(--blue); border-bottom:1px solid var(--border-light); padding-bottom:6px; margin-bottom:10px; }
 .spec-export-point { margin-bottom:12px; }
 .spec-export-point p { margin:0 0 2px 0; font-size:13.5px; line-height:1.5; }
 .spec-export-sub { color:var(--ink-secondary); padding-left:14px; }
+
+/* ---------- Design Fundamentals ---------- */
+.dtf-summary-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:12px; margin-bottom:24px; }
+.dtf-summary-card { background:var(--bg); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:8px; }
+.dtf-summary-value { font-size:26px; font-weight:700; letter-spacing:-0.01em; color:var(--ink); }
+.dtf-stage-pill { display:inline-flex; align-items:center; padding:5px 12px; border-radius:var(--radius-pill); font-size:12.5px; font-weight:600; }
+.dtf-section-list { display:flex; flex-direction:column; gap:6px; }
+.dtf-section-row { display:flex; align-items:center; justify-content:space-between; background:var(--surface); border:1px solid var(--border-light); border-radius:var(--radius-sm); padding:11px 14px; font-size:13.5px; }
+.dtf-section-name { font-weight:500; }

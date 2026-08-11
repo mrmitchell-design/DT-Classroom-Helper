@@ -42,6 +42,7 @@ const quizSetsPublicRoutes = require("./routes/quizsets-public");
 const tasksAdminRoutes = require("./routes/tasks");
 const tasksPublicRoutes = require("./routes/tasks-public");
 const specRoutes = require("./routes/specs");
+const dtfRoutes = require("./routes/dtf");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -84,6 +85,7 @@ app.use("/api/admin", tasksAdminRoutes);
 app.use("/api/quiz-sets", quizSetsPublicRoutes);
 app.use("/api/tasks", tasksPublicRoutes);
 app.use("/api/specs", specRoutes);
+app.use("/api/dtf", dtfRoutes);
 
 // uploaded task images - served statically, no auth (images are shown inline
 // in the worksheet task UI; they're not sensitive, just product photos)

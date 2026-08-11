@@ -11,7 +11,7 @@ const ICON_KEBAB = {
   RefreshCw: "refresh-cw", SlidersHorizontal: "sliders-horizontal", Recycle: "recycle",
   Eraser: "eraser", ArrowLeftRight: "arrow-left-right", UserPlus: "user-plus", Key: "key",
   Trash2: "trash-2", FileDown: "file-down", UsersRound: "users-round",
-  ClipboardList: "clipboard-list", LogOut: "log-out", Shield: "shield",
+  ClipboardList: "clipboard-list", LogOut: "log-out", Shield: "shield", GraduationCap: "graduation-cap",
 };
 const ICON_SVG_CACHE = {};
 

@@ -13,6 +13,7 @@ const PUBLIC = path.join(ROOT, "public");
 const FILES_IN_ORDER = [
   "content.js",
   "specbuilder-content.js",
+  "dtf-content.js",
   "icons.jsx",
   "api.jsx",
   "shared.jsx",
@@ -21,6 +22,7 @@ const FILES_IN_ORDER = [
   "quiz.jsx",
   "worksheet.jsx",
   "specbuilder.jsx",
+  "dtf.jsx",
   "login.jsx",
   "studentapp.jsx",
   "admin-csvimport.jsx",
@@ -70,7 +72,7 @@ function vendorStaticAssets() {
     "coins", "users", "leaf", "ruler", "shield-check", "settings", "layers",
     "repeat", "git-merge", "refresh-cw", "sliders-horizontal", "recycle",
     "eraser", "arrow-left-right", "user-plus", "key", "trash-2", "file-down",
-    "users-round", "clipboard-list", "log-out", "shield",
+    "users-round", "clipboard-list", "log-out", "shield", "graduation-cap",
   ];
   let copied = 0;
   needed.forEach((name) => {
