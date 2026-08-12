@@ -685,8 +685,23 @@ const U1S1_META = {
   title: "Problem Before Product",
   sectionQuestion: "How do we make sure we are solving the right problem?",
   fiveCFocus: "Critical Thinking",
+  welcome: "Every product around you started because somebody noticed something.\n\nMaybe something was difficult to use, uncomfortable, unsafe, frustrating, wasteful, difficult to carry, difficult to store, or simply could be better.\n\nDesigners don't just make things. They identify problems and opportunities and develop ways of responding to them.\n\nIn this section, you are going to start thinking like a designer by learning how to find the problem before the product.",
+  wagbaHeadline: "Identifying a design problem before deciding what should be made.",
+  wagbaBullets: ["recognise a design context", "identify problems, needs and opportunities", "tell the difference between a problem and a solution", "explore different design possibilities", "avoid getting stuck on your first idea"],
+  stageLadder: {
+    beginning: "I can recognise a design problem or solution with support.",
+    emerging: "I can identify problems and possible solutions.",
+    developing: "I can explain why designers should investigate a problem before choosing a solution.",
+    mastering: "I can investigate a context, identify the underlying problem and justify different possible design directions."
+  },
   gettingBetterAt: ["recognising a design problem, need or opportunity", "understanding what a design context is", "separating a problem from a solution", "identifying different design possibilities", "explaining why one problem can have several possible solutions", "avoiding jumping immediately to the first product idea", "recognising basic design fixation", "using evidence and investigation before making design decisions"],
   successCriteria: ["I can identify a design problem.", "I can explain the difference between a problem and a solution.", "I can recognise when a solution has been hidden inside a design context.", "I can suggest different design possibilities.", "I can explain why designers investigate before choosing a product.", "I can recognise basic design fixation."]
+};
+const U1S1_STARTING_POINT = {
+  scenario: "Every lesson, students waste time searching through their bags for pens, pencils, rulers and other equipment.",
+  prompt: "Which would be the best place for a designer to start?",
+  options: ["Design a new pencil case.", "Investigate why students struggle to organise their equipment.", "Choose a material.", "Draw some storage boxes."],
+  correct: "Investigate why students struggle to organise their equipment."
 };
 const U1S1_VOCAB = [{
   id: "u1s1-design",
@@ -723,61 +738,70 @@ const U1S1_VOCAB = [{
 }];
 const U1S1_CARDS = [{
   type: "content",
-  id: "opening-1",
-  heading: "Start with the problem",
-  body: "Students regularly lose stationery inside their school bags and struggle to find the equipment they need during lessons."
-}, {
-  type: "touchpoint",
-  id: "opening-predict",
-  kind: "pause_predict",
-  heading: "Pause & Predict",
-  prompt: "What would you design?"
+  id: "learn-what-designers-do",
+  heading: "What Does a Designer Actually Do?",
+  body: "Students can easily think Design & Technology means \u201cI have to make something.\u201d\n\nMaking is part of DT, but good designing starts before making.\n\nA designer normally needs to understand: who has a problem? What is happening? Why is it a problem? What needs to improve?\n\nOnly then should they start deciding: what could I design?\n\nThis is why we use the idea of Problem Before Product. If you decide what to make too early, you might create a brilliant product that solves the wrong problem."
 }, {
   type: "content",
-  id: "opening-2",
-  heading: "Problem Before Product",
-  body: "You may already be thinking about pencil cases, organisers, pockets or storage boxes.\n\nThat's normal \u2014 but you've just done something designers need to be careful about. You've started thinking about the product before fully investigating the problem.\n\nGood designers don't start by asking \u201cWhat should I make?\u201d They start by asking \u201cWhat problem am I actually trying to solve?\u201d"
+  id: "learn-design-context",
+  heading: "What Is a Design Context?",
+  body: "Design Context: the situation surrounding a design problem, need or opportunity.\n\nA context gives us somewhere to start.\n\nStudents regularly struggle to organise and access the equipment they need during lessons.\n\nNotice what this doesn't say. It doesn't tell us what product to make, what material to use, what shape it should be, or what it should look like. That's deliberate \u2014 it gives the designer something to investigate."
 }, {
   type: "content",
-  id: "know-context",
-  heading: "What We Need to Know: Design Context",
-  body: "A design context is the situation surrounding a design problem, need or opportunity.",
+  id: "example-compare-contexts",
+  heading: "Example: Compare the Contexts",
+  body: "Context A gives us a product and a material already \u2014 the designer has very little freedom to investigate the actual problem.\n\nContext B leaves room to investigate what equipment students carry, what they lose, where they store it, when they need it, why existing solutions don't work, and what different students need. Only after that do we start thinking about possible products.",
   compare: {
-    a: "Design a pencil case.",
+    a: "Design a plywood pencil case.",
     b: "Students need a better way to organise and access the equipment they use during lessons."
-  }
+  },
+  footer: "A good design context gives us a problem to investigate, not simply a product to make."
 }, {
   type: "touchpoint",
   id: "which-stronger-1",
   kind: "which_is_stronger",
-  heading: "Which Is Stronger?",
-  prompt: "Which gives the designer more opportunity to investigate?",
-  optionA: "Design a pencil case.",
+  heading: "Quick Check",
+  prompt: "Which is the stronger design context?",
+  optionA: "Design a plywood pencil case.",
   optionB: "Students need a better way to organise and access the equipment they use during lessons.",
   correct: "b",
-  feedbackCorrect: "Good thinking. B describes the situation and need without deciding what the final product must be.",
-  feedbackIncorrect: "A has already decided that the solution will be a pencil case. Look again at B. What other solutions could respond to that problem?"
+  feedbackCorrect: "Good thinking. B describes the situation and need without deciding what the final product or material must be.",
+  feedbackIncorrect: "A has already decided the product (pencil case) and the material (plywood). Look again at B \u2014 what could you investigate that A doesn't allow?"
 }, {
   type: "content",
-  id: "example-possibilities",
-  heading: "One Problem, Many Possibilities",
-  body: "Students need a better way to organise and access equipment during lessons.\n\nThis one context could lead to many different directions:",
-  list: ["portable organiser", "modular bag insert", "desk storage", "classroom storage system", "equipment tray", "labelled storage", "wearable organiser", "equipment checking system"],
-  footer: "These are not eight finished designs. They are design possibilities \u2014 different directions we could investigate."
+  id: "learn-problem-need-opportunity",
+  heading: "Problem, Need and Opportunity",
+  body: "Problem: an issue or difficulty that could be improved through design.\nExample: students' water bottles are regularly knocked over during lessons.\n\nNeed: something necessary for a user or situation.\nExample: students need somewhere safe and accessible to keep their bottles.\n\nOpportunity: a situation where design could improve something or create something useful.\nExample: there is an opportunity to improve how bottles are stored around classroom desks.\n\nThese ideas are connected, but they are not exactly the same."
 }, {
   type: "touchpoint",
-  id: "quick-check-1",
-  kind: "quick_check",
-  heading: "Quick Check",
-  prompt: "Which of these is a design possibility?",
-  options: ["Students lose stationery.", "Students are in Year 8.", "A modular bag organiser.", "The problem is annoying."],
-  correct: "A modular bag organiser.",
-  feedback: "A modular bag organiser is one possible way of responding to the problem."
+  id: "pno-check-1",
+  kind: "problem_need_opportunity",
+  heading: "Check",
+  prompt: "Sort each statement as a Problem, a Need, or an Opportunity.",
+  items: [{
+    text: "Wet umbrellas leave puddles that make the classroom floor slippery.",
+    answer: "problem"
+  }, {
+    text: "Students need somewhere dry to keep umbrellas during lessons.",
+    answer: "need"
+  }, {
+    text: "There is a chance to improve how the whole school stores umbrellas, not just one classroom.",
+    answer: "opportunity"
+  }, {
+    text: "Headphones get tangled and lost inside bags.",
+    answer: "problem"
+  }, {
+    text: "Students need a reliable way to keep headphones tidy.",
+    answer: "need"
+  }, {
+    text: "A shared class charging station could improve equipment access for everyone.",
+    answer: "opportunity"
+  }]
 }, {
   type: "content",
-  id: "problem-or-solution",
-  heading: "Problem or Solution?",
-  body: "Problem: an issue or difficulty that could be improved or solved through design.\n\nSolution: a way of responding to a problem, need or opportunity.\n\nMy phone keeps falling off my desk while I work.\n\nThe problem is NOT \u201cI don't have a phone stand.\u201d A phone stand is already a solution. Other possible solutions could include a non-slip surface, a desk pocket, a clip, a tray, an adjustable holder, or an attachment to another product.\n\nDon't hide the solution inside the problem."
+  id: "learn-problem-vs-solution",
+  heading: "Problem vs Solution",
+  body: "Your phone keeps falling off your desk while you work.\n\nThe problem is: my phone keeps falling from the desk.\n\nA need might be: I need a safe way to position my phone while working.\n\nPossible solutions might be: a phone stand, a non-slip surface, a clip, a desk pocket, or an adjustable holder.\n\n\u201cI don't have a phone stand\u201d isn't really the design problem \u2014 you've already decided that a stand is the answer."
 }, {
   type: "touchpoint",
   id: "stop-sort-1",
@@ -810,26 +834,17 @@ const U1S1_CARDS = [{
     answer: "solution"
   }]
 }, {
-  type: "touchpoint",
-  id: "spot-hidden-1",
-  kind: "spot_hidden_solution",
-  heading: "Spot the Hidden Solution",
-  prompt: "Students need a wall-mounted rack to organise their equipment.\n\nWhat's wrong with this design context?",
-  modelExplanation: "\u201cWall-mounted rack\u201d has already specified the solution.",
-  improvedVersion: "Students need a better way to organise and access their equipment."
-}, {
-  type: "touchpoint",
-  id: "spot-hidden-2",
-  kind: "spot_hidden_solution",
-  heading: "Spot the Hidden Solution",
-  prompt: "Students need a lightweight plastic container to carry art equipment.\n\nWhat has already been decided here?",
-  modelExplanation: "\u201cContainer\u201d is a chosen product, and \u201cplastic\u201d is a chosen material \u2014 both decided before the problem was fully investigated.",
-  improvedVersion: "Students need a practical way to safely transport art equipment between classrooms."
+  type: "content",
+  id: "learn-one-problem-many-possibilities",
+  heading: "One Problem, Many Possibilities",
+  body: "Problem: students struggle to organise their equipment.\n\nThat one problem could lead to many different possibilities:",
+  list: ["portable organiser", "bag insert", "desk storage", "shared classroom system", "equipment-checking system"],
+  footer: "Notice that these aren't five different-looking pencil cases. They are different ways of responding to the problem."
 }, {
   type: "touchpoint",
   id: "think-try-test-1",
   kind: "think_try_test",
-  heading: "Think, Try, Test",
+  heading: "Practice: Your Turn",
   scenario: "Students regularly leave reusable water bottles on the floor beside their desks, where they are knocked over.",
   parts: [{
     key: "problem",
@@ -843,14 +858,14 @@ const U1S1_CARDS = [{
   teacherGuidance: "Model guidance: students do not have a safe and convenient place to store bottles during lessons, resulting in bottles being knocked over. Three differently shaped desk-mounted bottle holders should not automatically count as three different design possibilities \u2014 we are looking for different approaches to the problem, e.g. a desk-mounted holder, storage attached to furniture, a central bottle-storage system, or a bag attachment."
 }, {
   type: "content",
-  id: "notice-more-ideas",
-  heading: "What We Need to Notice",
-  body: "More ideas does not automatically mean better design thinking.\n\nA student produces a round pencil case, a square pencil case, a triangular pencil case, and a hexagonal pencil case.\n\nHave they explored four different design possibilities? Not necessarily \u2014 they have explored variations of the same solution.\n\nStronger exploration might compare a pencil case, a bag insert, a desk organiser and an equipment-storage system."
+  id: "learn-fixation-framing",
+  heading: "When Your First Idea Gets in the Way",
+  body: "Have you ever had an idea that you really liked, and then found yourself trying to make everything fit that idea?\n\nDesigners do this too.\n\nDesign Fixation: becoming too focused on one idea or type of solution and finding it difficult to explore alternatives."
 }, {
   type: "content",
-  id: "design-fixation-intro",
-  heading: "Design Fixation",
-  body: "Design Fixation: becoming too focused on one idea or type of solution and finding it difficult to explore alternatives.\n\nYour design context is: students need a better way to organise classroom equipment.\n\nYour first action is searching online for \u201cBest classroom storage boxes.\u201d"
+  id: "learn-fixation-example",
+  heading: "Design Fixation in Practice",
+  body: "Your design context is: students need a better way to organise classroom equipment.\n\nYour first action is searching online for \u201cBest classroom storage boxes.\u201d"
 }, {
   type: "touchpoint",
   id: "spot-problem-fixation",
@@ -858,25 +873,34 @@ const U1S1_CARDS = [{
   heading: "Spot the Problem",
   prompt: "What could be wrong with searching \u201cBest classroom storage boxes\u201d before investigating the problem?",
   modelExplanation: "The search assumes that a storage box is the solution before the problem has been properly investigated. Looking at existing products is useful later, but the search terms we use can influence the solutions we discover."
-}, {
-  type: "touchpoint",
-  id: "decide-defend-1",
-  kind: "decide_defend",
-  heading: "Decide & Defend",
-  scenario: "Students regularly lose stationery inside their school bags.",
-  optionA: {
-    label: "Student A",
-    text: "\u201cLet's design a better pencil case.\u201d"
-  },
-  optionB: {
-    label: "Student B",
-    text: "\u201cLet's investigate why the stationery is getting lost first.\u201d"
-  },
-  correct: "b",
-  prompt: "Who is showing stronger design thinking, and why?",
-  modelResponse: "Student B, because they are investigating the cause of the problem before deciding which solution should be developed.",
-  acceptedIdeas: ["investigate first", "understand cause", "avoid choosing solution too early", "explore alternatives"]
 }];
+const U1S1_APPLY_TASK = {
+  heading: "Design Detective",
+  scenario: "During practical lessons, bags are placed around stools and workbenches. Students and teachers sometimes trip over them, but students need access to some of the equipment stored inside them during the lesson.",
+  parts: [{
+    key: "happening",
+    label: "1. What is happening?",
+    placeholder: "Describe the situation in your own words..."
+  }, {
+    key: "problem",
+    label: "2. What is the design problem?",
+    placeholder: "Describe the real problem, not a solution..."
+  }, {
+    key: "needs",
+    label: "3. What do users appear to need?",
+    placeholder: "Describe what students and teachers need..."
+  }, {
+    key: "possibilities",
+    label: "4. Suggest three genuinely different design possibilities.",
+    placeholder: "List three different directions..."
+  }, {
+    key: "priority",
+    label: "5. Which would you investigate first, and why?",
+    placeholder: "Explain your choice..."
+  }],
+  acceptedIdeas: ["bags cause a trip hazard", "bags block walkways or floor space", "need access to equipment during the lesson", "safe storage", "accessible storage", "genuinely different possibilities", "investigate first", "justified choice"],
+  expectedKnowledge: "Applying problem/need identification and generating genuinely different possibilities in an unfamiliar scenario."
+};
 const U1S1_QUESTIONS = [{
   qid: "U1-S1-R01",
   category: "R",
@@ -4264,6 +4288,57 @@ function TP_StopSort({
     size: 16
   })));
 }
+function TP_ProblemNeedOpportunity({
+  card,
+  onContinue
+}) {
+  const [answers, setAnswers] = useState({});
+  const allDone = card.items.every((_, i) => answers[i] !== undefined);
+  function pick(i, val) {
+    if (answers[i] !== undefined) return;
+    setAnswers(a => ({
+      ...a,
+      [i]: val
+    }));
+  }
+  const labels = {
+    problem: "Problem",
+    need: "Need",
+    opportunity: "Opportunity"
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "dtf-touchpoint"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dtf-touchpoint-label"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "SlidersHorizontal",
+    size: 14
+  }), " ", card.heading), /*#__PURE__*/React.createElement("p", {
+    className: "dtf-touchpoint-prompt"
+  }, card.prompt), /*#__PURE__*/React.createElement("div", {
+    className: "dtf-sort-list"
+  }, card.items.map((item, i) => /*#__PURE__*/React.createElement("div", {
+    className: "dtf-sort-row",
+    key: i
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dtf-sort-text"
+  }, item.text), /*#__PURE__*/React.createElement("div", {
+    className: "dtf-sort-buttons"
+  }, ["problem", "need", "opportunity"].map(val => /*#__PURE__*/React.createElement("button", {
+    key: val,
+    type: "button",
+    className: "chip" + (answers[i] === val ? val === item.answer ? " active-correct" : " active-wrong" : ""),
+    onClick: () => pick(i, val),
+    disabled: answers[i] !== undefined
+  }, labels[val])))))), allDone && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: onContinue
+  }, "Continue ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  })));
+}
 function TP_RevealExplanation({
   card,
   sectionKey,
@@ -4424,6 +4499,7 @@ const TOUCHPOINT_RENDERERS = {
   which_is_stronger: TP_WhichIsStronger,
   quick_check: TP_QuickCheck,
   stop_sort: TP_StopSort,
+  problem_need_opportunity: TP_ProblemNeedOpportunity,
   spot_hidden_solution: TP_RevealExplanation,
   spot_the_problem: TP_RevealExplanation,
   think_try_test: TP_ThinkTryTest,
@@ -4431,106 +4507,22 @@ const TOUCHPOINT_RENDERERS = {
 };
 
 /* ------------------------------------------------------------------ */
-/* GUIDED CARD FLOW                                                     */
+/* ------------------------------------------------------------------ */
+/* MID-FLOW KNOWLEDGE CHECK - 3-5 questions on material taught so far   */
+/* Pulled from Remember & Recognise + Explain & Examine only, since     */
+/* Apply/Decide/Challenge questions test things not yet covered by the  */
+/* point this step appears at in the flow.                              */
 /* ------------------------------------------------------------------ */
 
-function DTFCardFlow({
-  meta,
-  cards,
-  onFinished,
-  onBack
-}) {
-  const [idx, setIdx] = useState(0);
-  const card = cards[idx];
-  const canAutoAdvance = card.type === "content";
-  function next() {
-    if (idx + 1 >= cards.length) onFinished();else setIdx(i => i + 1);
-  }
-  const Touchpoint = card.type === "touchpoint" ? TOUCHPOINT_RENDERERS[card.kind] : null;
-  return /*#__PURE__*/React.createElement("div", {
-    className: "tab-content"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "spec-wizard-progress"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "quiz-history-label"
-  }, "Section ", meta.number, " of 17 \xB7 ", meta.title), /*#__PURE__*/React.createElement("div", {
-    className: "quiz-progress-bar"
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: `${(idx + 1) / cards.length * 100}%`,
-      background: "var(--blue)"
-    }
-  }))), card.type === "content" && /*#__PURE__*/React.createElement("div", {
-    className: "dtf-content-card"
-  }, /*#__PURE__*/React.createElement("h2", null, card.heading), /*#__PURE__*/React.createElement("p", {
-    className: "dtf-card-body",
-    style: {
-      whiteSpace: "pre-line"
-    }
-  }, card.body), card.compare && /*#__PURE__*/React.createElement("div", {
-    className: "dtf-compare-grid"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "dtf-compare-item"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "dtf-choice-letter"
-  }, "A"), /*#__PURE__*/React.createElement("p", null, card.compare.a)), /*#__PURE__*/React.createElement("div", {
-    className: "dtf-compare-item"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "dtf-choice-letter"
-  }, "B"), /*#__PURE__*/React.createElement("p", null, card.compare.b))), card.list && /*#__PURE__*/React.createElement("div", {
-    className: "chip-row"
-  }, card.list.map((item, i) => /*#__PURE__*/React.createElement("span", {
-    key: i,
-    className: "chip chip-word"
-  }, item))), card.footer && /*#__PURE__*/React.createElement("p", {
-    className: "sub",
-    style: {
-      marginTop: 10
-    }
-  }, card.footer)), Touchpoint && /*#__PURE__*/React.createElement(Touchpoint, {
-    card: card,
-    sectionKey: meta.sectionKey,
-    onContinue: next
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "quiz-nav-row",
-    style: {
-      marginTop: 20
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    className: "btn-secondary",
-    onClick: () => idx === 0 ? onBack() : setIdx(i => i - 1)
-  }, /*#__PURE__*/React.createElement(IconGlyph, {
-    name: "ChevronRight",
-    size: 16,
-    style: {
-      transform: "rotate(180deg)"
-    }
-  }), " Back"), canAutoAdvance && /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    className: "btn-primary",
-    onClick: next
-  }, idx + 1 >= cards.length ? "Continue" : "Next", " ", /*#__PURE__*/React.createElement(IconGlyph, {
-    name: "ChevronRight",
-    size: 16
-  }))));
-}
-
-/* ------------------------------------------------------------------ */
-/* SECTION CHECK - 5 randomly drawn questions (2R/1E/1A/1(D-or-C))      */
-/* ------------------------------------------------------------------ */
-
-function pickSectionCheckQuestions(bank) {
+function pickKnowledgeCheckQuestions(bank) {
   const byCat = {
     R: [],
-    E: [],
-    A: [],
-    D: [],
-    C: []
+    E: []
   };
-  bank.forEach(q => byCat[q.category].push(q));
-  const dOrC = shuffle([...byCat.D, ...byCat.C]);
-  return [...shuffle(byCat.R).slice(0, 2), ...shuffle(byCat.E).slice(0, 1), ...shuffle(byCat.A).slice(0, 1), ...dOrC.slice(0, 1)].filter(Boolean);
+  bank.forEach(q => {
+    if (byCat[q.category]) byCat[q.category].push(q);
+  });
+  return [...shuffle(byCat.R).slice(0, 3), ...shuffle(byCat.E).slice(0, 2)].filter(Boolean);
 }
 const OPEN_TYPES = ["short_response", "extended_response", "improve_it", "decide_defend_short"];
 function DTFQuestionRenderer({
@@ -4616,7 +4608,6 @@ function DTFQuestionRenderer({
       }
     }, "Submit"));
   }
-  // open response types
   return /*#__PURE__*/React.createElement("div", {
     className: "dtf-open-response"
   }, /*#__PURE__*/React.createElement("textarea", {
@@ -4631,16 +4622,17 @@ function DTFQuestionRenderer({
     disabled: !text.trim()
   }, "Submit"));
 }
-function DTFSectionCheck({
+function DTFKnowledgeCheckStep({
   meta,
   bank,
-  onFinished,
-  onBack
+  onEvidence,
+  onContinue
 }) {
-  const [questions] = useState(() => pickSectionCheckQuestions(bank));
+  const [questions] = useState(() => pickKnowledgeCheckQuestions(bank));
   const [responses, setResponses] = useState({});
   const startTimeRef = useRef(Date.now());
   const allAnswered = questions.every(q => responses[q.qid]);
+  const [submitted, setSubmitted] = useState(false);
   function respond(qid, r) {
     setResponses(rs => ({
       ...rs,
@@ -4657,49 +4649,28 @@ function DTFSectionCheck({
       correctAnswer: q.correctAnswer || null,
       isCorrect: responses[q.qid] ? responses[q.qid].isCorrect : null
     }));
-
-    // Aggregate the open-response stage suggestions collected during this
-    // check into one section-level suggestion (the DT stage never comes
-    // from the MCQ score alone - it comes from how the open responses
-    // showed the student thinking, per section 5/6 of the brief).
     const openStages = questions.filter(q => OPEN_TYPES.includes(q.type)).map(q => responses[q.qid] && responses[q.qid].suggestion && responses[q.qid].suggestion.stage).filter(Boolean);
-    let suggestedStage = null;
-    let stageReasoning = "";
-    if (openStages.length) {
-      const counts = {};
-      openStages.forEach(s => {
-        counts[s] = (counts[s] || 0) + 1;
-      });
-      suggestedStage = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
-      stageReasoning = `Based on ${openStages.length} open response${openStages.length === 1 ? "" : "s"} in this Section Check, most closely matching the "${DT_STAGE_INFO[suggestedStage].label}" stage.`;
-    }
     try {
       await apiPost("/api/dtf/attempts", {
         unitKey: meta.unitKey,
         sectionKey: meta.sectionKey,
-        attemptType: "section",
+        attemptType: "micro",
         score,
         total: objective.length || 1,
         details,
         durationSeconds: Math.round((Date.now() - startTimeRef.current) / 1000)
       });
-      const knowledgeScore = objective.length ? Math.round(score / objective.length * 100) : null;
-      await apiPut(`/api/dtf/progress/${meta.unitKey}/${meta.sectionKey}`, {
-        knowledgeScore,
-        suggestedStage,
-        stageReasoning,
-        completed: true
-      });
     } catch (e) {/* ignore */}
-    onFinished();
+    onEvidence(openStages);
+    setSubmitted(true);
   }
   return /*#__PURE__*/React.createElement("div", {
     className: "tab-content"
   }, /*#__PURE__*/React.createElement("div", {
     className: "panel-head"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "Section Check"), /*#__PURE__*/React.createElement("p", {
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "Knowledge Check"), /*#__PURE__*/React.createElement("p", {
     className: "sub"
-  }, meta.title, " \u2014 a quick check across what you've just learned."))), /*#__PURE__*/React.createElement("div", {
+  }, "A quick check on what you've just learned \u2014 nothing beyond that yet."))), /*#__PURE__*/React.createElement("div", {
     className: "dtf-section-check-list"
   }, questions.map((q, i) => /*#__PURE__*/React.createElement("div", {
     className: "dtf-question-block",
@@ -4719,26 +4690,376 @@ function DTFSectionCheck({
     style: {
       marginTop: 20
     }
-  }, /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    className: "btn-secondary",
-    onClick: onBack
-  }, "Back"), /*#__PURE__*/React.createElement("button", {
+  }, !submitted && /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "btn-primary",
     onClick: finish,
     disabled: !allAnswered
-  }, allAnswered ? "See results" : `Answer all ${questions.length} to continue`, " ", /*#__PURE__*/React.createElement(IconGlyph, {
+  }, allAnswered ? "Check my answers" : `Answer all ${questions.length} to continue`, " ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  })), submitted && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: onContinue
+  }, "Continue ", /*#__PURE__*/React.createElement(IconGlyph, {
     name: "ChevronRight",
     size: 16
   }))));
 }
 
 /* ------------------------------------------------------------------ */
-/* REFLECT & REFINE (section closing screen)                           */
+/* APPLY - Design Detective (unfamiliar scenario, 5-part response)     */
 /* ------------------------------------------------------------------ */
 
-function DTFReflect({
+function DTFApplyStep({
+  meta,
+  task,
+  onEvidence,
+  onContinue
+}) {
+  const [values, setValues] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [suggestion, setSuggestion] = useState(null);
+  const allFilled = task.parts.every(p => (values[p.key] || "").trim());
+  async function submit() {
+    const combined = task.parts.map(p => values[p.key] || "").join("\n\n");
+    const s = suggestDTStage(combined, {
+      acceptedIdeas: task.acceptedIdeas
+    });
+    setSuggestion(s);
+    setSubmitted(true);
+    onEvidence([s.stage]);
+    apiPost(`/api/dtf/responses/U1-${meta.sectionKey.toUpperCase()}-APPLY`, {
+      text: combined,
+      suggestedStage: s.stage,
+      stageReasoning: s.reasoning
+    }).catch(() => {});
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "Apply: ", task.heading), /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "A new, unfamiliar scenario \u2014 use what you've learned in this section."))), /*#__PURE__*/React.createElement("p", {
+    className: "dtf-scenario"
+  }, task.scenario), /*#__PURE__*/React.createElement("div", {
+    className: "spec-setup-form"
+  }, task.parts.map(p => /*#__PURE__*/React.createElement("label", {
+    key: p.key
+  }, /*#__PURE__*/React.createElement("span", null, p.label), /*#__PURE__*/React.createElement("textarea", {
+    rows: 2,
+    value: values[p.key] || "",
+    onChange: e => setValues(v => ({
+      ...v,
+      [p.key]: e.target.value
+    })),
+    placeholder: p.placeholder,
+    disabled: submitted
+  })))), !submitted && /*#__PURE__*/React.createElement("div", {
+    className: "qb-save-row",
+    style: {
+      marginTop: 14
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: submit,
+    disabled: !allFilled
+  }, "Submit")), submitted && suggestion && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "dtf-stage-suggestion",
+    style: {
+      marginTop: 14
+    }
+  }, /*#__PURE__*/React.createElement(DTFStagePill, {
+    stage: suggestion.stage
+  }), /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, stageNextStepFeedback(suggestion.stage))), /*#__PURE__*/React.createElement("div", {
+    className: "qb-save-row",
+    style: {
+      marginTop: 14
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: onContinue
+  }, "Continue ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  })))));
+}
+
+/* ------------------------------------------------------------------ */
+/* FIXED FLOW STEPS - welcome, WAGBA, stage ladder, starting point,    */
+/* starting-point review, vocab review, next step                     */
+/* ------------------------------------------------------------------ */
+
+function DTFStepShell({
+  children,
+  onNext,
+  onBack,
+  nextLabel
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, children, /*#__PURE__*/React.createElement("div", {
+    className: "quiz-nav-row",
+    style: {
+      marginTop: 20
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: onBack
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16,
+    style: {
+      transform: "rotate(180deg)"
+    }
+  }), " Back"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: onNext
+  }, nextLabel || "Next", " ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  }))));
+}
+function DTFWelcomeStep({
+  meta,
+  onNext,
+  onBack
+}) {
+  return /*#__PURE__*/React.createElement(DTFStepShell, {
+    onNext: onNext,
+    onBack: onBack,
+    nextLabel: "Let's begin"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dtf-content-card"
+  }, /*#__PURE__*/React.createElement("h2", null, "Welcome"), /*#__PURE__*/React.createElement("p", {
+    className: "dtf-card-body",
+    style: {
+      whiteSpace: "pre-line"
+    }
+  }, meta.welcome)));
+}
+function DTFWagbaStep({
+  meta,
+  onNext,
+  onBack
+}) {
+  return /*#__PURE__*/React.createElement(DTFStepShell, {
+    onNext: onNext,
+    onBack: onBack
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dtf-content-card"
+  }, /*#__PURE__*/React.createElement("h2", null, "What We Are Getting Better At"), /*#__PURE__*/React.createElement("p", {
+    className: "dtf-card-body"
+  }, meta.wagbaHeadline), /*#__PURE__*/React.createElement("span", {
+    className: "help-label"
+  }, "You will learn how to"), /*#__PURE__*/React.createElement("ul", {
+    className: "spec-prompt-list"
+  }, meta.wagbaBullets.map((b, i) => /*#__PURE__*/React.createElement("li", {
+    key: i
+  }, b)))));
+}
+function DTFStageLadderStep({
+  meta,
+  onNext,
+  onBack,
+  highlightStage,
+  title
+}) {
+  return /*#__PURE__*/React.createElement(DTFStepShell, {
+    onNext: onNext,
+    onBack: onBack
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dtf-content-card"
+  }, /*#__PURE__*/React.createElement("h2", null, title || "How We Show Success"), !highlightStage && /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "By the end, you should be able to say one of these:"), highlightStage && /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "Based on what you've shown in this section, here's where you currently sit \u2014 you and your teacher can always discuss and adjust this."), /*#__PURE__*/React.createElement("div", {
+    className: "dtf-ladder"
+  }, DT_STAGES.map(stage => /*#__PURE__*/React.createElement("div", {
+    key: stage,
+    className: "dtf-ladder-row" + (highlightStage === stage ? " current" : "")
+  }, /*#__PURE__*/React.createElement(DTFStagePill, {
+    stage: stage
+  }), /*#__PURE__*/React.createElement("p", null, meta.stageLadder[stage]))))));
+}
+function DTFStartingPointStep({
+  meta,
+  question,
+  onNext,
+  onBack
+}) {
+  const [picked, setPicked] = useState(null);
+  function choose(opt) {
+    if (picked) return;
+    setPicked(opt);
+    saveTouchpointResponse(meta.sectionKey, "starting_point", opt);
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "What Do You Think?"), /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "Imagine this situation:"))), /*#__PURE__*/React.createElement("p", {
+    className: "dtf-scenario"
+  }, question.scenario), /*#__PURE__*/React.createElement("p", {
+    className: "dtf-question-prompt"
+  }, question.prompt), /*#__PURE__*/React.createElement("div", {
+    className: "quiz-options"
+  }, question.options.map(opt => /*#__PURE__*/React.createElement("button", {
+    key: opt,
+    className: "quiz-option" + (picked === opt ? " picked" : ""),
+    onClick: () => choose(opt),
+    disabled: !!picked
+  }, opt))), picked && /*#__PURE__*/React.createElement("div", {
+    className: "dtf-feedback",
+    style: {
+      marginTop: 14
+    }
+  }, "Don't worry if you're unsure \u2014 this is your starting point, not your final test. Keep your answer in mind, we'll return to this idea later."), /*#__PURE__*/React.createElement("div", {
+    className: "quiz-nav-row",
+    style: {
+      marginTop: 20
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: onBack
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16,
+    style: {
+      transform: "rotate(180deg)"
+    }
+  }), " Back"), picked && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: () => onNext(picked)
+  }, "Next ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  }))));
+}
+function DTFStartingPointReviewStep({
+  meta,
+  startingPointText,
+  onNext,
+  onBack
+}) {
+  const [reflection, setReflection] = useState("");
+  const [saved, setSaved] = useState(false);
+  async function save() {
+    if (reflection.trim()) saveTouchpointResponse(meta.sectionKey, "starting_point_reflection", reflection);
+    setSaved(true);
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "Look Back at Your Starting Point"))), /*#__PURE__*/React.createElement("div", {
+    className: "spec-context-banner"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "help-label"
+  }, "At the beginning you said"), /*#__PURE__*/React.createElement("p", {
+    className: "spec-context-name",
+    style: {
+      fontWeight: 500
+    }
+  }, "\u201C", startingPointText || "(no answer recorded)", "\u201D")), /*#__PURE__*/React.createElement("div", {
+    className: "spec-setup-form"
+  }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", null, "Would you give the same answer now? Why or why not?"), /*#__PURE__*/React.createElement("textarea", {
+    rows: 3,
+    value: reflection,
+    onChange: e => setReflection(e.target.value)
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "quiz-nav-row",
+    style: {
+      marginTop: 20
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: onBack
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16,
+    style: {
+      transform: "rotate(180deg)"
+    }
+  }), " Back"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: async () => {
+      await save();
+      onNext();
+    }
+  }, "Next ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  }))));
+}
+function DTFVocabReviewStep({
+  vocab,
+  onNext,
+  onBack
+}) {
+  const [flipped, setFlipped] = useState({});
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "Words We've Worked With"), /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "Tap a card to see the definition."))), /*#__PURE__*/React.createElement("div", {
+    className: "tool-picker-grid"
+  }, vocab.map(v => /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    key: v.id,
+    className: "tool-picker-card",
+    onClick: () => setFlipped(f => ({
+      ...f,
+      [v.id]: !f[v.id]
+    }))
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "tool-picker-title"
+  }, v.term), flipped[v.id] && /*#__PURE__*/React.createElement("span", {
+    className: "tool-picker-desc"
+  }, v.definition), !flipped[v.id] && /*#__PURE__*/React.createElement("span", {
+    className: "sub"
+  }, "Tap to reveal")))), /*#__PURE__*/React.createElement("div", {
+    className: "quiz-nav-row",
+    style: {
+      marginTop: 20
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: onBack
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16,
+    style: {
+      transform: "rotate(180deg)"
+    }
+  }), " Back"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: onNext
+  }, "Continue ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  }))));
+}
+function DTFNextStepStep({
   meta,
   onDone
 }) {
@@ -4756,18 +5077,7 @@ function DTFReflect({
     className: "panel-head"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "Reflect & Refine"), /*#__PURE__*/React.createElement("p", {
     className: "sub"
-  }, "What We Are Getting Better At"))), /*#__PURE__*/React.createElement("div", {
-    className: "spec-strength-grid",
-    style: {
-      marginBottom: 20
-    }
-  }, meta.successCriteria.map((c, i) => /*#__PURE__*/React.createElement("span", {
-    key: i,
-    className: "dtf-success-criterion"
-  }, /*#__PURE__*/React.createElement(IconGlyph, {
-    name: "Check",
-    size: 13
-  }), " ", c))), /*#__PURE__*/React.createElement("div", {
+  }, "Section complete \u2014 nice work."))), /*#__PURE__*/React.createElement("div", {
     className: "spec-setup-form"
   }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", null, "Something I understand better now is\u2026"), /*#__PURE__*/React.createElement("textarea", {
     rows: 2,
@@ -4798,17 +5108,124 @@ function DTFReflect({
 }
 
 /* ------------------------------------------------------------------ */
-/* SECTION SHELL - orchestrates cards \u2192 section check \u2192 reflect        */
+/* SECTION SHELL - builds the full WAGBA-framed flow and resumes from  */
+/* wherever the student left off, so a refresh never restarts them.    */
 /* ------------------------------------------------------------------ */
 
+function buildSectionFlow(meta, cards) {
+  return [{
+    stepType: "welcome"
+  }, {
+    stepType: "wagba"
+  }, {
+    stepType: "stage-ladder"
+  }, {
+    stepType: "starting-point"
+  }, ...cards.map(c => ({
+    stepType: c.type,
+    card: c
+  })), {
+    stepType: "knowledge-check"
+  }, {
+    stepType: "apply"
+  }, {
+    stepType: "wagba-return"
+  }, {
+    stepType: "starting-point-review"
+  }, {
+    stepType: "vocab-review"
+  }, {
+    stepType: "next-step"
+  }];
+}
 function DTFSectionShell({
   meta,
   cards,
   bank,
+  vocab,
+  applyTask,
+  startingPointQuestion,
   onExit
 }) {
-  const [phase, setPhase] = useState("cards"); // cards | check | reflect
-
+  const flow = useMemo(() => buildSectionFlow(meta, cards), [meta, cards]);
+  const [loading, setLoading] = useState(true);
+  const [stepIndex, setStepIndex] = useState(0);
+  const [startingPointText, setStartingPointText] = useState("");
+  const [stageEvidence, setStageEvidence] = useState([]);
+  const [resumed, setResumed] = useState(false);
+  useEffect(() => {
+    apiGet("/api/dtf/progress").then(rows => {
+      const existing = rows.find(r => r.unitKey === meta.unitKey && r.sectionKey === meta.sectionKey);
+      const state = existing ? existing.sessionState : null;
+      if (state && typeof state.stepIndex === "number" && state.stepIndex > 0) {
+        setStepIndex(Math.min(state.stepIndex, flow.length - 1));
+        setStartingPointText(state.startingPointText || "");
+        setResumed(true);
+      }
+      setLoading(false);
+    }).catch(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  function saveSession(extra) {
+    const sessionState = {
+      stepIndex,
+      startingPointText,
+      ...extra
+    };
+    apiPut(`/api/dtf/progress/${meta.unitKey}/${meta.sectionKey}`, {
+      sessionState
+    }).catch(() => {});
+  }
+  function goTo(nextIndex, extra) {
+    setStepIndex(nextIndex);
+    const sessionState = {
+      stepIndex: nextIndex,
+      startingPointText: extra && extra.startingPointText || startingPointText
+    };
+    apiPut(`/api/dtf/progress/${meta.unitKey}/${meta.sectionKey}`, {
+      sessionState
+    }).catch(() => {});
+  }
+  function next() {
+    goTo(Math.min(stepIndex + 1, flow.length - 1));
+  }
+  function back() {
+    stepIndex === 0 ? onExit() : goTo(stepIndex - 1);
+  }
+  function addEvidence(stages) {
+    setStageEvidence(s => [...s, ...stages]);
+  }
+  function finalStageSuggestion() {
+    if (!stageEvidence.length) return null;
+    const counts = {};
+    stageEvidence.forEach(s => {
+      counts[s] = (counts[s] || 0) + 1;
+    });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+  }
+  async function finishKnowledgeOrApplyStep() {
+    const stage = finalStageSuggestion();
+    if (stage) {
+      await apiPut(`/api/dtf/progress/${meta.unitKey}/${meta.sectionKey}`, {
+        suggestedStage: stage,
+        stageReasoning: `Based on ${stageEvidence.length} piece${stageEvidence.length === 1 ? "" : "s"} of evidence from this section's Knowledge Check and Apply task, most closely matching the "${DT_STAGE_INFO[stage].label}" stage.`,
+        completed: true
+      });
+    } else {
+      await apiPut(`/api/dtf/progress/${meta.unitKey}/${meta.sectionKey}`, {
+        completed: true
+      });
+    }
+    next();
+  }
+  if (loading) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "tab-content"
+    }, /*#__PURE__*/React.createElement("p", {
+      className: "sub"
+    }, "Loading..."));
+  }
+  const step = flow[stepIndex];
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "tool-subheader no-print"
   }, /*#__PURE__*/React.createElement("button", {
@@ -4821,17 +5238,138 @@ function DTFSectionShell({
     style: {
       transform: "rotate(180deg)"
     }
-  }), " Design Fundamentals")), phase === "cards" && /*#__PURE__*/React.createElement(DTFCardFlow, {
+  }), " Design Fundamentals")), resumed && stepIndex > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "admin-banner no-print",
+    style: {
+      margin: "0 14px 0 14px"
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "Welcome back \u2014 picking up where you left off."), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => setResumed(false),
+    "aria-label": "Dismiss"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "X",
+    size: 14
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "spec-wizard-progress",
+    style: {
+      margin: "16px 14px 0 14px"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "quiz-history-label"
+  }, "Section ", meta.number, " of 17 \xB7 ", meta.title), /*#__PURE__*/React.createElement("div", {
+    className: "quiz-progress-bar"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: `${(stepIndex + 1) / flow.length * 100}%`,
+      background: "var(--blue)"
+    }
+  }))), step.stepType === "welcome" && /*#__PURE__*/React.createElement(DTFWelcomeStep, {
     meta: meta,
-    cards: cards,
-    onFinished: () => setPhase("check"),
-    onBack: onExit
-  }), phase === "check" && /*#__PURE__*/React.createElement(DTFSectionCheck, {
+    onNext: next,
+    onBack: back
+  }), step.stepType === "wagba" && /*#__PURE__*/React.createElement(DTFWagbaStep, {
+    meta: meta,
+    onNext: next,
+    onBack: back
+  }), step.stepType === "stage-ladder" && /*#__PURE__*/React.createElement(DTFStageLadderStep, {
+    meta: meta,
+    onNext: next,
+    onBack: back
+  }), step.stepType === "starting-point" && /*#__PURE__*/React.createElement(DTFStartingPointStep, {
+    meta: meta,
+    question: startingPointQuestion,
+    onBack: back,
+    onNext: answerText => {
+      setStartingPointText(answerText);
+      goTo(stepIndex + 1, {
+        startingPointText: answerText
+      });
+    }
+  }), (step.stepType === "content" || step.stepType === "touchpoint") && /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, step.stepType === "content" && /*#__PURE__*/React.createElement("div", {
+    className: "dtf-content-card"
+  }, /*#__PURE__*/React.createElement("h2", null, step.card.heading), /*#__PURE__*/React.createElement("p", {
+    className: "dtf-card-body",
+    style: {
+      whiteSpace: "pre-line"
+    }
+  }, step.card.body), step.card.compare && /*#__PURE__*/React.createElement("div", {
+    className: "dtf-compare-grid"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dtf-compare-item"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dtf-choice-letter"
+  }, "A"), /*#__PURE__*/React.createElement("p", null, step.card.compare.a)), /*#__PURE__*/React.createElement("div", {
+    className: "dtf-compare-item"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dtf-choice-letter"
+  }, "B"), /*#__PURE__*/React.createElement("p", null, step.card.compare.b))), step.card.list && /*#__PURE__*/React.createElement("div", {
+    className: "chip-row"
+  }, step.card.list.map((item, i) => /*#__PURE__*/React.createElement("span", {
+    key: i,
+    className: "chip chip-word"
+  }, item))), step.card.footer && /*#__PURE__*/React.createElement("p", {
+    className: "sub",
+    style: {
+      marginTop: 10
+    }
+  }, step.card.footer)), step.stepType === "touchpoint" && (() => {
+    const Touchpoint = TOUCHPOINT_RENDERERS[step.card.kind];
+    return Touchpoint ? /*#__PURE__*/React.createElement(Touchpoint, {
+      card: step.card,
+      sectionKey: meta.sectionKey,
+      onContinue: next
+    }) : null;
+  })(), /*#__PURE__*/React.createElement("div", {
+    className: "quiz-nav-row",
+    style: {
+      marginTop: 20
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: back
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16,
+    style: {
+      transform: "rotate(180deg)"
+    }
+  }), " Back"), step.stepType === "content" && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: next
+  }, "Next ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  })))), step.stepType === "knowledge-check" && /*#__PURE__*/React.createElement(DTFKnowledgeCheckStep, {
     meta: meta,
     bank: bank,
-    onFinished: () => setPhase("reflect"),
-    onBack: () => setPhase("cards")
-  }), phase === "reflect" && /*#__PURE__*/React.createElement(DTFReflect, {
+    onEvidence: addEvidence,
+    onContinue: next
+  }), step.stepType === "apply" && /*#__PURE__*/React.createElement(DTFApplyStep, {
+    meta: meta,
+    task: applyTask,
+    onEvidence: addEvidence,
+    onContinue: finishKnowledgeOrApplyStep
+  }), step.stepType === "wagba-return" && /*#__PURE__*/React.createElement(DTFStageLadderStep, {
+    meta: meta,
+    onNext: next,
+    onBack: back,
+    highlightStage: finalStageSuggestion(),
+    title: "Return to WAGBA"
+  }), step.stepType === "starting-point-review" && /*#__PURE__*/React.createElement(DTFStartingPointReviewStep, {
+    meta: meta,
+    startingPointText: startingPointText,
+    onNext: next,
+    onBack: back
+  }), step.stepType === "vocab-review" && /*#__PURE__*/React.createElement(DTFVocabReviewStep, {
+    vocab: vocab,
+    onNext: next,
+    onBack: back
+  }), step.stepType === "next-step" && /*#__PURE__*/React.createElement(DTFNextStepStep, {
     meta: meta,
     onDone: onExit
   }));
@@ -4846,6 +5384,9 @@ function DesignFundamentalsTool({
       meta: U1S1_META,
       cards: U1S1_CARDS,
       bank: U1S1_QUESTIONS,
+      vocab: U1S1_VOCAB,
+      applyTask: U1S1_APPLY_TASK,
+      startingPointQuestion: U1S1_STARTING_POINT,
       onExit: () => setOpenSectionKey(null)
     });
   }

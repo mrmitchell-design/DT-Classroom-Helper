@@ -645,3 +645,8 @@ body {
 .dtf-question-prompt { font-size:15px; font-weight:600; margin:6px 0 12px 0; }
 
 .dtf-success-criterion { display:flex; align-items:center; gap:6px; background:var(--green-tint); color:var(--green-text); padding:8px 14px; border-radius:var(--radius-pill); font-size:12.5px; font-weight:500; }
+
+.dtf-ladder { display:flex; flex-direction:column; gap:8px; margin-top:6px; }
+.dtf-ladder-row { display:flex; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--border-light); border-radius:var(--radius-md); padding:12px 16px; }
+.dtf-ladder-row p { margin:0; font-size:13.5px; line-height:1.4; }
+.dtf-ladder-row.current { border-color: var(--blue); background:var(--blue-tint); box-shadow: var(--shadow-sm); }

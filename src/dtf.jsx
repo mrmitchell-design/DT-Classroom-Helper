@@ -221,6 +221,43 @@ function TP_StopSort({ card, onContinue }) {
   );
 }
 
+function TP_ProblemNeedOpportunity({ card, onContinue }) {
+  const [answers, setAnswers] = useState({});
+  const allDone = card.items.every((_, i) => answers[i] !== undefined);
+  function pick(i, val) {
+    if (answers[i] !== undefined) return;
+    setAnswers((a) => ({ ...a, [i]: val }));
+  }
+  const labels = { problem: "Problem", need: "Need", opportunity: "Opportunity" };
+  return (
+    <div className="dtf-touchpoint">
+      <span className="dtf-touchpoint-label"><IconGlyph name="SlidersHorizontal" size={14} /> {card.heading}</span>
+      <p className="dtf-touchpoint-prompt">{card.prompt}</p>
+      <div className="dtf-sort-list">
+        {card.items.map((item, i) => (
+          <div className="dtf-sort-row" key={i}>
+            <span className="dtf-sort-text">{item.text}</span>
+            <div className="dtf-sort-buttons">
+              {["problem", "need", "opportunity"].map((val) => (
+                <button
+                  key={val}
+                  type="button"
+                  className={"chip" + (answers[i] === val ? (val === item.answer ? " active-correct" : " active-wrong") : "")}
+                  onClick={() => pick(i, val)}
+                  disabled={answers[i] !== undefined}
+                >
+                  {labels[val]}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      {allDone && <button type="button" className="btn-primary" onClick={onContinue}>Continue <IconGlyph name="ChevronRight" size={16} /></button>}
+    </div>
+  );
+}
+
 function TP_RevealExplanation({ card, sectionKey, onContinue }) {
   const [text, setText] = useState("");
   const [revealed, setRevealed] = useState(false);
@@ -331,6 +368,7 @@ const TOUCHPOINT_RENDERERS = {
   which_is_stronger: TP_WhichIsStronger,
   quick_check: TP_QuickCheck,
   stop_sort: TP_StopSort,
+  problem_need_opportunity: TP_ProblemNeedOpportunity,
   spot_hidden_solution: TP_RevealExplanation,
   spot_the_problem: TP_RevealExplanation,
   think_try_test: TP_ThinkTryTest,
@@ -338,77 +376,17 @@ const TOUCHPOINT_RENDERERS = {
 };
 
 /* ------------------------------------------------------------------ */
-/* GUIDED CARD FLOW                                                     */
+/* ------------------------------------------------------------------ */
+/* MID-FLOW KNOWLEDGE CHECK - 3-5 questions on material taught so far   */
+/* Pulled from Remember & Recognise + Explain & Examine only, since     */
+/* Apply/Decide/Challenge questions test things not yet covered by the  */
+/* point this step appears at in the flow.                              */
 /* ------------------------------------------------------------------ */
 
-function DTFCardFlow({ meta, cards, onFinished, onBack }) {
-  const [idx, setIdx] = useState(0);
-  const card = cards[idx];
-  const canAutoAdvance = card.type === "content";
-
-  function next() {
-    if (idx + 1 >= cards.length) onFinished();
-    else setIdx((i) => i + 1);
-  }
-
-  const Touchpoint = card.type === "touchpoint" ? TOUCHPOINT_RENDERERS[card.kind] : null;
-
-  return (
-    <div className="tab-content">
-      <div className="spec-wizard-progress">
-        <span className="quiz-history-label">Section {meta.number} of 17 · {meta.title}</span>
-        <div className="quiz-progress-bar"><div style={{ width: `${((idx + 1) / cards.length) * 100}%`, background: "var(--blue)" }} /></div>
-      </div>
-
-      {card.type === "content" && (
-        <div className="dtf-content-card">
-          <h2>{card.heading}</h2>
-          <p className="dtf-card-body" style={{ whiteSpace: "pre-line" }}>{card.body}</p>
-          {card.compare && (
-            <div className="dtf-compare-grid">
-              <div className="dtf-compare-item"><span className="dtf-choice-letter">A</span><p>{card.compare.a}</p></div>
-              <div className="dtf-compare-item"><span className="dtf-choice-letter">B</span><p>{card.compare.b}</p></div>
-            </div>
-          )}
-          {card.list && (
-            <div className="chip-row">
-              {card.list.map((item, i) => <span key={i} className="chip chip-word">{item}</span>)}
-            </div>
-          )}
-          {card.footer && <p className="sub" style={{ marginTop: 10 }}>{card.footer}</p>}
-        </div>
-      )}
-
-      {Touchpoint && <Touchpoint card={card} sectionKey={meta.sectionKey} onContinue={next} />}
-
-      <div className="quiz-nav-row" style={{ marginTop: 20 }}>
-        <button type="button" className="btn-secondary" onClick={() => (idx === 0 ? onBack() : setIdx((i) => i - 1))}>
-          <IconGlyph name="ChevronRight" size={16} style={{ transform: "rotate(180deg)" }} /> Back
-        </button>
-        {canAutoAdvance && (
-          <button type="button" className="btn-primary" onClick={next}>
-            {idx + 1 >= cards.length ? "Continue" : "Next"} <IconGlyph name="ChevronRight" size={16} />
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* SECTION CHECK - 5 randomly drawn questions (2R/1E/1A/1(D-or-C))      */
-/* ------------------------------------------------------------------ */
-
-function pickSectionCheckQuestions(bank) {
-  const byCat = { R: [], E: [], A: [], D: [], C: [] };
-  bank.forEach((q) => byCat[q.category].push(q));
-  const dOrC = shuffle([...byCat.D, ...byCat.C]);
-  return [
-    ...shuffle(byCat.R).slice(0, 2),
-    ...shuffle(byCat.E).slice(0, 1),
-    ...shuffle(byCat.A).slice(0, 1),
-    ...dOrC.slice(0, 1),
-  ].filter(Boolean);
+function pickKnowledgeCheckQuestions(bank) {
+  const byCat = { R: [], E: [] };
+  bank.forEach((q) => { if (byCat[q.category]) byCat[q.category].push(q); });
+  return [...shuffle(byCat.R).slice(0, 3), ...shuffle(byCat.E).slice(0, 2)].filter(Boolean);
 }
 
 const OPEN_TYPES = ["short_response", "extended_response", "improve_it", "decide_defend_short"];
@@ -471,7 +449,6 @@ function DTFQuestionRenderer({ question, response, onRespond }) {
       </div>
     );
   }
-  // open response types
   return (
     <div className="dtf-open-response">
       <textarea rows={3} value={text} onChange={(e) => setText(e.target.value)} placeholder="Type your answer..." />
@@ -480,11 +457,12 @@ function DTFQuestionRenderer({ question, response, onRespond }) {
   );
 }
 
-function DTFSectionCheck({ meta, bank, onFinished, onBack }) {
-  const [questions] = useState(() => pickSectionCheckQuestions(bank));
+function DTFKnowledgeCheckStep({ meta, bank, onEvidence, onContinue }) {
+  const [questions] = useState(() => pickKnowledgeCheckQuestions(bank));
   const [responses, setResponses] = useState({});
   const startTimeRef = useRef(Date.now());
   const allAnswered = questions.every((q) => responses[q.qid]);
+  const [submitted, setSubmitted] = useState(false);
 
   function respond(qid, r) {
     setResponses((rs) => ({ ...rs, [qid]: r }));
@@ -499,41 +477,26 @@ function DTFSectionCheck({ meta, bank, onFinished, onBack }) {
       correctAnswer: q.correctAnswer || null,
       isCorrect: responses[q.qid] ? responses[q.qid].isCorrect : null,
     }));
-
-    // Aggregate the open-response stage suggestions collected during this
-    // check into one section-level suggestion (the DT stage never comes
-    // from the MCQ score alone - it comes from how the open responses
-    // showed the student thinking, per section 5/6 of the brief).
     const openStages = questions
       .filter((q) => OPEN_TYPES.includes(q.type))
       .map((q) => responses[q.qid] && responses[q.qid].suggestion && responses[q.qid].suggestion.stage)
       .filter(Boolean);
-    let suggestedStage = null;
-    let stageReasoning = "";
-    if (openStages.length) {
-      const counts = {};
-      openStages.forEach((s) => { counts[s] = (counts[s] || 0) + 1; });
-      suggestedStage = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
-      stageReasoning = `Based on ${openStages.length} open response${openStages.length === 1 ? "" : "s"} in this Section Check, most closely matching the "${DT_STAGE_INFO[suggestedStage].label}" stage.`;
-    }
-
     try {
       await apiPost("/api/dtf/attempts", {
-        unitKey: meta.unitKey, sectionKey: meta.sectionKey, attemptType: "section",
+        unitKey: meta.unitKey, sectionKey: meta.sectionKey, attemptType: "micro",
         score, total: objective.length || 1, details, durationSeconds: Math.round((Date.now() - startTimeRef.current) / 1000),
       });
-      const knowledgeScore = objective.length ? Math.round((score / objective.length) * 100) : null;
-      await apiPut(`/api/dtf/progress/${meta.unitKey}/${meta.sectionKey}`, { knowledgeScore, suggestedStage, stageReasoning, completed: true });
     } catch (e) { /* ignore */ }
-    onFinished();
+    onEvidence(openStages);
+    setSubmitted(true);
   }
 
   return (
     <div className="tab-content">
       <div className="panel-head">
         <div>
-          <h2>Section Check</h2>
-          <p className="sub">{meta.title} — a quick check across what you've just learned.</p>
+          <h2>Knowledge Check</h2>
+          <p className="sub">A quick check on what you've just learned — nothing beyond that yet.</p>
         </div>
       </div>
       <div className="dtf-section-check-list">
@@ -547,20 +510,245 @@ function DTFSectionCheck({ meta, bank, onFinished, onBack }) {
         ))}
       </div>
       <div className="quiz-result-actions" style={{ marginTop: 20 }}>
-        <button type="button" className="btn-secondary" onClick={onBack}>Back</button>
-        <button type="button" className="btn-primary" onClick={finish} disabled={!allAnswered}>
-          {allAnswered ? "See results" : `Answer all ${questions.length} to continue`} <IconGlyph name="ChevronRight" size={16} />
-        </button>
+        {!submitted && (
+          <button type="button" className="btn-primary" onClick={finish} disabled={!allAnswered}>
+            {allAnswered ? "Check my answers" : `Answer all ${questions.length} to continue`} <IconGlyph name="ChevronRight" size={16} />
+          </button>
+        )}
+        {submitted && (
+          <button type="button" className="btn-primary" onClick={onContinue}>Continue <IconGlyph name="ChevronRight" size={16} /></button>
+        )}
       </div>
     </div>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* REFLECT & REFINE (section closing screen)                           */
+/* APPLY - Design Detective (unfamiliar scenario, 5-part response)     */
 /* ------------------------------------------------------------------ */
 
-function DTFReflect({ meta, onDone }) {
+function DTFApplyStep({ meta, task, onEvidence, onContinue }) {
+  const [values, setValues] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [suggestion, setSuggestion] = useState(null);
+  const allFilled = task.parts.every((p) => (values[p.key] || "").trim());
+
+  async function submit() {
+    const combined = task.parts.map((p) => values[p.key] || "").join("\n\n");
+    const s = suggestDTStage(combined, { acceptedIdeas: task.acceptedIdeas });
+    setSuggestion(s);
+    setSubmitted(true);
+    onEvidence([s.stage]);
+    apiPost(`/api/dtf/responses/U1-${meta.sectionKey.toUpperCase()}-APPLY`, { text: combined, suggestedStage: s.stage, stageReasoning: s.reasoning }).catch(() => {});
+  }
+
+  return (
+    <div className="tab-content">
+      <div className="panel-head">
+        <div>
+          <h2>Apply: {task.heading}</h2>
+          <p className="sub">A new, unfamiliar scenario — use what you've learned in this section.</p>
+        </div>
+      </div>
+      <p className="dtf-scenario">{task.scenario}</p>
+      <div className="spec-setup-form">
+        {task.parts.map((p) => (
+          <label key={p.key}>
+            <span>{p.label}</span>
+            <textarea rows={2} value={values[p.key] || ""} onChange={(e) => setValues((v) => ({ ...v, [p.key]: e.target.value }))} placeholder={p.placeholder} disabled={submitted} />
+          </label>
+        ))}
+      </div>
+      {!submitted && (
+        <div className="qb-save-row" style={{ marginTop: 14 }}>
+          <button type="button" className="btn-primary" onClick={submit} disabled={!allFilled}>Submit</button>
+        </div>
+      )}
+      {submitted && suggestion && (
+        <>
+          <div className="dtf-stage-suggestion" style={{ marginTop: 14 }}>
+            <DTFStagePill stage={suggestion.stage} />
+            <p className="sub">{stageNextStepFeedback(suggestion.stage)}</p>
+          </div>
+          <div className="qb-save-row" style={{ marginTop: 14 }}>
+            <button type="button" className="btn-primary" onClick={onContinue}>Continue <IconGlyph name="ChevronRight" size={16} /></button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* FIXED FLOW STEPS - welcome, WAGBA, stage ladder, starting point,    */
+/* starting-point review, vocab review, next step                     */
+/* ------------------------------------------------------------------ */
+
+function DTFStepShell({ children, onNext, onBack, nextLabel }) {
+  return (
+    <div className="tab-content">
+      {children}
+      <div className="quiz-nav-row" style={{ marginTop: 20 }}>
+        <button type="button" className="btn-secondary" onClick={onBack}>
+          <IconGlyph name="ChevronRight" size={16} style={{ transform: "rotate(180deg)" }} /> Back
+        </button>
+        <button type="button" className="btn-primary" onClick={onNext}>
+          {nextLabel || "Next"} <IconGlyph name="ChevronRight" size={16} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DTFWelcomeStep({ meta, onNext, onBack }) {
+  return (
+    <DTFStepShell onNext={onNext} onBack={onBack} nextLabel="Let's begin">
+      <div className="dtf-content-card">
+        <h2>Welcome</h2>
+        <p className="dtf-card-body" style={{ whiteSpace: "pre-line" }}>{meta.welcome}</p>
+      </div>
+    </DTFStepShell>
+  );
+}
+
+function DTFWagbaStep({ meta, onNext, onBack }) {
+  return (
+    <DTFStepShell onNext={onNext} onBack={onBack}>
+      <div className="dtf-content-card">
+        <h2>What We Are Getting Better At</h2>
+        <p className="dtf-card-body">{meta.wagbaHeadline}</p>
+        <span className="help-label">You will learn how to</span>
+        <ul className="spec-prompt-list">
+          {meta.wagbaBullets.map((b, i) => <li key={i}>{b}</li>)}
+        </ul>
+      </div>
+    </DTFStepShell>
+  );
+}
+
+function DTFStageLadderStep({ meta, onNext, onBack, highlightStage, title }) {
+  return (
+    <DTFStepShell onNext={onNext} onBack={onBack}>
+      <div className="dtf-content-card">
+        <h2>{title || "How We Show Success"}</h2>
+        {!highlightStage && <p className="sub">By the end, you should be able to say one of these:</p>}
+        {highlightStage && <p className="sub">Based on what you've shown in this section, here's where you currently sit — you and your teacher can always discuss and adjust this.</p>}
+        <div className="dtf-ladder">
+          {DT_STAGES.map((stage) => (
+            <div key={stage} className={"dtf-ladder-row" + (highlightStage === stage ? " current" : "")}>
+              <DTFStagePill stage={stage} />
+              <p>{meta.stageLadder[stage]}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </DTFStepShell>
+  );
+}
+
+function DTFStartingPointStep({ meta, question, onNext, onBack }) {
+  const [picked, setPicked] = useState(null);
+
+  function choose(opt) {
+    if (picked) return;
+    setPicked(opt);
+    saveTouchpointResponse(meta.sectionKey, "starting_point", opt);
+  }
+
+  return (
+    <div className="tab-content">
+      <div className="panel-head">
+        <div>
+          <h2>What Do You Think?</h2>
+          <p className="sub">Imagine this situation:</p>
+        </div>
+      </div>
+      <p className="dtf-scenario">{question.scenario}</p>
+      <p className="dtf-question-prompt">{question.prompt}</p>
+      <div className="quiz-options">
+        {question.options.map((opt) => (
+          <button key={opt} className={"quiz-option" + (picked === opt ? " picked" : "")} onClick={() => choose(opt)} disabled={!!picked}>{opt}</button>
+        ))}
+      </div>
+      {picked && (
+        <div className="dtf-feedback" style={{ marginTop: 14 }}>
+          Don't worry if you're unsure — this is your starting point, not your final test. Keep your answer in mind, we'll return to this idea later.
+        </div>
+      )}
+      <div className="quiz-nav-row" style={{ marginTop: 20 }}>
+        <button type="button" className="btn-secondary" onClick={onBack}>
+          <IconGlyph name="ChevronRight" size={16} style={{ transform: "rotate(180deg)" }} /> Back
+        </button>
+        {picked && <button type="button" className="btn-primary" onClick={() => onNext(picked)}>Next <IconGlyph name="ChevronRight" size={16} /></button>}
+      </div>
+    </div>
+  );
+}
+
+function DTFStartingPointReviewStep({ meta, startingPointText, onNext, onBack }) {
+  const [reflection, setReflection] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  async function save() {
+    if (reflection.trim()) saveTouchpointResponse(meta.sectionKey, "starting_point_reflection", reflection);
+    setSaved(true);
+  }
+
+  return (
+    <div className="tab-content">
+      <div className="panel-head">
+        <div><h2>Look Back at Your Starting Point</h2></div>
+      </div>
+      <div className="spec-context-banner">
+        <span className="help-label">At the beginning you said</span>
+        <p className="spec-context-name" style={{ fontWeight: 500 }}>“{startingPointText || "(no answer recorded)"}”</p>
+      </div>
+      <div className="spec-setup-form">
+        <label>
+          <span>Would you give the same answer now? Why or why not?</span>
+          <textarea rows={3} value={reflection} onChange={(e) => setReflection(e.target.value)} />
+        </label>
+      </div>
+      <div className="quiz-nav-row" style={{ marginTop: 20 }}>
+        <button type="button" className="btn-secondary" onClick={onBack}>
+          <IconGlyph name="ChevronRight" size={16} style={{ transform: "rotate(180deg)" }} /> Back
+        </button>
+        <button type="button" className="btn-primary" onClick={async () => { await save(); onNext(); }}>Next <IconGlyph name="ChevronRight" size={16} /></button>
+      </div>
+    </div>
+  );
+}
+
+function DTFVocabReviewStep({ vocab, onNext, onBack }) {
+  const [flipped, setFlipped] = useState({});
+  return (
+    <div className="tab-content">
+      <div className="panel-head">
+        <div>
+          <h2>Words We've Worked With</h2>
+          <p className="sub">Tap a card to see the definition.</p>
+        </div>
+      </div>
+      <div className="tool-picker-grid">
+        {vocab.map((v) => (
+          <button type="button" key={v.id} className="tool-picker-card" onClick={() => setFlipped((f) => ({ ...f, [v.id]: !f[v.id] }))}>
+            <span className="tool-picker-title">{v.term}</span>
+            {flipped[v.id] && <span className="tool-picker-desc">{v.definition}</span>}
+            {!flipped[v.id] && <span className="sub">Tap to reveal</span>}
+          </button>
+        ))}
+      </div>
+      <div className="quiz-nav-row" style={{ marginTop: 20 }}>
+        <button type="button" className="btn-secondary" onClick={onBack}>
+          <IconGlyph name="ChevronRight" size={16} style={{ transform: "rotate(180deg)" }} /> Back
+        </button>
+        <button type="button" className="btn-primary" onClick={onNext}>Continue <IconGlyph name="ChevronRight" size={16} /></button>
+      </div>
+    </div>
+  );
+}
+
+function DTFNextStepStep({ meta, onDone }) {
   const [understand, setUnderstand] = useState("");
   const [practise, setPractise] = useState("");
   const [saved, setSaved] = useState(false);
@@ -576,13 +764,8 @@ function DTFReflect({ meta, onDone }) {
       <div className="panel-head">
         <div>
           <h2>Reflect &amp; Refine</h2>
-          <p className="sub">What We Are Getting Better At</p>
+          <p className="sub">Section complete — nice work.</p>
         </div>
-      </div>
-      <div className="spec-strength-grid" style={{ marginBottom: 20 }}>
-        {meta.successCriteria.map((c, i) => (
-          <span key={i} className="dtf-success-criterion"><IconGlyph name="Check" size={13} /> {c}</span>
-        ))}
       </div>
       <div className="spec-setup-form">
         <label>
@@ -603,11 +786,96 @@ function DTFReflect({ meta, onDone }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* SECTION SHELL - orchestrates cards \u2192 section check \u2192 reflect        */
+/* SECTION SHELL - builds the full WAGBA-framed flow and resumes from  */
+/* wherever the student left off, so a refresh never restarts them.    */
 /* ------------------------------------------------------------------ */
 
-function DTFSectionShell({ meta, cards, bank, onExit }) {
-  const [phase, setPhase] = useState("cards"); // cards | check | reflect
+function buildSectionFlow(meta, cards) {
+  return [
+    { stepType: "welcome" },
+    { stepType: "wagba" },
+    { stepType: "stage-ladder" },
+    { stepType: "starting-point" },
+    ...cards.map((c) => ({ stepType: c.type, card: c })),
+    { stepType: "knowledge-check" },
+    { stepType: "apply" },
+    { stepType: "wagba-return" },
+    { stepType: "starting-point-review" },
+    { stepType: "vocab-review" },
+    { stepType: "next-step" },
+  ];
+}
+
+function DTFSectionShell({ meta, cards, bank, vocab, applyTask, startingPointQuestion, onExit }) {
+  const flow = useMemo(() => buildSectionFlow(meta, cards), [meta, cards]);
+  const [loading, setLoading] = useState(true);
+  const [stepIndex, setStepIndex] = useState(0);
+  const [startingPointText, setStartingPointText] = useState("");
+  const [stageEvidence, setStageEvidence] = useState([]);
+  const [resumed, setResumed] = useState(false);
+
+  useEffect(() => {
+    apiGet("/api/dtf/progress").then((rows) => {
+      const existing = rows.find((r) => r.unitKey === meta.unitKey && r.sectionKey === meta.sectionKey);
+      const state = existing ? existing.sessionState : null;
+      if (state && typeof state.stepIndex === "number" && state.stepIndex > 0) {
+        setStepIndex(Math.min(state.stepIndex, flow.length - 1));
+        setStartingPointText(state.startingPointText || "");
+        setResumed(true);
+      }
+      setLoading(false);
+    }).catch(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function saveSession(extra) {
+    const sessionState = { stepIndex, startingPointText, ...extra };
+    apiPut(`/api/dtf/progress/${meta.unitKey}/${meta.sectionKey}`, { sessionState }).catch(() => {});
+  }
+
+  function goTo(nextIndex, extra) {
+    setStepIndex(nextIndex);
+    const sessionState = { stepIndex: nextIndex, startingPointText: (extra && extra.startingPointText) || startingPointText };
+    apiPut(`/api/dtf/progress/${meta.unitKey}/${meta.sectionKey}`, { sessionState }).catch(() => {});
+  }
+
+  function next() { goTo(Math.min(stepIndex + 1, flow.length - 1)); }
+  function back() { stepIndex === 0 ? onExit() : goTo(stepIndex - 1); }
+
+  function addEvidence(stages) {
+    setStageEvidence((s) => [...s, ...stages]);
+  }
+
+  function finalStageSuggestion() {
+    if (!stageEvidence.length) return null;
+    const counts = {};
+    stageEvidence.forEach((s) => { counts[s] = (counts[s] || 0) + 1; });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+  }
+
+  async function finishKnowledgeOrApplyStep() {
+    const stage = finalStageSuggestion();
+    if (stage) {
+      await apiPut(`/api/dtf/progress/${meta.unitKey}/${meta.sectionKey}`, {
+        suggestedStage: stage,
+        stageReasoning: `Based on ${stageEvidence.length} piece${stageEvidence.length === 1 ? "" : "s"} of evidence from this section's Knowledge Check and Apply task, most closely matching the "${DT_STAGE_INFO[stage].label}" stage.`,
+        completed: true,
+      });
+    } else {
+      await apiPut(`/api/dtf/progress/${meta.unitKey}/${meta.sectionKey}`, { completed: true });
+    }
+    next();
+  }
+
+  if (loading) {
+    return (
+      <div className="tab-content">
+        <p className="sub">Loading...</p>
+      </div>
+    );
+  }
+
+  const step = flow[stepIndex];
 
   return (
     <>
@@ -616,9 +884,82 @@ function DTFSectionShell({ meta, cards, bank, onExit }) {
           <IconGlyph name="ChevronRight" size={15} style={{ transform: "rotate(180deg)" }} /> Design Fundamentals
         </button>
       </div>
-      {phase === "cards" && <DTFCardFlow meta={meta} cards={cards} onFinished={() => setPhase("check")} onBack={onExit} />}
-      {phase === "check" && <DTFSectionCheck meta={meta} bank={bank} onFinished={() => setPhase("reflect")} onBack={() => setPhase("cards")} />}
-      {phase === "reflect" && <DTFReflect meta={meta} onDone={onExit} />}
+
+      {resumed && stepIndex > 0 && (
+        <div className="admin-banner no-print" style={{ margin: "0 14px 0 14px" }}>
+          <span>Welcome back — picking up where you left off.</span>
+          <button type="button" onClick={() => setResumed(false)} aria-label="Dismiss"><IconGlyph name="X" size={14} /></button>
+        </div>
+      )}
+
+      <div className="spec-wizard-progress" style={{ margin: "16px 14px 0 14px" }}>
+        <span className="quiz-history-label">Section {meta.number} of 17 · {meta.title}</span>
+        <div className="quiz-progress-bar"><div style={{ width: `${((stepIndex + 1) / flow.length) * 100}%`, background: "var(--blue)" }} /></div>
+      </div>
+
+      {step.stepType === "welcome" && <DTFWelcomeStep meta={meta} onNext={next} onBack={back} />}
+      {step.stepType === "wagba" && <DTFWagbaStep meta={meta} onNext={next} onBack={back} />}
+      {step.stepType === "stage-ladder" && <DTFStageLadderStep meta={meta} onNext={next} onBack={back} />}
+      {step.stepType === "starting-point" && (
+        <DTFStartingPointStep
+          meta={meta} question={startingPointQuestion} onBack={back}
+          onNext={(answerText) => { setStartingPointText(answerText); goTo(stepIndex + 1, { startingPointText: answerText }); }}
+        />
+      )}
+
+      {(step.stepType === "content" || step.stepType === "touchpoint") && (
+        <div className="tab-content">
+          {step.stepType === "content" && (
+            <div className="dtf-content-card">
+              <h2>{step.card.heading}</h2>
+              <p className="dtf-card-body" style={{ whiteSpace: "pre-line" }}>{step.card.body}</p>
+              {step.card.compare && (
+                <div className="dtf-compare-grid">
+                  <div className="dtf-compare-item"><span className="dtf-choice-letter">A</span><p>{step.card.compare.a}</p></div>
+                  <div className="dtf-compare-item"><span className="dtf-choice-letter">B</span><p>{step.card.compare.b}</p></div>
+                </div>
+              )}
+              {step.card.list && (
+                <div className="chip-row">
+                  {step.card.list.map((item, i) => <span key={i} className="chip chip-word">{item}</span>)}
+                </div>
+              )}
+              {step.card.footer && <p className="sub" style={{ marginTop: 10 }}>{step.card.footer}</p>}
+            </div>
+          )}
+          {step.stepType === "touchpoint" && (() => {
+            const Touchpoint = TOUCHPOINT_RENDERERS[step.card.kind];
+            return Touchpoint ? <Touchpoint card={step.card} sectionKey={meta.sectionKey} onContinue={next} /> : null;
+          })()}
+          <div className="quiz-nav-row" style={{ marginTop: 20 }}>
+            <button type="button" className="btn-secondary" onClick={back}>
+              <IconGlyph name="ChevronRight" size={16} style={{ transform: "rotate(180deg)" }} /> Back
+            </button>
+            {step.stepType === "content" && (
+              <button type="button" className="btn-primary" onClick={next}>Next <IconGlyph name="ChevronRight" size={16} /></button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {step.stepType === "knowledge-check" && (
+        <DTFKnowledgeCheckStep meta={meta} bank={bank} onEvidence={addEvidence} onContinue={next} />
+      )}
+      {step.stepType === "apply" && (
+        <DTFApplyStep meta={meta} task={applyTask} onEvidence={addEvidence} onContinue={finishKnowledgeOrApplyStep} />
+      )}
+      {step.stepType === "wagba-return" && (
+        <DTFStageLadderStep meta={meta} onNext={next} onBack={back} highlightStage={finalStageSuggestion()} title="Return to WAGBA" />
+      )}
+      {step.stepType === "starting-point-review" && (
+        <DTFStartingPointReviewStep meta={meta} startingPointText={startingPointText} onNext={next} onBack={back} />
+      )}
+      {step.stepType === "vocab-review" && (
+        <DTFVocabReviewStep vocab={vocab} onNext={next} onBack={back} />
+      )}
+      {step.stepType === "next-step" && (
+        <DTFNextStepStep meta={meta} onDone={onExit} />
+      )}
     </>
   );
 }
@@ -632,6 +973,9 @@ function DesignFundamentalsTool({ user, onBack }) {
         meta={U1S1_META}
         cards={U1S1_CARDS}
         bank={U1S1_QUESTIONS}
+        vocab={U1S1_VOCAB}
+        applyTask={U1S1_APPLY_TASK}
+        startingPointQuestion={U1S1_STARTING_POINT}
         onExit={() => setOpenSectionKey(null)}
       />
     );

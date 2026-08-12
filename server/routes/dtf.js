@@ -14,6 +14,7 @@ function serializeProgress(row) {
     confirmedStage: row.confirmed_stage,
     stageReasoning: row.stage_reasoning || "",
     completedAt: row.completed_at,
+    sessionState: JSON.parse(row.session_state || "{}"),
     updatedAt: row.updated_at,
   };
 }
@@ -24,8 +25,9 @@ router.get("/progress", (req, res) => {
 });
 
 router.put("/progress/:unitKey/:sectionKey", (req, res) => {
-  const { knowledgeScore, suggestedStage, stageReasoning, completed } = req.body || {};
+  const { knowledgeScore, suggestedStage, stageReasoning, completed, sessionState } = req.body || {};
   const { unitKey, sectionKey } = req.params;
+  const sessionStateJson = sessionState !== undefined ? JSON.stringify(sessionState) : null;
   const existing = db.prepare("SELECT * FROM dtf_section_progress WHERE user_id = ? AND unit_key = ? AND section_key = ?").get(req.session.userId, unitKey, sectionKey);
   if (existing) {
     db.prepare(
@@ -33,15 +35,16 @@ router.put("/progress/:unitKey/:sectionKey", (req, res) => {
          knowledge_score = COALESCE(?, knowledge_score),
          suggested_stage = COALESCE(?, suggested_stage),
          stage_reasoning = COALESCE(?, stage_reasoning),
+         session_state = COALESCE(?, session_state),
          completed_at = CASE WHEN ? = 1 THEN COALESCE(completed_at, datetime('now')) ELSE completed_at END,
          updated_at = datetime('now')
        WHERE id = ?`
-    ).run(knowledgeScore ?? null, suggestedStage ?? null, stageReasoning ?? null, completed ? 1 : 0, existing.id);
+    ).run(knowledgeScore ?? null, suggestedStage ?? null, stageReasoning ?? null, sessionStateJson, completed ? 1 : 0, existing.id);
   } else {
     db.prepare(
-      `INSERT INTO dtf_section_progress (user_id, unit_key, section_key, knowledge_score, suggested_stage, stage_reasoning, completed_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`
-    ).run(req.session.userId, unitKey, sectionKey, knowledgeScore ?? null, suggestedStage ?? null, stageReasoning || "", completed ? new Date().toISOString().replace("T", " ").slice(0, 19) : null);
+      `INSERT INTO dtf_section_progress (user_id, unit_key, section_key, knowledge_score, suggested_stage, stage_reasoning, session_state, completed_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(req.session.userId, unitKey, sectionKey, knowledgeScore ?? null, suggestedStage ?? null, stageReasoning || "", sessionStateJson || "{}", completed ? new Date().toISOString().replace("T", " ").slice(0, 19) : null);
   }
   const row = db.prepare("SELECT * FROM dtf_section_progress WHERE user_id = ? AND unit_key = ? AND section_key = ?").get(req.session.userId, unitKey, sectionKey);
   res.json(serializeProgress(row));

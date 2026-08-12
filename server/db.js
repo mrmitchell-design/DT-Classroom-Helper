@@ -242,6 +242,12 @@ ensureColumn("quiz_attempts", "quiz_set_id", "INTEGER REFERENCES quiz_sets(id)")
 ensureColumn("submissions", "status", "TEXT NOT NULL DEFAULT 'submitted'");
 ensureColumn("submissions", "submitted_at", "TEXT");
 ensureColumn("spec_projects", "summary_text", "TEXT DEFAULT ''");
+// Resumable section progress - the whole point is that a page refresh must
+// never send a student back to the start of a section they're partway
+// through. session_state is a small JSON blob (current step index, plus
+// anything that needs to be shown back to them later, like their Starting
+// Point answer) - not a full answer log, just enough to resume cleanly.
+ensureColumn("dtf_section_progress", "session_state", "TEXT DEFAULT '{}'");
 
 
 // --- one-time admin bootstrap ---

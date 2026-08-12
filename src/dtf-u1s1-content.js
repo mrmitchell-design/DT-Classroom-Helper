@@ -11,6 +11,21 @@ const U1S1_META = {
   title: "Problem Before Product",
   sectionQuestion: "How do we make sure we are solving the right problem?",
   fiveCFocus: "Critical Thinking",
+  welcome: "Every product around you started because somebody noticed something.\n\nMaybe something was difficult to use, uncomfortable, unsafe, frustrating, wasteful, difficult to carry, difficult to store, or simply could be better.\n\nDesigners don't just make things. They identify problems and opportunities and develop ways of responding to them.\n\nIn this section, you are going to start thinking like a designer by learning how to find the problem before the product.",
+  wagbaHeadline: "Identifying a design problem before deciding what should be made.",
+  wagbaBullets: [
+    "recognise a design context",
+    "identify problems, needs and opportunities",
+    "tell the difference between a problem and a solution",
+    "explore different design possibilities",
+    "avoid getting stuck on your first idea",
+  ],
+  stageLadder: {
+    beginning: "I can recognise a design problem or solution with support.",
+    emerging: "I can identify problems and possible solutions.",
+    developing: "I can explain why designers should investigate a problem before choosing a solution.",
+    mastering: "I can investigate a context, identify the underlying problem and justify different possible design directions.",
+  },
   gettingBetterAt: [
     "recognising a design problem, need or opportunity",
     "understanding what a design context is",
@@ -31,6 +46,18 @@ const U1S1_META = {
   ],
 };
 
+const U1S1_STARTING_POINT = {
+  scenario: "Every lesson, students waste time searching through their bags for pens, pencils, rulers and other equipment.",
+  prompt: "Which would be the best place for a designer to start?",
+  options: [
+    "Design a new pencil case.",
+    "Investigate why students struggle to organise their equipment.",
+    "Choose a material.",
+    "Draw some storage boxes.",
+  ],
+  correct: "Investigate why students struggle to organise their equipment.",
+};
+
 const U1S1_VOCAB = [
   { id: "u1s1-design", term: "Design", definition: "The process of developing ideas to solve a problem, meet a need or respond to an opportunity." },
   { id: "u1s1-context", term: "Design Context", definition: "The situation surrounding a design problem, need or opportunity." },
@@ -44,61 +71,57 @@ const U1S1_VOCAB = [
 
 const U1S1_CARDS = [
   {
-    type: "content", id: "opening-1",
-    heading: "Start with the problem",
-    body: "Students regularly lose stationery inside their school bags and struggle to find the equipment they need during lessons.",
+    type: "content", id: "learn-what-designers-do",
+    heading: "What Does a Designer Actually Do?",
+    body: "Students can easily think Design & Technology means \u201cI have to make something.\u201d\n\nMaking is part of DT, but good designing starts before making.\n\nA designer normally needs to understand: who has a problem? What is happening? Why is it a problem? What needs to improve?\n\nOnly then should they start deciding: what could I design?\n\nThis is why we use the idea of Problem Before Product. If you decide what to make too early, you might create a brilliant product that solves the wrong problem.",
   },
   {
-    type: "touchpoint", id: "opening-predict", kind: "pause_predict",
-    heading: "Pause & Predict",
-    prompt: "What would you design?",
+    type: "content", id: "learn-design-context",
+    heading: "What Is a Design Context?",
+    body: "Design Context: the situation surrounding a design problem, need or opportunity.\n\nA context gives us somewhere to start.\n\nStudents regularly struggle to organise and access the equipment they need during lessons.\n\nNotice what this doesn't say. It doesn't tell us what product to make, what material to use, what shape it should be, or what it should look like. That's deliberate \u2014 it gives the designer something to investigate.",
   },
   {
-    type: "content", id: "opening-2",
-    heading: "Problem Before Product",
-    body: "You may already be thinking about pencil cases, organisers, pockets or storage boxes.\n\nThat's normal \u2014 but you've just done something designers need to be careful about. You've started thinking about the product before fully investigating the problem.\n\nGood designers don't start by asking \u201cWhat should I make?\u201d They start by asking \u201cWhat problem am I actually trying to solve?\u201d",
-  },
-  {
-    type: "content", id: "know-context",
-    heading: "What We Need to Know: Design Context",
-    body: "A design context is the situation surrounding a design problem, need or opportunity.",
+    type: "content", id: "example-compare-contexts",
+    heading: "Example: Compare the Contexts",
+    body: "Context A gives us a product and a material already \u2014 the designer has very little freedom to investigate the actual problem.\n\nContext B leaves room to investigate what equipment students carry, what they lose, where they store it, when they need it, why existing solutions don't work, and what different students need. Only after that do we start thinking about possible products.",
     compare: {
-      a: "Design a pencil case.",
+      a: "Design a plywood pencil case.",
       b: "Students need a better way to organise and access the equipment they use during lessons.",
     },
+    footer: "A good design context gives us a problem to investigate, not simply a product to make.",
   },
   {
     type: "touchpoint", id: "which-stronger-1", kind: "which_is_stronger",
-    heading: "Which Is Stronger?",
-    prompt: "Which gives the designer more opportunity to investigate?",
-    optionA: "Design a pencil case.",
+    heading: "Quick Check",
+    prompt: "Which is the stronger design context?",
+    optionA: "Design a plywood pencil case.",
     optionB: "Students need a better way to organise and access the equipment they use during lessons.",
     correct: "b",
-    feedbackCorrect: "Good thinking. B describes the situation and need without deciding what the final product must be.",
-    feedbackIncorrect: "A has already decided that the solution will be a pencil case. Look again at B. What other solutions could respond to that problem?",
+    feedbackCorrect: "Good thinking. B describes the situation and need without deciding what the final product or material must be.",
+    feedbackIncorrect: "A has already decided the product (pencil case) and the material (plywood). Look again at B \u2014 what could you investigate that A doesn't allow?",
   },
   {
-    type: "content", id: "example-possibilities",
-    heading: "One Problem, Many Possibilities",
-    body: "Students need a better way to organise and access equipment during lessons.\n\nThis one context could lead to many different directions:",
-    list: [
-      "portable organiser", "modular bag insert", "desk storage", "classroom storage system",
-      "equipment tray", "labelled storage", "wearable organiser", "equipment checking system",
+    type: "content", id: "learn-problem-need-opportunity",
+    heading: "Problem, Need and Opportunity",
+    body: "Problem: an issue or difficulty that could be improved through design.\nExample: students' water bottles are regularly knocked over during lessons.\n\nNeed: something necessary for a user or situation.\nExample: students need somewhere safe and accessible to keep their bottles.\n\nOpportunity: a situation where design could improve something or create something useful.\nExample: there is an opportunity to improve how bottles are stored around classroom desks.\n\nThese ideas are connected, but they are not exactly the same.",
+  },
+  {
+    type: "touchpoint", id: "pno-check-1", kind: "problem_need_opportunity",
+    heading: "Check",
+    prompt: "Sort each statement as a Problem, a Need, or an Opportunity.",
+    items: [
+      { text: "Wet umbrellas leave puddles that make the classroom floor slippery.", answer: "problem" },
+      { text: "Students need somewhere dry to keep umbrellas during lessons.", answer: "need" },
+      { text: "There is a chance to improve how the whole school stores umbrellas, not just one classroom.", answer: "opportunity" },
+      { text: "Headphones get tangled and lost inside bags.", answer: "problem" },
+      { text: "Students need a reliable way to keep headphones tidy.", answer: "need" },
+      { text: "A shared class charging station could improve equipment access for everyone.", answer: "opportunity" },
     ],
-    footer: "These are not eight finished designs. They are design possibilities \u2014 different directions we could investigate.",
   },
   {
-    type: "touchpoint", id: "quick-check-1", kind: "quick_check",
-    heading: "Quick Check",
-    prompt: "Which of these is a design possibility?",
-    options: ["Students lose stationery.", "Students are in Year 8.", "A modular bag organiser.", "The problem is annoying."],
-    correct: "A modular bag organiser.",
-    feedback: "A modular bag organiser is one possible way of responding to the problem.",
-  },
-  {
-    type: "content", id: "problem-or-solution",
-    heading: "Problem or Solution?",
-    body: "Problem: an issue or difficulty that could be improved or solved through design.\n\nSolution: a way of responding to a problem, need or opportunity.\n\nMy phone keeps falling off my desk while I work.\n\nThe problem is NOT \u201cI don't have a phone stand.\u201d A phone stand is already a solution. Other possible solutions could include a non-slip surface, a desk pocket, a clip, a tray, an adjustable holder, or an attachment to another product.\n\nDon't hide the solution inside the problem.",
+    type: "content", id: "learn-problem-vs-solution",
+    heading: "Problem vs Solution",
+    body: "Your phone keeps falling off your desk while you work.\n\nThe problem is: my phone keeps falling from the desk.\n\nA need might be: I need a safe way to position my phone while working.\n\nPossible solutions might be: a phone stand, a non-slip surface, a clip, a desk pocket, or an adjustable holder.\n\n\u201cI don't have a phone stand\u201d isn't really the design problem \u2014 you've already decided that a stand is the answer.",
   },
   {
     type: "touchpoint", id: "stop-sort-1", kind: "stop_sort",
@@ -116,22 +139,15 @@ const U1S1_CARDS = [
     ],
   },
   {
-    type: "touchpoint", id: "spot-hidden-1", kind: "spot_hidden_solution",
-    heading: "Spot the Hidden Solution",
-    prompt: "Students need a wall-mounted rack to organise their equipment.\n\nWhat's wrong with this design context?",
-    modelExplanation: "\u201cWall-mounted rack\u201d has already specified the solution.",
-    improvedVersion: "Students need a better way to organise and access their equipment.",
-  },
-  {
-    type: "touchpoint", id: "spot-hidden-2", kind: "spot_hidden_solution",
-    heading: "Spot the Hidden Solution",
-    prompt: "Students need a lightweight plastic container to carry art equipment.\n\nWhat has already been decided here?",
-    modelExplanation: "\u201cContainer\u201d is a chosen product, and \u201cplastic\u201d is a chosen material \u2014 both decided before the problem was fully investigated.",
-    improvedVersion: "Students need a practical way to safely transport art equipment between classrooms.",
+    type: "content", id: "learn-one-problem-many-possibilities",
+    heading: "One Problem, Many Possibilities",
+    body: "Problem: students struggle to organise their equipment.\n\nThat one problem could lead to many different possibilities:",
+    list: ["portable organiser", "bag insert", "desk storage", "shared classroom system", "equipment-checking system"],
+    footer: "Notice that these aren't five different-looking pencil cases. They are different ways of responding to the problem.",
   },
   {
     type: "touchpoint", id: "think-try-test-1", kind: "think_try_test",
-    heading: "Think, Try, Test",
+    heading: "Practice: Your Turn",
     scenario: "Students regularly leave reusable water bottles on the floor beside their desks, where they are knocked over.",
     parts: [
       { key: "problem", label: "1. What is the actual problem?", placeholder: "Describe the real problem, not a solution..." },
@@ -140,14 +156,14 @@ const U1S1_CARDS = [
     teacherGuidance: "Model guidance: students do not have a safe and convenient place to store bottles during lessons, resulting in bottles being knocked over. Three differently shaped desk-mounted bottle holders should not automatically count as three different design possibilities \u2014 we are looking for different approaches to the problem, e.g. a desk-mounted holder, storage attached to furniture, a central bottle-storage system, or a bag attachment.",
   },
   {
-    type: "content", id: "notice-more-ideas",
-    heading: "What We Need to Notice",
-    body: "More ideas does not automatically mean better design thinking.\n\nA student produces a round pencil case, a square pencil case, a triangular pencil case, and a hexagonal pencil case.\n\nHave they explored four different design possibilities? Not necessarily \u2014 they have explored variations of the same solution.\n\nStronger exploration might compare a pencil case, a bag insert, a desk organiser and an equipment-storage system.",
+    type: "content", id: "learn-fixation-framing",
+    heading: "When Your First Idea Gets in the Way",
+    body: "Have you ever had an idea that you really liked, and then found yourself trying to make everything fit that idea?\n\nDesigners do this too.\n\nDesign Fixation: becoming too focused on one idea or type of solution and finding it difficult to explore alternatives.",
   },
   {
-    type: "content", id: "design-fixation-intro",
-    heading: "Design Fixation",
-    body: "Design Fixation: becoming too focused on one idea or type of solution and finding it difficult to explore alternatives.\n\nYour design context is: students need a better way to organise classroom equipment.\n\nYour first action is searching online for \u201cBest classroom storage boxes.\u201d",
+    type: "content", id: "learn-fixation-example",
+    heading: "Design Fixation in Practice",
+    body: "Your design context is: students need a better way to organise classroom equipment.\n\nYour first action is searching online for \u201cBest classroom storage boxes.\u201d",
   },
   {
     type: "touchpoint", id: "spot-problem-fixation", kind: "spot_the_problem",
@@ -155,18 +171,24 @@ const U1S1_CARDS = [
     prompt: "What could be wrong with searching \u201cBest classroom storage boxes\u201d before investigating the problem?",
     modelExplanation: "The search assumes that a storage box is the solution before the problem has been properly investigated. Looking at existing products is useful later, but the search terms we use can influence the solutions we discover.",
   },
-  {
-    type: "touchpoint", id: "decide-defend-1", kind: "decide_defend",
-    heading: "Decide & Defend",
-    scenario: "Students regularly lose stationery inside their school bags.",
-    optionA: { label: "Student A", text: "\u201cLet's design a better pencil case.\u201d" },
-    optionB: { label: "Student B", text: "\u201cLet's investigate why the stationery is getting lost first.\u201d" },
-    correct: "b",
-    prompt: "Who is showing stronger design thinking, and why?",
-    modelResponse: "Student B, because they are investigating the cause of the problem before deciding which solution should be developed.",
-    acceptedIdeas: ["investigate first", "understand cause", "avoid choosing solution too early", "explore alternatives"],
-  },
 ];
+
+const U1S1_APPLY_TASK = {
+  heading: "Design Detective",
+  scenario: "During practical lessons, bags are placed around stools and workbenches. Students and teachers sometimes trip over them, but students need access to some of the equipment stored inside them during the lesson.",
+  parts: [
+    { key: "happening", label: "1. What is happening?", placeholder: "Describe the situation in your own words..." },
+    { key: "problem", label: "2. What is the design problem?", placeholder: "Describe the real problem, not a solution..." },
+    { key: "needs", label: "3. What do users appear to need?", placeholder: "Describe what students and teachers need..." },
+    { key: "possibilities", label: "4. Suggest three genuinely different design possibilities.", placeholder: "List three different directions..." },
+    { key: "priority", label: "5. Which would you investigate first, and why?", placeholder: "Explain your choice..." },
+  ],
+  acceptedIdeas: [
+    "bags cause a trip hazard", "bags block walkways or floor space", "need access to equipment during the lesson",
+    "safe storage", "accessible storage", "genuinely different possibilities", "investigate first", "justified choice",
+  ],
+  expectedKnowledge: "Applying problem/need identification and generating genuinely different possibilities in an unfamiliar scenario.",
+};
 
 const U1S1_QUESTIONS = [
   { qid: "U1-S1-R01", category: "R", type: "mcq", prompt: "What is a design context?",
