@@ -3981,6 +3981,20 @@ function DTFStagePill({
     }
   }, info.label);
 }
+
+// Only Section 1 has a real flow built so far; sections without one just
+// show no progress bar (nothing to measure yet) rather than a fake 0%.
+function getSectionFlowLength(sectionKey) {
+  if (sectionKey === "s1") return buildSectionFlow(U1S1_META, U1S1_CARDS).length;
+  return null;
+}
+function sectionProgressPercent(sectionKey, progressRow) {
+  const flowLength = getSectionFlowLength(sectionKey);
+  if (!flowLength || flowLength <= 1) return null;
+  if (!progressRow) return 0;
+  const stepIndex = progressRow.sessionState && typeof progressRow.sessionState.stepIndex === "number" ? progressRow.sessionState.stepIndex : 0;
+  return Math.min(100, Math.round(stepIndex / (flowLength - 1) * 100));
+}
 function DTFDashboard({
   sections,
   onOpenSection
@@ -4043,12 +4057,15 @@ function DTFDashboard({
   }, "Sections"), sections.map(s => {
     const p = byKey[s.key];
     const available = !!s.available;
+    const percent = available ? sectionProgressPercent(s.key, p) : null;
     return /*#__PURE__*/React.createElement("button", {
       type: "button",
       key: s.key,
       className: "dtf-section-row" + (available ? " clickable" : " disabled"),
       onClick: () => available && onOpenSection(s.key),
       disabled: !available
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "dtf-section-row-top"
     }, /*#__PURE__*/React.createElement("span", {
       className: "dtf-section-name"
     }, s.number, ". ", s.title, !available && /*#__PURE__*/React.createElement("span", {
@@ -4058,7 +4075,18 @@ function DTFDashboard({
       }
     }, "Coming soon")), /*#__PURE__*/React.createElement(DTFStagePill, {
       stage: p ? p.confirmedStage || p.suggestedStage : null
-    }));
+    })), percent !== null && /*#__PURE__*/React.createElement("div", {
+      className: "dtf-section-progress-row"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "quiz-progress-bar dtf-section-progress-bar"
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: `${percent}%`,
+        background: percent >= 100 ? "var(--green)" : "var(--blue)"
+      }
+    })), /*#__PURE__*/React.createElement("span", {
+      className: "mono"
+    }, percent, "%")));
   })));
 }
 const UNIT_1_SECTIONS = [{
@@ -4215,6 +4243,7 @@ function TP_QuickCheck({
   onContinue
 }) {
   const [picked, setPicked] = useState(null);
+  const options = useMemo(() => shuffle(card.options), [card]);
   return /*#__PURE__*/React.createElement("div", {
     className: "dtf-touchpoint"
   }, /*#__PURE__*/React.createElement("span", {
@@ -4226,7 +4255,7 @@ function TP_QuickCheck({
     className: "dtf-touchpoint-prompt"
   }, card.prompt), /*#__PURE__*/React.createElement("div", {
     className: "quiz-options"
-  }, card.options.map(opt => /*#__PURE__*/React.createElement("button", {
+  }, options.map(opt => /*#__PURE__*/React.createElement("button", {
     key: opt,
     className: "quiz-option" + (picked === opt ? opt === card.correct ? " correct" : " wrong" : ""),
     onClick: () => !picked && setPicked(opt),
@@ -4522,7 +4551,17 @@ function pickKnowledgeCheckQuestions(bank) {
   bank.forEach(q => {
     if (byCat[q.category]) byCat[q.category].push(q);
   });
-  return [...shuffle(byCat.R).slice(0, 3), ...shuffle(byCat.E).slice(0, 2)].filter(Boolean);
+
+  // Randomise the total (4-5) and the R/E split each time, rather than a
+  // fixed 3+2 every single time - guarantee at least one of each so it
+  // never accidentally becomes all-recall or all-explain.
+  const total = 4 + Math.floor(Math.random() * 2); // 4 or 5
+  const remaining = total - 2;
+  const extraR = Math.floor(Math.random() * (remaining + 1));
+  const rCount = Math.min(1 + extraR, byCat.R.length);
+  const eCount = Math.min(total - rCount, byCat.E.length);
+  const picked = [...shuffle(byCat.R).slice(0, rCount), ...shuffle(byCat.E).slice(0, eCount)];
+  return shuffle(picked);
 }
 const OPEN_TYPES = ["short_response", "extended_response", "improve_it", "decide_defend_short"];
 function DTFQuestionRenderer({
@@ -4532,6 +4571,7 @@ function DTFQuestionRenderer({
 }) {
   const [text, setText] = useState(response ? response.text : "");
   const [picked, setPicked] = useState(response ? response.picked : null);
+  const mcqOptions = useMemo(() => question.type === "mcq" ? shuffle(question.options) : null, [question]);
   function submitObjective(answer, isCorrect) {
     onRespond({
       picked: answer,
@@ -4573,7 +4613,7 @@ function DTFQuestionRenderer({
   if (question.type === "mcq") {
     return /*#__PURE__*/React.createElement("div", {
       className: "quiz-options"
-    }, question.options.map(opt => /*#__PURE__*/React.createElement("button", {
+    }, mcqOptions.map(opt => /*#__PURE__*/React.createElement("button", {
       key: opt,
       className: "quiz-option",
       onClick: () => submitObjective(opt, opt === question.correctAnswer)

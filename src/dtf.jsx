@@ -4,6 +4,21 @@ function DTFStagePill({ stage }) {
   return <span className="dtf-stage-pill" style={{ background: info.tint + "22", color: info.tint }}>{info.label}</span>;
 }
 
+// Only Section 1 has a real flow built so far; sections without one just
+// show no progress bar (nothing to measure yet) rather than a fake 0%.
+function getSectionFlowLength(sectionKey) {
+  if (sectionKey === "s1") return buildSectionFlow(U1S1_META, U1S1_CARDS).length;
+  return null;
+}
+
+function sectionProgressPercent(sectionKey, progressRow) {
+  const flowLength = getSectionFlowLength(sectionKey);
+  if (!flowLength || flowLength <= 1) return null;
+  if (!progressRow) return 0;
+  const stepIndex = (progressRow.sessionState && typeof progressRow.sessionState.stepIndex === "number") ? progressRow.sessionState.stepIndex : 0;
+  return Math.min(100, Math.round((stepIndex / (flowLength - 1)) * 100));
+}
+
 function DTFDashboard({ sections, onOpenSection }) {
   const [progress, setProgress] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -63,6 +78,7 @@ function DTFDashboard({ sections, onOpenSection }) {
         {sections.map((s) => {
           const p = byKey[s.key];
           const available = !!s.available;
+          const percent = available ? sectionProgressPercent(s.key, p) : null;
           return (
             <button
               type="button"
@@ -71,8 +87,16 @@ function DTFDashboard({ sections, onOpenSection }) {
               onClick={() => available && onOpenSection(s.key)}
               disabled={!available}
             >
-              <span className="dtf-section-name">{s.number}. {s.title}{!available && <span className="status-pill draft" style={{ marginLeft: 8 }}>Coming soon</span>}</span>
-              <DTFStagePill stage={p ? (p.confirmedStage || p.suggestedStage) : null} />
+              <div className="dtf-section-row-top">
+                <span className="dtf-section-name">{s.number}. {s.title}{!available && <span className="status-pill draft" style={{ marginLeft: 8 }}>Coming soon</span>}</span>
+                <DTFStagePill stage={p ? (p.confirmedStage || p.suggestedStage) : null} />
+              </div>
+              {percent !== null && (
+                <div className="dtf-section-progress-row">
+                  <div className="quiz-progress-bar dtf-section-progress-bar"><div style={{ width: `${percent}%`, background: percent >= 100 ? "var(--green)" : "var(--blue)" }} /></div>
+                  <span className="mono">{percent}%</span>
+                </div>
+              )}
             </button>
           );
         })}
@@ -159,12 +183,13 @@ function TP_WhichIsStronger({ card, onContinue }) {
 
 function TP_QuickCheck({ card, onContinue }) {
   const [picked, setPicked] = useState(null);
+  const options = useMemo(() => shuffle(card.options), [card]);
   return (
     <div className="dtf-touchpoint">
       <span className="dtf-touchpoint-label"><IconGlyph name="Check" size={14} /> {card.heading}</span>
       <p className="dtf-touchpoint-prompt">{card.prompt}</p>
       <div className="quiz-options">
-        {card.options.map((opt) => (
+        {options.map((opt) => (
           <button
             key={opt}
             className={"quiz-option" + (picked === opt ? (opt === card.correct ? " correct" : " wrong") : "")}
@@ -386,7 +411,18 @@ const TOUCHPOINT_RENDERERS = {
 function pickKnowledgeCheckQuestions(bank) {
   const byCat = { R: [], E: [] };
   bank.forEach((q) => { if (byCat[q.category]) byCat[q.category].push(q); });
-  return [...shuffle(byCat.R).slice(0, 3), ...shuffle(byCat.E).slice(0, 2)].filter(Boolean);
+
+  // Randomise the total (4-5) and the R/E split each time, rather than a
+  // fixed 3+2 every single time - guarantee at least one of each so it
+  // never accidentally becomes all-recall or all-explain.
+  const total = 4 + Math.floor(Math.random() * 2); // 4 or 5
+  const remaining = total - 2;
+  const extraR = Math.floor(Math.random() * (remaining + 1));
+  const rCount = Math.min(1 + extraR, byCat.R.length);
+  const eCount = Math.min(total - rCount, byCat.E.length);
+
+  const picked = [...shuffle(byCat.R).slice(0, rCount), ...shuffle(byCat.E).slice(0, eCount)];
+  return shuffle(picked);
 }
 
 const OPEN_TYPES = ["short_response", "extended_response", "improve_it", "decide_defend_short"];
@@ -394,6 +430,7 @@ const OPEN_TYPES = ["short_response", "extended_response", "improve_it", "decide
 function DTFQuestionRenderer({ question, response, onRespond }) {
   const [text, setText] = useState(response ? response.text : "");
   const [picked, setPicked] = useState(response ? response.picked : null);
+  const mcqOptions = useMemo(() => (question.type === "mcq" ? shuffle(question.options) : null), [question]);
 
   function submitObjective(answer, isCorrect) {
     onRespond({ picked: answer, isCorrect, text: "" });
@@ -423,7 +460,7 @@ function DTFQuestionRenderer({ question, response, onRespond }) {
   if (question.type === "mcq") {
     return (
       <div className="quiz-options">
-        {question.options.map((opt) => (
+        {mcqOptions.map((opt) => (
           <button key={opt} className="quiz-option" onClick={() => submitObjective(opt, opt === question.correctAnswer)}>{opt}</button>
         ))}
       </div>
