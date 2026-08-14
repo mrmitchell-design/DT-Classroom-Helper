@@ -15,6 +15,7 @@ const FILES_IN_ORDER = [
   "specbuilder-content.js",
   "dtf-content.js",
   "dtf-u1s1-content.js",
+  "vocab-content.js",
   "icons.jsx",
   "api.jsx",
   "shared.jsx",
@@ -24,6 +25,7 @@ const FILES_IN_ORDER = [
   "worksheet.jsx",
   "specbuilder.jsx",
   "dtf.jsx",
+  "vocab.jsx",
   "login.jsx",
   "studentapp.jsx",
   "admin-csvimport.jsx",
@@ -88,6 +90,38 @@ function vendorStaticAssets() {
   console.log(`[build] vendored ${copied}/${needed.length} icons`);
 }
 
+function vendorFonts() {
+  // Self-hosted so the app works fully offline (no Google Fonts CDN call at
+  // runtime) - same reasoning as vendoring React/icons above.
+  const fontsDir = path.join(PUBLIC, "fonts");
+  fs.mkdirSync(fontsDir, { recursive: true });
+
+  const families = [
+    { pkg: "@fontsource/raleway", cssVar: "Raleway", weights: [400, 500, 600, 700] },
+    { pkg: "@fontsource/space-grotesk", cssVar: "Space Grotesk", weights: [500, 600, 700] },
+  ];
+
+  let faceRules = "";
+  families.forEach(({ pkg, cssVar, weights }) => {
+    const filesDir = path.join(path.dirname(require.resolve(`${pkg}/package.json`)), "files");
+    const slug = cssVar.toLowerCase().replace(/\s+/g, "-");
+    weights.forEach((w) => {
+      const filename = `${slug}-latin-${w}-normal.woff2`;
+      const from = path.join(filesDir, filename);
+      if (!fs.existsSync(from)) {
+        console.warn(`[build] WARNING: font file not found: ${from}`);
+        return;
+      }
+      fs.copyFileSync(from, path.join(fontsDir, filename));
+      faceRules += `@font-face { font-family: '${cssVar}'; font-style: normal; font-weight: ${w}; font-display: swap; src: url('/fonts/${filename}') format('woff2'); }\n`;
+    });
+  });
+
+  fs.writeFileSync(path.join(PUBLIC, "fonts.css"), faceRules);
+  console.log("[build] vendored Raleway + Space Grotesk font files");
+}
+
 buildAppJs();
 vendorStaticAssets();
+vendorFonts();
 console.log("[build] done.");

@@ -1413,6 +1413,683 @@ const U1S1_QUESTIONS = [{
   }
 }];
 
+/* ===== vocab-content.js ===== */
+/* ------------------------------------------------------------------ */
+/* WORDS WE NEED TO WORK WITH - master vocabulary dataset              */
+/* Every term has a stable id (never reuse/renumber), a category, and  */
+/* two definitions per the EAL requirement: simpleDefinition (short,   */
+/* accessible) and definition (the full DT meaning). Faithfully        */
+/* transcribed from the approved source dataset - only minor           */
+/* formatting changes made, no meanings altered.                       */
+/* ------------------------------------------------------------------ */
+
+const VOCAB_CATEGORIES = [{
+  key: "contexts-problems",
+  label: "Contexts & Design Problems"
+}, {
+  key: "clients-research",
+  label: "Clients, Users & Research"
+}, {
+  key: "briefs-specs",
+  label: "Briefs & Specifications"
+}, {
+  key: "sustainability",
+  label: "Sustainability & Wider Issues"
+}, {
+  key: "energy",
+  label: "Energy"
+}, {
+  key: "designers-analysis",
+  label: "Designers & Product Analysis"
+}, {
+  key: "strategies",
+  label: "Design Strategies"
+}, {
+  key: "communicating",
+  label: "Communicating Design Ideas"
+}, {
+  key: "prototyping",
+  label: "Prototyping & Manufacturing"
+}, {
+  key: "testing",
+  label: "Testing & Evaluation"
+}, {
+  key: "safety",
+  label: "Working Safely"
+}];
+const VOCAB_TERMS = [{
+  id: "design",
+  term: "Design",
+  category: "contexts-problems",
+  simpleDefinition: "Developing ideas to solve problems or meet people's needs.",
+  definition: "The process of developing ideas to solve a problem, meet a need or respond to an opportunity.",
+  example: "Developing a safer way to store school bags during a practical lesson."
+}, {
+  id: "design-context",
+  term: "Design Context",
+  category: "contexts-problems",
+  simpleDefinition: "The situation or problem a designer is working with.",
+  definition: "The situation or circumstances surrounding a design problem, need or opportunity.",
+  example: "Students need a better way to organise the equipment they use during lessons.",
+  commonlyConfusedWith: ["design-problem"]
+}, {
+  id: "design-possibility",
+  term: "Design Possibility",
+  category: "contexts-problems",
+  simpleDefinition: "One possible way of solving a design problem.",
+  definition: "A possible direction or type of solution that could respond to a design context.",
+  example: "A bag organiser, desk organiser and shared storage system could all be different design possibilities.",
+  commonlyConfusedWith: ["design-solution"]
+}, {
+  id: "design-solution",
+  term: "Design Solution",
+  category: "contexts-problems",
+  simpleDefinition: "An idea developed to solve a problem or meet a need.",
+  definition: "A developed idea that responds to a design problem, need or opportunity.",
+  commonlyConfusedWith: ["design-possibility"]
+}, {
+  id: "design-problem",
+  term: "Design Problem",
+  category: "contexts-problems",
+  simpleDefinition: "Something that could be improved through design.",
+  definition: "An issue or difficulty that could be improved or solved through design.",
+  commonlyConfusedWith: ["design-context"]
+}, {
+  id: "need",
+  term: "Need",
+  category: "contexts-problems",
+  simpleDefinition: "Something a user must have or be able to do.",
+  definition: "Something a user requires for a product or solution to work successfully for them.",
+  commonlyConfusedWith: ["opportunity"]
+}, {
+  id: "opportunity",
+  term: "Opportunity",
+  category: "contexts-problems",
+  simpleDefinition: "A chance to improve something through design.",
+  definition: "A situation where design could improve something or create a useful new solution.",
+  commonlyConfusedWith: ["need"]
+}, {
+  id: "constraint",
+  term: "Constraint",
+  category: "contexts-problems",
+  simpleDefinition: "Something that limits what a designer can do.",
+  definition: "A limit or restriction that a designer has to work within, such as cost, time, size or available materials."
+}, {
+  id: "client",
+  term: "Client",
+  category: "clients-research",
+  simpleDefinition: "The person or organisation asking for the design.",
+  definition: "The person or organisation asking for a product or solution to be designed.",
+  commonlyConfusedWith: ["user", "customer"]
+}, {
+  id: "user",
+  term: "User",
+  category: "clients-research",
+  simpleDefinition: "The person who will use the product.",
+  definition: "The person or group who will actually use the product or solution.",
+  commonlyConfusedWith: ["client", "customer"]
+}, {
+  id: "user-need",
+  term: "User Need",
+  category: "clients-research",
+  simpleDefinition: "Something the user needs the design to do.",
+  definition: "Something the user requires the design to provide or achieve."
+}, {
+  id: "primary-data",
+  term: "Primary Data",
+  category: "clients-research",
+  simpleDefinition: "Information you collect yourself.",
+  definition: "Information collected first-hand by the designer for their particular project.",
+  example: "Interviews, questionnaires, observations and measurements collected by the designer.",
+  commonlyConfusedWith: ["secondary-data"]
+}, {
+  id: "secondary-data",
+  term: "Secondary Data",
+  category: "clients-research",
+  simpleDefinition: "Information already collected by someone else.",
+  definition: "Information that already exists and was originally collected or produced by somebody else.",
+  example: "Books, websites, existing research and published measurements.",
+  commonlyConfusedWith: ["primary-data"]
+}, {
+  id: "metric-data",
+  term: "Metric Data",
+  category: "clients-research",
+  simpleDefinition: "Information shown using numbers or measurements.",
+  definition: "Information expressed using measurements or numerical values."
+}, {
+  id: "anthropometric-data",
+  term: "Anthropometric Data",
+  category: "clients-research",
+  simpleDefinition: "Measurements of people's bodies.",
+  definition: "Measurements of the human body used to help design products that fit or suit people.",
+  example: "Hand width, height, reach and sitting height."
+}, {
+  id: "observation",
+  term: "Observation",
+  category: "clients-research",
+  simpleDefinition: "Watching what happens to collect information.",
+  definition: "Watching users, products or situations to find out what actually happens."
+}, {
+  id: "questionnaire",
+  term: "Questionnaire",
+  category: "clients-research",
+  simpleDefinition: "A list of questions used to collect information.",
+  definition: "A set of questions used to collect information from a number of people."
+}, {
+  id: "interview",
+  term: "Interview",
+  category: "clients-research",
+  simpleDefinition: "Asking someone questions to learn more from them.",
+  definition: "A conversation in which questions are asked to collect detailed information from a person."
+}, {
+  id: "focus-group",
+  term: "Focus Group",
+  category: "clients-research",
+  simpleDefinition: "A small group discussing and giving opinions about something.",
+  definition: "A small group of people brought together to discuss and give opinions about a product, idea or problem."
+}, {
+  id: "market-research",
+  term: "Market Research",
+  category: "clients-research",
+  simpleDefinition: "Finding out about existing products, users and what people may want.",
+  definition: "Investigating existing products, users and markets to understand what is already available and what people may need."
+}, {
+  id: "design-brief",
+  term: "Design Brief",
+  category: "briefs-specs",
+  simpleDefinition: "A short statement saying what needs designing, who it is for and why.",
+  definition: "A short statement explaining what needs to be designed, who it is for and what problem or need it should address.",
+  commonlyConfusedWith: ["design-specification"]
+}, {
+  id: "design-specification",
+  term: "Design Specification",
+  category: "briefs-specs",
+  simpleDefinition: "A list of things the design needs to do.",
+  definition: "A list of requirements that a successful design should meet.",
+  commonlyConfusedWith: ["design-brief", "manufacturing-specification"]
+}, {
+  id: "manufacturing-specification",
+  term: "Manufacturing Specification",
+  category: "briefs-specs",
+  simpleDefinition: "Instructions and details for how the product should be made.",
+  definition: "Detailed information explaining how a product should be made and the standards it should achieve.",
+  commonlyConfusedWith: ["design-specification"]
+}, {
+  id: "tolerance",
+  term: "Tolerance",
+  category: "briefs-specs",
+  simpleDefinition: "How much a measurement is allowed to be different.",
+  definition: "The allowed amount that a measurement can vary from its intended value.",
+  example: "50 mm \u00b1 0.5 mm allows the final dimension to vary slightly above or below 50 mm."
+}, {
+  id: "aesthetics",
+  term: "Aesthetics",
+  category: "briefs-specs",
+  simpleDefinition: "How a product looks and feels.",
+  definition: "How a product looks and feels, including features such as colour, shape, form and texture."
+}, {
+  id: "cost",
+  term: "Cost",
+  category: "briefs-specs",
+  simpleDefinition: "How much money something costs.",
+  definition: "The amount of money involved in producing, buying or using a product."
+}, {
+  id: "customer",
+  term: "Customer",
+  category: "briefs-specs",
+  simpleDefinition: "The person or organisation buying the product.",
+  definition: "The person or organisation that buys a product.",
+  commonlyConfusedWith: ["client", "user"]
+}, {
+  id: "environment",
+  term: "Environment",
+  category: "briefs-specs",
+  simpleDefinition: "Where a product is used and how it affects the natural world.",
+  definition: "The surroundings in which a product is made, used or disposed of, and the effect it may have on the natural world."
+}, {
+  id: "safety-spec",
+  term: "Safety",
+  category: "briefs-specs",
+  simpleDefinition: "Making sure a product does not cause unnecessary harm.",
+  definition: "Designing so that a product does not create unnecessary risk or harm."
+}, {
+  id: "size",
+  term: "Size",
+  category: "briefs-specs",
+  simpleDefinition: "How big or small something is.",
+  definition: "The dimensions, scale or physical measurements of a product."
+}, {
+  id: "function",
+  term: "Function",
+  category: "briefs-specs",
+  simpleDefinition: "What a product is supposed to do.",
+  definition: "What a product is designed to do and how it performs its purpose."
+}, {
+  id: "materials",
+  term: "Materials",
+  category: "briefs-specs",
+  simpleDefinition: "What a product is made from.",
+  definition: "The substances from which a product is made.",
+  commonlyConfusedWith: ["manufacture"]
+}, {
+  id: "manufacture",
+  term: "Manufacture",
+  category: "briefs-specs",
+  simpleDefinition: "How a product is made.",
+  definition: "The processes and methods used to make a product.",
+  commonlyConfusedWith: ["materials"]
+}, {
+  id: "sustainability",
+  term: "Sustainability",
+  category: "sustainability",
+  simpleDefinition: "Meeting our needs while causing less harm now and in the future.",
+  definition: "Meeting our needs while reducing harm to people, resources and the environment now and in the future."
+}, {
+  id: "environmental",
+  term: "Environmental",
+  category: "sustainability",
+  simpleDefinition: "About the natural world and our effect on it.",
+  definition: "Relating to the natural world and the effect a product has on it."
+}, {
+  id: "social",
+  term: "Social",
+  category: "sustainability",
+  simpleDefinition: "About people and communities.",
+  definition: "Relating to people, communities and the way people live."
+}, {
+  id: "economic",
+  term: "Economic",
+  category: "sustainability",
+  simpleDefinition: "About money, jobs and businesses.",
+  definition: "Relating to money, jobs, businesses, production and the economy."
+}, {
+  id: "product-life-cycle",
+  term: "Product Life Cycle",
+  category: "sustainability",
+  simpleDefinition: "The stages a product goes through from materials to disposal or reuse.",
+  definition: "The stages a product goes through from obtaining materials and manufacture to use and eventual disposal or reuse."
+}, {
+  id: "reuse",
+  term: "Reuse",
+  category: "sustainability",
+  simpleDefinition: "Use something again.",
+  definition: "Using a product or material again instead of throwing it away."
+}, {
+  id: "rethink",
+  term: "Rethink",
+  category: "sustainability",
+  simpleDefinition: "Think again about whether there is a better way.",
+  definition: "Questioning whether a product, material or process is needed or could be done in a better way."
+}, {
+  id: "reduce",
+  term: "Reduce",
+  category: "sustainability",
+  simpleDefinition: "Use less.",
+  definition: "Using fewer materials, less energy or fewer resources."
+}, {
+  id: "repair",
+  term: "Repair",
+  category: "sustainability",
+  simpleDefinition: "Fix something so it can be used again.",
+  definition: "Fixing a product so that it can continue to be used."
+}, {
+  id: "recycle",
+  term: "Recycle",
+  category: "sustainability",
+  simpleDefinition: "Turn waste into material that can be used again.",
+  definition: "Processing waste material so it can be made into new material or products."
+}, {
+  id: "fossil-fuel",
+  term: "Fossil Fuel",
+  category: "energy",
+  simpleDefinition: "Fuel such as coal, oil or natural gas formed over millions of years.",
+  definition: "A fuel such as coal, oil or natural gas formed from ancient organic material over millions of years."
+}, {
+  id: "non-renewable-energy",
+  term: "Non-Renewable Energy Source",
+  category: "energy",
+  simpleDefinition: "An energy source that will eventually run out.",
+  definition: "An energy source that is used faster than it can naturally be replaced.",
+  commonlyConfusedWith: ["renewable-energy"]
+}, {
+  id: "renewable-energy",
+  term: "Renewable Energy Source",
+  category: "energy",
+  simpleDefinition: "An energy source that is naturally replaced.",
+  definition: "An energy source that is naturally replaced and can be used repeatedly.",
+  commonlyConfusedWith: ["non-renewable-energy"]
+}, {
+  id: "nuclear-power",
+  term: "Nuclear Power",
+  category: "energy",
+  simpleDefinition: "Energy produced using nuclear reactions.",
+  definition: "Energy produced using nuclear reactions to generate heat and ultimately electricity."
+}, {
+  id: "solar-power",
+  term: "Solar Power",
+  category: "energy",
+  simpleDefinition: "Energy from sunlight.",
+  definition: "Energy from sunlight that can be converted into electricity or heat."
+}, {
+  id: "wind-power",
+  term: "Wind Power",
+  category: "energy",
+  simpleDefinition: "Energy from moving air.",
+  definition: "Energy from moving air that can be converted into electricity using wind turbines."
+}, {
+  id: "hydroelectricity",
+  term: "Hydroelectricity",
+  category: "energy",
+  simpleDefinition: "Electricity made using moving water.",
+  definition: "Electricity generated using moving or falling water."
+}, {
+  id: "geothermal-energy",
+  term: "Geothermal Energy",
+  category: "energy",
+  simpleDefinition: "Energy from heat inside the Earth.",
+  definition: "Energy obtained from heat inside the Earth."
+}, {
+  id: "biomass",
+  term: "Biomass",
+  category: "energy",
+  simpleDefinition: "Plant or animal material used as an energy source.",
+  definition: "Organic material from plants or animals that can be used as an energy source."
+}, {
+  id: "designer",
+  term: "Designer",
+  category: "designers-analysis",
+  simpleDefinition: "Someone who develops ideas to solve problems.",
+  definition: "A person who investigates problems and develops ideas, products or systems to respond to them."
+}, {
+  id: "product-analysis",
+  term: "Product Analysis",
+  category: "designers-analysis",
+  simpleDefinition: "Looking closely at an existing product to learn from it.",
+  definition: "Studying an existing product to understand how and why it has been designed and made.",
+  commonlyConfusedWith: ["design-analysis"]
+}, {
+  id: "design-analysis",
+  term: "Design Analysis",
+  category: "designers-analysis",
+  simpleDefinition: "Looking closely at a design to understand its decisions, strengths and weaknesses.",
+  definition: "Examining a design in detail to understand its features, decisions, strengths and weaknesses.",
+  commonlyConfusedWith: ["product-analysis"]
+}, {
+  id: "characteristics",
+  term: "Characteristics",
+  category: "designers-analysis",
+  simpleDefinition: "The features or qualities of something.",
+  definition: "The features or qualities that describe a product."
+}, {
+  id: "iterative-design",
+  term: "Iterative Design",
+  category: "strategies",
+  simpleDefinition: "Improving a design by making, testing and changing it again and again.",
+  definition: "A way of designing where ideas are repeatedly made, tested, evaluated and improved.",
+  example: "Make \u2192 Test \u2192 Evaluate \u2192 Improve \u2192 Test again.",
+  commonlyConfusedWith: ["user-centred-design"]
+}, {
+  id: "user-centred-design",
+  term: "User-Centred Design",
+  category: "strategies",
+  simpleDefinition: "Designing around what the user needs and experiences.",
+  definition: "A design approach that keeps the needs and experiences of the user at the centre of decisions.",
+  commonlyConfusedWith: ["iterative-design"]
+}, {
+  id: "inclusive-design",
+  term: "Inclusive Design",
+  category: "strategies",
+  simpleDefinition: "Designing so that as many different people as possible can use it.",
+  definition: "Designing so that a product can be used successfully by as wide a range of people as possible."
+}, {
+  id: "systems-thinking",
+  term: "Systems Thinking",
+  category: "strategies",
+  simpleDefinition: "Looking at how different parts work together.",
+  definition: "Looking at how different parts of a system connect and work together."
+}, {
+  id: "input",
+  term: "Input",
+  category: "strategies",
+  simpleDefinition: "What goes into a system.",
+  definition: "Information, energy or a signal that enters a system."
+}, {
+  id: "process",
+  term: "Process",
+  category: "strategies",
+  simpleDefinition: "What the system does with the input.",
+  definition: "What happens inside a system to change or respond to the input."
+}, {
+  id: "output",
+  term: "Output",
+  category: "strategies",
+  simpleDefinition: "What comes out of the system.",
+  definition: "The result, action or signal produced by a system."
+}, {
+  id: "freehand-sketch",
+  term: "Freehand Sketch",
+  category: "communicating",
+  simpleDefinition: "A quick drawing made without drawing tools.",
+  definition: "A drawing made without drawing instruments, usually used to communicate an idea quickly."
+}, {
+  id: "working-drawing",
+  term: "Working Drawing",
+  category: "communicating",
+  simpleDefinition: "A detailed drawing used to help make a product.",
+  definition: "A detailed technical drawing containing the information needed to make a product."
+}, {
+  id: "orthographic-projection",
+  term: "Orthographic Projection",
+  category: "communicating",
+  simpleDefinition: "Separate 2D views of an object, such as front, side and plan.",
+  definition: "A technical drawing method that shows separate 2D views of an object, such as front, side and plan.",
+  commonlyConfusedWith: ["isometric-projection"]
+}, {
+  id: "isometric-projection",
+  term: "Isometric Projection",
+  category: "communicating",
+  simpleDefinition: "A way of drawing an object so it looks 3D.",
+  definition: "A drawing method used to represent a 3D object using angled lines while keeping dimensions in proportion.",
+  commonlyConfusedWith: ["orthographic-projection"]
+}, {
+  id: "perspective-drawing",
+  term: "Perspective Drawing",
+  category: "communicating",
+  simpleDefinition: "A drawing that shows how an object looks in 3D from a viewpoint.",
+  definition: "A drawing technique that makes objects appear three-dimensional and shows how they look from a particular viewpoint."
+}, {
+  id: "vanishing-point",
+  term: "Vanishing Point",
+  category: "communicating",
+  simpleDefinition: "The point where lines appear to meet in a perspective drawing.",
+  definition: "The point in a perspective drawing where parallel lines appear to meet in the distance."
+}, {
+  id: "horizon-line",
+  term: "Horizon Line",
+  category: "communicating",
+  simpleDefinition: "The line showing eye level in a perspective drawing.",
+  definition: "A horizontal line representing the viewer's eye level in a perspective drawing."
+}, {
+  id: "exploded-view",
+  term: "Exploded View",
+  category: "communicating",
+  simpleDefinition: "A drawing that separates parts to show how they fit together.",
+  definition: "A drawing showing the parts of a product separated while keeping their relationship and assembly position clear."
+}, {
+  id: "schematic-diagram",
+  term: "Schematic Diagram",
+  category: "communicating",
+  simpleDefinition: "A simple diagram showing how parts connect.",
+  definition: "A simplified drawing that uses symbols and lines to show how parts of a system or circuit connect."
+}, {
+  id: "physical-model",
+  term: "Physical Model",
+  category: "communicating",
+  simpleDefinition: "A real model you can hold and test.",
+  definition: "A real, three-dimensional representation used to explore, communicate or test a design.",
+  commonlyConfusedWith: ["virtual-model"]
+}, {
+  id: "virtual-model",
+  term: "Virtual Model",
+  category: "communicating",
+  simpleDefinition: "A model made and viewed on a computer.",
+  definition: "A digital representation of a design created using computer software.",
+  commonlyConfusedWith: ["physical-model"]
+}, {
+  id: "mathematical-model",
+  term: "Mathematical Model",
+  category: "communicating",
+  simpleDefinition: "Using maths to predict how something will work.",
+  definition: "A representation that uses numbers, formulas or calculations to predict how something will behave."
+}, {
+  id: "prototype",
+  term: "Prototype",
+  category: "prototyping",
+  simpleDefinition: "An early version used to try out and improve an idea.",
+  definition: "An early version or model of a design used to explore, test and improve it before the final product is made.",
+  commonlyConfusedWith: ["prototyping"]
+}, {
+  id: "prototyping",
+  term: "Prototyping",
+  category: "prototyping",
+  simpleDefinition: "Making and testing early versions of a design.",
+  definition: "The process of making and testing prototypes.",
+  commonlyConfusedWith: ["prototype"]
+}, {
+  id: "cad",
+  term: "Computer-Aided Design (CAD)",
+  category: "prototyping",
+  simpleDefinition: "Using computer software to create designs.",
+  definition: "Using computer software to create, modify and develop designs.",
+  commonlyConfusedWith: ["cam"],
+  aliases: ["CAD"]
+}, {
+  id: "cam",
+  term: "Computer-Aided Manufacturing (CAM)",
+  category: "prototyping",
+  simpleDefinition: "Using computer-controlled machines to make products or parts.",
+  definition: "Using computer-controlled machines to manufacture parts or products.",
+  commonlyConfusedWith: ["cad"],
+  aliases: ["CAM"]
+}, {
+  id: "3d-printing",
+  term: "3D Printing",
+  category: "prototyping",
+  simpleDefinition: "Making a 3D object by building it up in layers.",
+  definition: "An additive manufacturing process that builds a three-dimensional object in layers from digital data."
+}, {
+  id: "breadboard",
+  term: "Breadboard",
+  category: "prototyping",
+  simpleDefinition: "A board used to build and test electronic circuits without permanent connections.",
+  definition: "A reusable board used to build and test electronic circuits without permanently joining the components."
+}, {
+  id: "hand-tool",
+  term: "Hand Tool",
+  category: "prototyping",
+  simpleDefinition: "A tool mainly powered and controlled by your hands.",
+  definition: "A tool powered and controlled mainly by the user's hands.",
+  commonlyConfusedWith: ["machine-tool"]
+}, {
+  id: "machine-tool",
+  term: "Machine Tool",
+  category: "prototyping",
+  simpleDefinition: "A powered machine used to work with materials.",
+  definition: "A powered machine used to shape, cut, drill or otherwise process materials.",
+  commonlyConfusedWith: ["hand-tool"]
+}, {
+  id: "testing",
+  term: "Testing",
+  category: "testing",
+  simpleDefinition: "Checking if something works as it should.",
+  definition: "Checking a product or idea to find out whether it performs as intended or meets a requirement.",
+  commonlyConfusedWith: ["evaluation"]
+}, {
+  id: "visual-testing",
+  term: "Visual Testing",
+  category: "testing",
+  simpleDefinition: "Looking carefully at a product to check it.",
+  definition: "Inspecting a product by looking at it carefully for faults, quality or other visible features.",
+  commonlyConfusedWith: ["user-testing"]
+}, {
+  id: "user-testing",
+  term: "User Testing",
+  category: "testing",
+  simpleDefinition: "Getting users to try a product and give information about it.",
+  definition: "Asking intended users to use or try a product so information can be collected about how well it works for them.",
+  commonlyConfusedWith: ["visual-testing"]
+}, {
+  id: "evaluation",
+  term: "Evaluation",
+  category: "testing",
+  simpleDefinition: "Deciding how well a design has worked.",
+  definition: "Judging how successful a design or product is using evidence, testing and the specification.",
+  commonlyConfusedWith: ["testing"]
+}, {
+  id: "criteria",
+  term: "Criteria",
+  category: "testing",
+  simpleDefinition: "Things used to judge whether something is successful.",
+  definition: "Standards or requirements used to judge whether something is successful."
+}, {
+  id: "refinement",
+  term: "Refinement",
+  category: "testing",
+  simpleDefinition: "Making changes to improve a design.",
+  definition: "Making changes to improve a design after testing, feedback or evaluation."
+}, {
+  id: "hazard",
+  term: "Hazard",
+  category: "safety",
+  simpleDefinition: "Something that could cause harm.",
+  definition: "Something with the potential to cause harm.",
+  commonlyConfusedWith: ["risk"]
+}, {
+  id: "risk",
+  term: "Risk",
+  category: "safety",
+  simpleDefinition: "How likely a hazard is to cause harm and how serious it could be.",
+  definition: "The chance that a hazard will cause harm and how serious that harm could be.",
+  commonlyConfusedWith: ["hazard"]
+}, {
+  id: "ppe",
+  term: "Personal Protective Equipment (PPE)",
+  category: "safety",
+  simpleDefinition: "Equipment worn to help protect you from injury.",
+  definition: "Equipment worn to reduce the chance of injury while carrying out a task.",
+  aliases: ["PPE"]
+}, {
+  id: "safety-glasses",
+  term: "Safety Glasses",
+  category: "safety",
+  simpleDefinition: "Glasses worn to protect your eyes.",
+  definition: "Eye protection worn to protect the eyes from particles, splashes or debris."
+}, {
+  id: "apron",
+  term: "Apron",
+  category: "safety",
+  simpleDefinition: "Clothing worn over your clothes for protection.",
+  definition: "Protective clothing worn over normal clothes to protect the body and clothing."
+}, {
+  id: "ear-protectors",
+  term: "Ear Protectors",
+  category: "safety",
+  simpleDefinition: "Equipment worn to protect your hearing.",
+  definition: "PPE used to reduce exposure to harmful levels of noise."
+}, {
+  id: "safety-shoes",
+  term: "Safety Shoes",
+  category: "safety",
+  simpleDefinition: "Shoes designed to protect your feet.",
+  definition: "Protective footwear designed to reduce the risk of foot injuries."
+}];
+function vocabTermById(id) {
+  return VOCAB_TERMS.find(t => t.id === id);
+}
+function vocabTermsByCategory(categoryKey) {
+  return VOCAB_TERMS.filter(t => t.category === categoryKey);
+}
+
 /* ===== icons.jsx ===== */
 /* ------------------------------------------------------------------ */
 /* ICONS \u2014 served from local /icons/*.svg (no external CDN needed)    */
@@ -5448,6 +6125,581 @@ function DesignFundamentalsTool({
   }));
 }
 
+/* ===== vocab.jsx ===== */
+/* ------------------------------------------------------------------ */
+/* VOCABULARY DASHBOARD                                                 */
+/* ------------------------------------------------------------------ */
+
+function VocabFamiliarityPill({
+  familiarity
+}) {
+  const info = {
+    not_started: {
+      label: "Not Started",
+      tint: "#7C877F"
+    },
+    learning: {
+      label: "Learning",
+      tint: "#294DFF"
+    },
+    practising: {
+      label: "Practising",
+      tint: "#FF7907"
+    },
+    confident: {
+      label: "Confident",
+      tint: "#00843D"
+    }
+  }[familiarity || "not_started"];
+  return /*#__PURE__*/React.createElement("span", {
+    className: "dtf-stage-pill",
+    style: {
+      background: info.tint + "22",
+      color: info.tint
+    }
+  }, info.label);
+}
+function VocabDashboard({
+  onBrowse,
+  onCategory,
+  onFlashcards,
+  onTargeted
+}) {
+  const [progress, setProgress] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    apiGet("/api/vocab/progress").then(setProgress).catch(() => {}).finally(() => setLoading(false));
+  }, []);
+  const byId = {};
+  progress.forEach(p => {
+    byId[p.termId] = p;
+  });
+  const counts = {
+    not_started: 0,
+    learning: 0,
+    practising: 0,
+    confident: 0
+  };
+  VOCAB_TERMS.forEach(t => {
+    const fam = byId[t.id] && byId[t.id].familiarity || "not_started";
+    counts[fam]++;
+  });
+  const strugglingCount = progress.filter(p => p.markedForPractice || p.familiarity === "practising").length;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "Words We Need to Work With"), /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "Learn, practise and check the key language used in Design & Technology."))), !loading && /*#__PURE__*/React.createElement("div", {
+    className: "dtf-summary-grid"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dtf-summary-card"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "help-label"
+  }, VOCAB_TERMS.length, " Words"), /*#__PURE__*/React.createElement("span", {
+    className: "dtf-summary-value"
+  }, counts.confident, " Confident")), /*#__PURE__*/React.createElement("div", {
+    className: "dtf-summary-card"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "help-label"
+  }, "Learning"), /*#__PURE__*/React.createElement("span", {
+    className: "dtf-summary-value"
+  }, counts.learning)), /*#__PURE__*/React.createElement("div", {
+    className: "dtf-summary-card"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "help-label"
+  }, "Practising"), /*#__PURE__*/React.createElement("span", {
+    className: "dtf-summary-value"
+  }, counts.practising))), /*#__PURE__*/React.createElement("div", {
+    className: "vocab-mode-grid"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "tool-picker-card",
+    onClick: onBrowse
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "tool-picker-icon"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Search",
+    size: 24
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "tool-picker-title"
+  }, "Browse & Search"), /*#__PURE__*/React.createElement("span", {
+    className: "tool-picker-desc"
+  }, "Look up any word, or browse a category. Not a quiz.")), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "tool-picker-card",
+    onClick: onFlashcards
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "tool-picker-icon"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "RotateCcw",
+    size: 24
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "tool-picker-title"
+  }, "Flip & Find"), /*#__PURE__*/React.createElement("span", {
+    className: "tool-picker-desc"
+  }, "Flashcards \u2014 see the word, try to recall it, then reveal.")), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "tool-picker-card",
+    onClick: onTargeted,
+    disabled: strugglingCount === 0
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "tool-picker-icon"
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Repeat",
+    size: 24
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "tool-picker-title"
+  }, "Practise Words I Struggle With"), /*#__PURE__*/React.createElement("span", {
+    className: "tool-picker-desc"
+  }, strugglingCount > 0 ? `${strugglingCount} word${strugglingCount === 1 ? "" : "s"} to revisit.` : "Nothing marked yet — come back after some practice."))), /*#__PURE__*/React.createElement("div", {
+    className: "dtf-section-list",
+    style: {
+      marginTop: 24
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "help-label"
+  }, "Browse by category"), VOCAB_CATEGORIES.map(c => {
+    const count = vocabTermsByCategory(c.key).length;
+    return /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      key: c.key,
+      className: "dtf-section-row clickable",
+      onClick: () => onCategory(c.key)
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "dtf-section-row-top"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "dtf-section-name"
+    }, c.label), /*#__PURE__*/React.createElement("span", {
+      className: "mono"
+    }, count, " words")));
+  })));
+}
+
+/* ------------------------------------------------------------------ */
+/* BROWSE / SEARCH                                                      */
+/* ------------------------------------------------------------------ */
+
+function vocabSearch(query, categoryFilter) {
+  const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  return VOCAB_TERMS.filter(t => {
+    if (categoryFilter && t.category !== categoryFilter) return false;
+    if (words.length === 0) return true;
+    const haystack = [t.term, t.simpleDefinition, t.definition, t.example, ...(t.aliases || [])].filter(Boolean).join(" ").toLowerCase();
+    // every query word must appear somewhere in the haystack - not
+    // necessarily as one contiguous phrase, so "body measurements" still
+    // finds "Measurements of the human body" even though the words are
+    // in a different order.
+    return words.every(w => haystack.includes(w));
+  });
+}
+function VocabBrowse({
+  initialCategory,
+  onOpenWord,
+  onBack
+}) {
+  const [query, setQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState(initialCategory || "");
+  const results = vocabSearch(query, categoryFilter);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "Browse & Search"), /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, results.length, " word", results.length === 1 ? "" : "s"))), /*#__PURE__*/React.createElement("div", {
+    className: "student-filters no-print",
+    style: {
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      flex: 1,
+      minWidth: 220
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "Search"), /*#__PURE__*/React.createElement("input", {
+    value: query,
+    onChange: e => setQuery(e.target.value),
+    placeholder: "Search a word or definition...",
+    style: {
+      width: "100%",
+      fontFamily: "inherit",
+      fontSize: 14,
+      padding: "9px 12px",
+      border: "1px solid var(--border)",
+      borderRadius: "var(--radius-sm)"
+    }
+  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", null, "Category"), /*#__PURE__*/React.createElement("select", {
+    value: categoryFilter,
+    onChange: e => setCategoryFilter(e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "All categories"), VOCAB_CATEGORIES.map(c => /*#__PURE__*/React.createElement("option", {
+    key: c.key,
+    value: c.key
+  }, c.label))))), results.length === 0 && /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "No words match \u2014 try a different search."), /*#__PURE__*/React.createElement("div", {
+    className: "vocab-word-grid"
+  }, results.map(t => /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    key: t.id,
+    className: "spec-list-row",
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr"
+    },
+    onClick: () => onOpenWord(t.id, results.map(r => r.id))
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "spec-list-name"
+  }, t.term), /*#__PURE__*/React.createElement("span", {
+    className: "sub",
+    style: {
+      margin: 0
+    }
+  }, t.simpleDefinition)))), /*#__PURE__*/React.createElement("div", {
+    className: "quiz-nav-row",
+    style: {
+      marginTop: 20
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: onBack
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16,
+    style: {
+      transform: "rotate(180deg)"
+    }
+  }), " Back")));
+}
+
+/* ------------------------------------------------------------------ */
+/* WORD CARD                                                            */
+/* ------------------------------------------------------------------ */
+
+function VocabWordCard({
+  termId,
+  wordList,
+  onNavigate,
+  onBack
+}) {
+  const term = vocabTermById(termId);
+  const idx = wordList.indexOf(termId);
+  const [markedForPractice, setMarkedForPractice] = useState(false);
+  useEffect(() => {
+    apiPost(`/api/vocab/progress/${termId}/viewed`, {}).catch(() => {});
+    apiGet("/api/vocab/progress").then(rows => {
+      const row = rows.find(r => r.termId === termId);
+      setMarkedForPractice(row ? row.markedForPractice : false);
+    }).catch(() => {});
+  }, [termId]);
+  async function toggleMark() {
+    const next = !markedForPractice;
+    setMarkedForPractice(next);
+    try {
+      await apiPost(`/api/vocab/progress/${termId}/mark`, {
+        marked: next
+      });
+    } catch (e) {/* ignore */}
+  }
+  if (!term) return null;
+  const confused = (term.commonlyConfusedWith || []).map(vocabTermById).filter(Boolean);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+    className: "help-label"
+  }, VOCAB_CATEGORIES.find(c => c.key === term.category).label), /*#__PURE__*/React.createElement("h2", null, term.term)), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "mark-complete-btn" + (markedForPractice ? " is-complete" : ""),
+    onClick: toggleMark
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: markedForPractice ? "Check" : "Repeat",
+    size: 14
+  }), " ", markedForPractice ? "Marked for practice" : "Mark for Practice")), /*#__PURE__*/React.createElement("div", {
+    className: "vocab-card-block"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "spec-field-label requirement"
+  }, "Simple Meaning"), /*#__PURE__*/React.createElement("p", null, term.simpleDefinition)), /*#__PURE__*/React.createElement("div", {
+    className: "vocab-card-block"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "spec-field-label reason"
+  }, "DT Meaning"), /*#__PURE__*/React.createElement("p", null, term.definition)), term.example && /*#__PURE__*/React.createElement("div", {
+    className: "vocab-card-block"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "spec-field-label testing"
+  }, "In Design & Technology"), /*#__PURE__*/React.createElement("p", null, term.example)), confused.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "vocab-card-block"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "help-label"
+  }, "Commonly Confused With"), /*#__PURE__*/React.createElement("div", {
+    className: "chip-row"
+  }, confused.map(c => /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    key: c.id,
+    className: "chip chip-word",
+    onClick: () => onNavigate(c.id, wordList)
+  }, c.term)))), /*#__PURE__*/React.createElement("div", {
+    className: "quiz-nav-row",
+    style: {
+      marginTop: 20
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: () => idx > 0 ? onNavigate(wordList[idx - 1], wordList) : onBack()
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16,
+    style: {
+      transform: "rotate(180deg)"
+    }
+  }), " Previous"), idx >= 0 && idx + 1 < wordList.length ? /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: () => onNavigate(wordList[idx + 1], wordList)
+  }, "Next Word ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16
+  })) : /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: onBack
+  }, "Done ", /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "Check",
+    size: 16
+  }))));
+}
+
+/* ------------------------------------------------------------------ */
+/* FLIP & FIND (flashcards)                                             */
+/* ------------------------------------------------------------------ */
+
+function VocabFlashcards({
+  terms,
+  onBack,
+  onDone
+}) {
+  const [idx, setIdx] = useState(0);
+  const [revealed, setRevealed] = useState(false);
+  const term = terms[idx];
+  async function respond(gotIt) {
+    try {
+      await apiPost(`/api/vocab/progress/${term.id}/attempt`, {
+        correct: gotIt,
+        questionType: "flashcard"
+      });
+    } catch (e) {/* ignore */}
+    if (idx + 1 >= terms.length) onDone();else {
+      setIdx(i => i + 1);
+      setRevealed(false);
+    }
+  }
+  if (!term) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "spec-wizard-progress"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "quiz-history-label"
+  }, "Flip & Find \xB7 Card ", idx + 1, " of ", terms.length), /*#__PURE__*/React.createElement("div", {
+    className: "quiz-progress-bar"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: `${(idx + 1) / terms.length * 100}%`,
+      background: "var(--blue)"
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "vocab-flashcard"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "vocab-flashcard-term"
+  }, term.term), !revealed && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: () => setRevealed(true)
+  }, "Reveal Meaning"), revealed && /*#__PURE__*/React.createElement("div", {
+    className: "vocab-flashcard-back"
+  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("strong", null, "Simple Meaning:"), " ", term.simpleDefinition), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("strong", null, "DT Meaning:"), " ", term.definition))), revealed && /*#__PURE__*/React.createElement("div", {
+    className: "quiz-result-actions",
+    style: {
+      marginTop: 20
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: () => respond(false)
+  }, "Practise Again"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-primary",
+    onClick: () => respond(true)
+  }, "Got It")), !revealed && /*#__PURE__*/React.createElement("div", {
+    className: "quiz-nav-row",
+    style: {
+      marginTop: 20
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-text",
+    onClick: onBack
+  }, "Exit")));
+}
+
+/* ------------------------------------------------------------------ */
+/* TARGETED PRACTICE                                                    */
+/* ------------------------------------------------------------------ */
+
+function VocabTargetedPractice({
+  onBack,
+  onOpenWord
+}) {
+  const [progress, setProgress] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    apiGet("/api/vocab/progress").then(setProgress).catch(() => {}).finally(() => setLoading(false));
+  }, []);
+  const struggling = progress.filter(p => p.markedForPractice || p.familiarity === "practising").map(p => vocabTermById(p.termId)).filter(Boolean);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "Practise Words I Struggle With"), /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "Terms you've marked, or that aren't consistent yet."))), loading && /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "Loading..."), !loading && struggling.length === 0 && /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "Nothing here yet \u2014 keep practising and this will fill up."), /*#__PURE__*/React.createElement("div", {
+    className: "vocab-word-grid"
+  }, struggling.map(t => /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    key: t.id,
+    className: "spec-list-row",
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr"
+    },
+    onClick: () => onOpenWord(t.id, struggling.map(s => s.id))
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "spec-list-name"
+  }, t.term), /*#__PURE__*/React.createElement("span", {
+    className: "sub",
+    style: {
+      margin: 0
+    }
+  }, t.simpleDefinition)))), /*#__PURE__*/React.createElement("div", {
+    className: "quiz-nav-row",
+    style: {
+      marginTop: 20
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-secondary",
+    onClick: onBack
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 16,
+    style: {
+      transform: "rotate(180deg)"
+    }
+  }), " Back")));
+}
+
+/* ------------------------------------------------------------------ */
+/* VOCABULARY TOOL SHELL                                                */
+/* ------------------------------------------------------------------ */
+
+function VocabularyTool({
+  user,
+  onBack
+}) {
+  const [view, setView] = useState("dashboard");
+  const [activeWordId, setActiveWordId] = useState(null);
+  const [activeWordList, setActiveWordList] = useState([]);
+  const [browseCategory, setBrowseCategory] = useState("");
+  function openWord(id, list) {
+    setActiveWordId(id);
+    setActiveWordList(list || VOCAB_TERMS.map(t => t.id));
+    setView("word");
+  }
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "tool-subheader no-print"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-text back-btn",
+    onClick: () => view === "dashboard" ? onBack() : setView("dashboard")
+  }, /*#__PURE__*/React.createElement(IconGlyph, {
+    name: "ChevronRight",
+    size: 15,
+    style: {
+      transform: "rotate(180deg)"
+    }
+  }), " ", view === "dashboard" ? "All tools" : "Words We Need to Work With")), view === "dashboard" && /*#__PURE__*/React.createElement(VocabDashboard, {
+    onBrowse: () => {
+      setBrowseCategory("");
+      setView("browse");
+    },
+    onCategory: cat => {
+      setBrowseCategory(cat);
+      setView("browse");
+    },
+    onFlashcards: () => setView("flashcards-setup"),
+    onTargeted: () => setView("targeted")
+  }), view === "browse" && /*#__PURE__*/React.createElement(VocabBrowse, {
+    initialCategory: browseCategory,
+    onOpenWord: openWord,
+    onBack: () => setView("dashboard")
+  }), view === "word" && activeWordId && /*#__PURE__*/React.createElement(VocabWordCard, {
+    termId: activeWordId,
+    wordList: activeWordList,
+    onNavigate: openWord,
+    onBack: () => setView("dashboard")
+  }), view === "flashcards-setup" && /*#__PURE__*/React.createElement("div", {
+    className: "tab-content"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "panel-head"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", null, "Flip & Find"), /*#__PURE__*/React.createElement("p", {
+    className: "sub"
+  }, "Pick a category, or practise a mixed set."))), /*#__PURE__*/React.createElement("div", {
+    className: "dtf-section-list"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "dtf-section-row clickable",
+    onClick: () => {
+      setActiveWordList(shuffle(VOCAB_TERMS.map(t => t.id)).slice(0, 10));
+      setView("flashcards");
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dtf-section-row-top"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dtf-section-name"
+  }, "Mixed (10 random words)"))), VOCAB_CATEGORIES.map(c => /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    key: c.key,
+    className: "dtf-section-row clickable",
+    onClick: () => {
+      setActiveWordList(vocabTermsByCategory(c.key).map(t => t.id));
+      setView("flashcards");
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dtf-section-row-top"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dtf-section-name"
+  }, c.label), /*#__PURE__*/React.createElement("span", {
+    className: "mono"
+  }, vocabTermsByCategory(c.key).length, " words")))))), view === "flashcards" && /*#__PURE__*/React.createElement(VocabFlashcards, {
+    terms: activeWordList.map(vocabTermById).filter(Boolean),
+    onBack: () => setView("dashboard"),
+    onDone: () => setView("dashboard")
+  }), view === "targeted" && /*#__PURE__*/React.createElement(VocabTargetedPractice, {
+    onBack: () => setView("dashboard"),
+    onOpenWord: openWord
+  }));
+}
+
 /* ===== login.jsx ===== */
 function LoginScreen({
   onLogin
@@ -5586,6 +6838,11 @@ function ToolPicker({
     title: "Discovering Design",
     icon: "GraduationCap",
     description: "A KS3 course on how designers move from problem to evidence to a measurable specification."
+  }, {
+    key: "vocabulary",
+    title: "Words We Need to Work With",
+    icon: "Search",
+    description: "Learn, practise and check the key language used in Design & Technology."
   }];
   return /*#__PURE__*/React.createElement("div", {
     className: "tab-content tool-picker no-print"
@@ -5651,6 +6908,9 @@ function StudentApp({
     user: user,
     onBack: () => setActiveTool(null)
   }), activeTool === "design-fundamentals" && /*#__PURE__*/React.createElement(DesignFundamentalsTool, {
+    user: user,
+    onBack: () => setActiveTool(null)
+  }), activeTool === "vocabulary" && /*#__PURE__*/React.createElement(VocabularyTool, {
     user: user,
     onBack: () => setActiveTool(null)
   }));

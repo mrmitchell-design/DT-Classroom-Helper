@@ -249,6 +249,47 @@ ensureColumn("spec_projects", "summary_text", "TEXT DEFAULT ''");
 // Point answer) - not a full answer log, just enough to resume cleanly.
 ensureColumn("dtf_section_progress", "session_state", "TEXT DEFAULT '{}'");
 
+db.exec(`
+-- Standalone vocabulary system ("Words We Need to Work With"). Deliberately
+-- separate from dtf_vocab_progress (an earlier, simpler table that was
+-- never wired to any real UI) - this one tracks the richer confidence
+-- model this system actually needs (four states, not three; which
+-- question styles a term has been answered correctly with, since
+-- "Confident" requires at least two different styles, not just repetition
+-- of the same one; and an explicit "marked for practice" flag).
+CREATE TABLE IF NOT EXISTS vocab_progress (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  term_id TEXT NOT NULL,
+  familiarity TEXT NOT NULL DEFAULT 'not_started',
+  correct_count INTEGER NOT NULL DEFAULT 0,
+  attempt_count INTEGER NOT NULL DEFAULT 0,
+  correct_styles TEXT NOT NULL DEFAULT '[]',
+  marked_for_practice INTEGER NOT NULL DEFAULT 0,
+  last_practised_at TEXT,
+  updated_at TEXT DEFAULT (datetime('now')),
+  UNIQUE(user_id, term_id)
+);
+
+-- One row per vocabulary quiz attempt (Mixed Word Workout, category
+-- practice, targeted practice) - details is a JSON array of
+-- {termId, questionType, isCorrect} so teachers can see which specific
+-- terms and question styles a class struggles with.
+CREATE TABLE IF NOT EXISTS vocab_quiz_attempts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  mode TEXT NOT NULL,
+  category TEXT,
+  score INTEGER NOT NULL DEFAULT 0,
+  total INTEGER NOT NULL DEFAULT 0,
+  details TEXT DEFAULT '[]',
+  taken_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_vocab_progress_user ON vocab_progress(user_id);
+CREATE INDEX IF NOT EXISTS idx_vocab_attempts_user ON vocab_quiz_attempts(user_id);
+`);
+
 
 // --- one-time admin bootstrap ---
 function ensureAdmin() {

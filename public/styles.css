@@ -1,12 +1,18 @@
 :root {
-  /* Apple system palette */
-  --ink:#1D1D1F; --ink-secondary:#6E6E73; --ink-tertiary:#86868B;
-  --blue:#0071E3; --blue-hover:#0077ED; --blue-tint:#EAF3FF;
-  --teal:#30B0C7; --green:#34C759; --green-tint:#E3F9E7; --green-text:#248A3D;
-  --red:#FF3B30; --red-tint:#FFEBEA; --red-text:#D70015;
-  --amber:#FF9F0A; --amber-tint:#FFF6E5; --amber-text:#B25E00;
-  --bg:#F5F5F7; --surface:#FFFFFF; --surface-sunken:#FBFBFD;
-  --border:#D2D2D7; --border-light:#E8E8ED;
+  /* Palette informed by the school's brand colours (Tenby Blue, Vivid
+     Green, Orange, Amethyst, Fuchsia) and near-black - familiar to
+     students without reproducing the school's actual branding, logo or
+     licensed typeface. Error red stays a conventional red rather than a
+     brand hue, since that's a safety signal, not a decorative choice. */
+  --ink:#101820; --ink-secondary:#525F5A; --ink-tertiary:#7C877F;
+  --blue:#294DFF; --blue-hover:#1B39CC; --blue-tint:#E9ECFF;
+  --teal:#9063CD; --green:#00843D; --green-tint:#E1F2E6; --green-text:#00632E;
+  --red:#E5484D; --red-tint:#FDECEC; --red-text:#B7292D;
+  --amber:#FF7907; --amber-tint:#FFEEDD; --amber-text:#B85400;
+  --purple:#9063CD; --purple-tint:#F0EBFA; --purple-text:#6B449E;
+  --fuchsia:#FD1E69; --fuchsia-tint:#FFE7EF;
+  --bg:#EEF0ED; --surface:#FFFFFF; --surface-sunken:#F7F8F6;
+  --border:#D7DCD7; --border-light:#EBEEEB;
 
   --ease-critical: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-momentum: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -94,8 +100,14 @@ body {
   padding: 24px 16px 48px 16px;
   background: var(--bg);
   min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Raleway', -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: var(--ink);
+}
+
+h1, h2, h3, .app-title, .tab-panel h2, .worksheet-fw-label, .tool-picker-title,
+.year-section-title, .spec-list-name, .spec-context-name, .dtf-summary-value,
+.dtf-content-card h2, .quiz-result h2 {
+  font-family: 'Space Grotesk', 'Raleway', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .loading-screen {
@@ -653,3 +665,19 @@ body {
 .dtf-ladder-row { display:flex; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--border-light); border-radius:var(--radius-md); padding:12px 16px; }
 .dtf-ladder-row p { margin:0; font-size:13.5px; line-height:1.4; }
 .dtf-ladder-row.current { border-color: var(--blue); background:var(--blue-tint); box-shadow: var(--shadow-sm); }
+
+/* ---------- Vocabulary system ---------- */
+.vocab-mode-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-top:6px; }
+.vocab-mode-grid .tool-picker-card:disabled { opacity:0.55; cursor:default; }
+.vocab-mode-grid .tool-picker-card:disabled:hover { border-color: var(--border-light); box-shadow: var(--shadow-sm); }
+
+.vocab-word-grid { display:flex; flex-direction:column; gap:8px; }
+
+.vocab-card-block { margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--border-light); }
+.vocab-card-block:last-of-type { border-bottom:none; }
+.vocab-card-block p { margin:6px 0 0 0; font-size:15px; line-height:1.6; color:var(--ink); }
+
+.vocab-flashcard { display:flex; flex-direction:column; align-items:center; text-align:center; gap:20px; background:var(--surface); border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:48px 32px; box-shadow: var(--shadow-sm); min-height:220px; justify-content:center; }
+.vocab-flashcard-term { font-family:'Space Grotesk', sans-serif; font-size:28px; font-weight:600; letter-spacing:-0.01em; color:var(--ink); }
+.vocab-flashcard-back { display:flex; flex-direction:column; gap:10px; text-align:left; width:100%; max-width:480px; }
+.vocab-flashcard-back p { margin:0; font-size:14.5px; line-height:1.6; color:var(--ink); }

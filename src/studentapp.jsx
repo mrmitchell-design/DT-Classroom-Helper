@@ -48,6 +48,10 @@ function ToolPicker({ onSelect }) {
       key: "design-fundamentals", title: "Discovering Design", icon: "GraduationCap",
       description: "A KS3 course on how designers move from problem to evidence to a measurable specification.",
     },
+    {
+      key: "vocabulary", title: "Words We Need to Work With", icon: "Search",
+      description: "Learn, practise and check the key language used in Design & Technology.",
+    },
   ];
   return (
     <div className="tab-content tool-picker no-print">
@@ -105,6 +109,10 @@ function StudentApp({ user, onLogout }) {
 
       {activeTool === "design-fundamentals" && (
         <DesignFundamentalsTool user={user} onBack={() => setActiveTool(null)} />
+      )}
+
+      {activeTool === "vocabulary" && (
+        <VocabularyTool user={user} onBack={() => setActiveTool(null)} />
       )}
     </div>
   );
